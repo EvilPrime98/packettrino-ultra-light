@@ -24,3 +24,12 @@
     }
 
 }
+
+.packet-animation {
+    width: 50px !important;
+    height: 50px !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-15%, -19%);
+}
