@@ -25,29 +25,30 @@ export type {
     UltraLightDiv
 }
 
-function parseHTMLString(htmlString: string | HTMLElement | Node): HTMLElement | Node | null {
-    if (typeof htmlString !== 'string') return htmlString;
-    const trimmed = htmlString.trim();
-    const svgExclusiveTags = new Set([
-        'svg', 'circle', 'ellipse', 'line', 'polygon', 'polyline', 'rect', 'path', 'g',
-        'defs', 'symbol', 'use', 'marker', 'clipPath', 'mask', 'pattern',
-        'linearGradient', 'radialGradient', 'meshGradient', 'stop', 'hatch', 'hatchpath',
-        'animate', 'animateMotion', 'animateTransform', 'set', 'animateColor', 'mpath',
-        'filter', 'feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite',
-        'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feDistantLight',
-        'feDropShadow', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR',
-        'feGaussianBlur', 'feImage', 'feMerge', 'feMergeNode', 'feMorphology',
-        'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile',
-        'feTurbulence', 'view', 'font', 'glyph', 'missing-glyph', 'vkern', 'hkern',
-        'color-profile', 'switch', 'cursor', 'image'
-    ]);
+const SVG_EXCLUSIVE_TAGS = new Set([
+    'svg', 'circle', 'ellipse', 'line', 'polygon', 'polyline', 'rect', 'path', 'g',
+    'defs', 'symbol', 'use', 'marker', 'clipPath', 'mask', 'pattern',
+    'linearGradient', 'radialGradient', 'meshGradient', 'stop', 'hatch', 'hatchpath',
+    'animate', 'animateMotion', 'animateTransform', 'set', 'animateColor', 'mpath',
+    'filter', 'feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite',
+    'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feDistantLight',
+    'feDropShadow', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR',
+    'feGaussianBlur', 'feImage', 'feMerge', 'feMergeNode', 'feMorphology',
+    'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile',
+    'feTurbulence', 'view', 'font', 'glyph', 'missing-glyph', 'vkern', 'hkern',
+    'color-profile', 'switch', 'cursor', 'image'
+]);
 
-    const tagMatch = trimmed.match(/^<([a-z][a-z0-9-]*)/i);
-    const tag = tagMatch?.[1]?.toLowerCase();
-    if (!tag) return null;
-    const isSVGRoot = tag === 'svg';
-    const isSVGExclusive = svgExclusiveTags.has(tag);
-    if (isSVGRoot || isSVGExclusive) {
+const TAG_REGEX = /^<([a-z][a-z0-9-]*)/i;
+
+function parseHTMLString(htmlString: string | HTMLElement | Node): HTMLElement | Node | null {
+    if (typeof htmlString !== 'string') return htmlString;    
+    const trimmed = htmlString.trim();
+    if (!trimmed) return null;
+    const tagMatch = trimmed.match(TAG_REGEX);
+    if (!tagMatch) return null;
+    const tag = tagMatch[1].toLowerCase();
+    if (SVG_EXCLUSIVE_TAGS.has(tag)) {
         const temp = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         temp.innerHTML = trimmed;
         return temp.firstElementChild;
@@ -56,7 +57,6 @@ function parseHTMLString(htmlString: string | HTMLElement | Node): HTMLElement |
     template.innerHTML = trimmed;
     return template.content.firstElementChild;
 }
-
 
 function stableHash(str: string): string {
     let hash = 0;
@@ -232,6 +232,11 @@ function matchRoute(routePath: string, currentPath: string): UltraRouteMatch {
     return { params, matched: true };
 }
 
+/**
+ * This functional component is used to create an SPA router.
+ * @param routes 
+ * @returns 
+ */
 export function UltraRouter(...routes: UltraRoute[]): UltraLightDiv {
     const paths = routes.map(r => r.path);
     const duplicates = paths.filter((p, i) => paths.indexOf(p) !== i && p !== '/*');
@@ -304,7 +309,14 @@ export function UltraRouter(...routes: UltraRoute[]): UltraLightDiv {
     return container;
 }
 
+/**
+ * This functional component is used to create a link element that works within
+ * the UltraRouter context.
+ * @param param0 
+ * @returns 
+ */
 export function UltraLink({ href, child }: UltraLinkProps): UltraLightElement {
+
     if (!href) {
         console.warn('UltraLink: href is required');
     }
@@ -341,6 +353,12 @@ export function UltraLink({ href, child }: UltraLinkProps): UltraLightElement {
     return link;
 }
 
+/**
+ * This functional component is used to create a fragment of HTML components. Useful 
+ * when needing to render multiple elements at once.
+ * @param children 
+ * @returns 
+ */
 export function UltraFragment(...children: (string | HTMLElement | Node)[]): DocumentFragment {
 
     const fragment = document.createDocumentFragment();
@@ -583,6 +601,12 @@ export function UltraActivity({
 
 const styleCache = new Map<string, Record<string, string>>();
 
+/**
+ * Returns a map of class names and their corresponding hashed class names.
+ * Alternative to css modules.
+ * @param cssString A valid CSS context.
+ * @returns 
+ */
 export function ultraStyles(cssString: string): Record<string, string> {
 
     if (!cssString || typeof cssString !== 'string') {

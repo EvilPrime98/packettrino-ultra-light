@@ -1,6 +1,5 @@
 import { 
     UltraFragment, 
-    ultraEffect, 
     ultraState
 } from "@ultra-light";
 import AppLoader from "@components/core/app-loader.ts";
@@ -15,11 +14,9 @@ export default function App() {
 
     const [isLoaded, setIsLoaded, subscribeIsLoaded] = ultraState(false);
 
-    ultraEffect(() => {
-        setTimeout(() => {
-            setIsLoaded(true);
-        }, 500);
-    }, []);
+    setTimeout(() => {
+        setIsLoaded(true);
+    }, 500);
 
     return UltraFragment(
 
