@@ -1,0 +1,23 @@
+.switch-animated {
+    animation: switch-animation 0.1s ease-in-out;
+}
+
+@keyframes switch-animation {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.switch-animated img {
+    transition: scale 0.2s ease-in-out;
+
+    &:active {
+        scale: 0.8;
+    }
+}
