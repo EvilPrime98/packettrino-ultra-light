@@ -4,9 +4,8 @@ import { isValidMac } from "@/utils/network_lib";
 import { AlignmentError, ConnectionAlreadyEstablishedError, InvalidMacAddressError, NotFoundMacRecord } from "@/errors";
 import { ISwitchElementProperties, IUltraSwitchConfig, TConnection  } from "@/types/TConfig";
 import { Packet } from "@/types/packets";
-import { CANVAS_CONTEXT } from "@/components/core/svg-canvas";
 import { ENV } from "@/context/env";
-import { WORK_SPACE_CONTEXT } from "@/components/core/work-space";
+import ultraAnimations from "@/hooks/ultraAnimations";
 
 export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchConfig {
 
@@ -17,6 +16,7 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
 
     const [getRecords, setRecords, subscribeToRecords] = ultraState<Record<string, MacRecord>>({});
     const [portIndex, setPortIndex,] = ultraState(0);
+    const { visualize } = ultraAnimations();
 
     const updateProperty = <K extends keyof ISwitchElementProperties>(
         key: K,
@@ -32,22 +32,6 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
         const newRecords = structuredClone(getRecords());
         newRecords[itemId].mac = packet.originMac;
         setRecords(newRecords);
-    }
-
-    async function visualize(itemId: string) {
-
-        const originCoordinates = WORK_SPACE_CONTEXT.get().getCoordinatesByElementId(itemId);
-        const destinationCoordinates = WORK_SPACE_CONTEXT.get().getCoordinatesByElementId(properties().elementId);
-
-        if (!originCoordinates || !destinationCoordinates) return;
-
-        await CANVAS_CONTEXT.get().createPacketAnimation(
-            originCoordinates.x.toString(),
-            originCoordinates.y.toString(),
-            destinationCoordinates.x.toString(),
-            destinationCoordinates.y.toString()
-        );
-
     }
 
     function getElementApiByMac(destinationMac: string){
@@ -120,7 +104,13 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
 
     async function sendPacket(packet: Packet, itemId: string) {
         
-        if (ENV.get().visualToggle) await visualize(itemId);
+        if (ENV.get().visualToggle) {
+            await visualize(
+                itemId, 
+                properties().elementId, 
+                packet
+            );
+        }
         
         updateMacRecords(packet, itemId);
 
@@ -139,7 +129,8 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
         const connections = properties().connections;
         connections.forEach((connection: TConnection) => {
             if (connection.itemId === itemId) return; //we dont want to send the packet to the source
-            connection.api?.sendPacket(packet, properties().elementId)
+            const copyPacket = structuredClone(packet); //we need to clone the packet to avoid mutating the original
+            connection.api?.sendPacket(copyPacket, properties().elementId)
         })
     }
 

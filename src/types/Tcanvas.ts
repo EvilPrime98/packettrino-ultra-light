@@ -25,6 +25,8 @@ export interface IUltraPacketConfig {
   startAnimation: () => Promise<void>;
 }
 
+export type TAnimatedPacket = "unicast" | "broadcast";
+
 export type CanvasContextInterface = {
   /**
    * The API of the target element.
@@ -44,7 +46,9 @@ export type CanvasContextInterface = {
    * @param y1
    * @param x2
    * @param y2
+   * @param type
    * @returns
    */
-  createPacketAnimation: (x1: string, y1: string, x2: string, y2: string) => Promise<void>;
+  createPacketAnimation: (x1: string, y1: string, x2: string, y2: string, type?: TAnimatedPacket) => Promise<void>;
+
 }

@@ -263,6 +263,17 @@ export interface IUltraCableConfig {
     updatePosition: (newPositions: ICableElementPosition) => void;
 }
 
+export interface IUltraAnimations {
+    /**
+     * Generates an animation for a packet between two elements.
+     * @param itemId1 
+     * @param itemId2 
+     * @param packet 
+     * @returns 
+     */
+    visualize: (itemId1: string, itemId2: string, packet: Packet) => Promise<void>;
+}
+
 //UNION TYPES
 export type TLayer3Properties = TPcElementProperties;
 export type TLayer2Properties = ISwitchElementProperties;

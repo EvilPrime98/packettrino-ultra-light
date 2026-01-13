@@ -5,10 +5,9 @@ import { AlreadyExistsError, NoAvailableInterfaceError } from "@/errors";
 import { TPcElementProperties, IUltraPcConfig, TConnection, iface } from "@/types/TConfig";
 import { Packet } from "@/types/packets";
 import { ENV } from "@/context/env";
-import { WORK_SPACE_CONTEXT } from "@/components/core/work-space";
-import { CANVAS_CONTEXT } from "@/components/core/svg-canvas";
 import { packetProcessor } from "@/utils/processors";
 import ultraRoutingConfig from "./ultraRoutingConfig";
+import ultraAnimations from "./ultraAnimations";
 
 export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
 
@@ -35,6 +34,7 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
     const [properties, setProperties, subscribeToProperties] = ultraState<TPcElementProperties>(initialProperties);
     const [buffer, setBuffer, subscribeToBuffer] = ultraState<Packet[]>([]);
     const [pendingReply, setPendingReply] = ultraState<boolean>(false);
+    const { visualize } = ultraAnimations();
 
     const self: IUltraPcConfig = {
         ...ultraRoutingConfig(),
@@ -109,22 +109,6 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
         const currentArpCache = properties()["arp-cache"];
         const { [ip]: _removed, ...remainingArpCache } = currentArpCache;
         updateProperty('arp-cache', remainingArpCache);
-    }
-
-    async function visualize(itemId: string) {
-        const WSC = WORK_SPACE_CONTEXT.get();
-        const originCoordinates = WSC
-            .getCoordinatesByElementId(itemId);
-        const destinationCoordinates = WSC
-            .getCoordinatesByElementId(properties().elementId);
-        if (!originCoordinates || !destinationCoordinates) return;
-
-        await CANVAS_CONTEXT.get().createPacketAnimation(
-            originCoordinates.x.toString(),
-            originCoordinates.y.toString(),
-            destinationCoordinates.x.toString(),
-            destinationCoordinates.y.toString()
-        );
     }
 
     function updateInterface(interfaceId: string, updates: Partial<iface>) {
@@ -219,7 +203,7 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
 
     async function sendPacket(packet: Packet, originId: string) {
 
-        if (ENV.get().visualToggle) await visualize(originId);
+        if (ENV.get().visualToggle) await visualize(originId, properties().elementId, packet);
 
         if (pendingReply()){
             await packetProcessor(packet, self);

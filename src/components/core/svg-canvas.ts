@@ -1,6 +1,6 @@
 import { UltraComponent, UltraContext, ultraEffect, ultraState } from "@ultra-light";
 import DefaultCable from "./default-cable";
-import { CanvasContextInterface, IDefaultCableProps } from "@/types/Tcanvas";
+import { CanvasContextInterface, IDefaultCableProps, TAnimatedPacket } from "@/types/Tcanvas";
 import Packet from "./packet";
 
 const CANVAS_CONTEXT = UltraContext<CanvasContextInterface>({
@@ -19,13 +19,13 @@ export function SvgCanvas() {
     const component = UltraComponent({
 
         component: `
-        <svg  
-            id="svg-board" 
-            preserveAspectRatio="none" 
-            width="100%" 
-            height="100%"
-        >
-        </svg>`,
+            <svg  
+                id="svg-board" 
+                preserveAspectRatio="none" 
+                width="100%" 
+                height="100%"
+            >
+            </svg>`,
 
         eventHandler: { 
             'dragover': (event: Event) => event.preventDefault() 
@@ -53,29 +53,36 @@ export function SvgCanvas() {
         setElementToAdd(element);
     }
 
-    async function createPacketAnimation(x1: string, y1: string, x2: string, y2: string): Promise<void> {
-        // El componente Packet ahora inicia su propia animación después de montarse
-        // y espera a que la animación termine antes de resolver la promesa
+    async function createPacketAnimation(
+        x1: string, 
+        y1: string, 
+        x2: string, 
+        y2: string,
+        type?: TAnimatedPacket
+    ): Promise<void> {
+
         component.appendChild(
-            Packet({ x1, y1, x2, y2, type: "unicast" })
+            Packet({ x1, y1, x2, y2, type: type || "unicast" })
         );
 
-        // Esperar a que la promesa de animación esté disponible y luego esperar a que se complete
         const promise = CANVAS_CONTEXT.get().animationPromise;
+
         if (promise) {
             await promise;
         }
+
     }
 
     ultraEffect(() => {
-        // Preservamos elementApi del contexto existente para no sobrescribir
-        // la referencia del componente Packet cuando se monta
+
         const currentContext = CANVAS_CONTEXT.get();
+
         CANVAS_CONTEXT.set({
             ...currentContext,
             addCableElement,
             createPacketAnimation
         })
+
     }, [])
 
     return component;
