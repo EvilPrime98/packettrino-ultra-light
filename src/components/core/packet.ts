@@ -1,13 +1,14 @@
 import { UltraLightElement, UltraComponent, ultraEffect } from "@ultra-light";
 import ultraPacketConfig from "@/hooks/ultraPacketConfig";
 import { CANVAS_CONTEXT } from "./svg-canvas";
+import { TAnimatedPacket } from "@/types/Tcanvas";
 
 type Props = {
     x1: string;
     y1: string;
     x2: string;
     y2: string;
-    type: string;
+    type: TAnimatedPacket;
 };
 
 export default function Packet({ x1, y1, x2, y2, type }: Props) {

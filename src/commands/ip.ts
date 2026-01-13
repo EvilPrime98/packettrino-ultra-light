@@ -4,7 +4,7 @@ import { catchopts, } from "@/utils/network_lib";
 import { ip_route } from "@/services/routing_service";
 import { ip_addr } from "@/services/ifaces_service";
 
-export default function command_ip() {
+export function command_ip() {
 
     const legalOptions = [
         'addr',

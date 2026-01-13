@@ -71,9 +71,6 @@ async function sendSinglePing(
     elementApi: IUltraPcConfig
 ): Promise<boolean> {
 
-    elementApi
-    .setPendingReply(true);
-
     return new Promise<boolean>((resolve) => {
 
         let unsubscribe: (() => void) | null = null;
@@ -112,26 +109,8 @@ async function sendSinglePing(
             'ff:ff:ff:ff:ff:ff'
         );
 
-        unsubscribe = elementApi.subscribeToBuffer(() => {
-
-            const buffer = elementApi.currentBuffer();
-            
-            if (buffer.length === 0) return;
-
-            const lastPacket = buffer[buffer.length - 1];
-
-            if (
-                lastPacket.protocol === "icmp" &&
-                lastPacket.type === "reply" &&
-                lastPacket.originIp === destinationIp
-            ) {
-                cleanup(
-                    true,
-                    `Reply from ${lastPacket.originIp}: bytes=32 time<1ms TTL=64`
-                );
-            }
-
-        });
+        elementApi
+        .setPendingReply(true);
 
         timeoutId = setTimeout(() => {
             cleanup(false, `Request timed out.`);
@@ -140,11 +119,36 @@ async function sendSinglePing(
         routing(
             elementApi,
             icmpRequest
-        ).catch(error => {
+        ).then(() => {
+            
+            unsubscribe = elementApi.subscribeToBuffer(() => {
+
+                const buffer = elementApi.currentBuffer();
+
+                if (buffer.length === 0) return;
+
+                const lastPacket = buffer[buffer.length - 1];
+
+                if (
+                    lastPacket.protocol === "icmp" &&
+                    lastPacket.type === "reply" &&
+                    lastPacket.originIp === destinationIp
+                ) {
+                    cleanup(
+                        true,
+                        `Reply from ${lastPacket.originIp}: bytes=32 time<1ms TTL=64`
+                    );
+                }
+
+            });
+
+        }).catch(error => {
+
             console.error('Error routing request:', error);
             cleanup(false, `Error routing request: ${error}`);
+            
         });
-        
+
     });
 
 }

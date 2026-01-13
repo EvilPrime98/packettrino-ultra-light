@@ -1,4 +1,4 @@
-import { UltraLightElement, UltraComponent, ultraState } from "@ultra-light";
+import { UltraComponent, ultraEffect, ultraState } from "@ultra-light";
 
 export default function PacketCursor() {
 
@@ -7,29 +7,15 @@ export default function PacketCursor() {
         y: ''
     })
 
-    const updatePosition = (self: HTMLElement) => {
+    const originalCursor = document.body.style.cursor;
+
+    function updatePosition(self: HTMLElement){
         if (!self) return;
         self.style.top = position().y;
         self.style.left = position().x;
     }
-
-    const component: UltraLightElement = UltraComponent({
-        component: (
-            `<article class="pack-cursor">
-                <img src="/assets/board/pack.svg" />
-            </article>`
-        ),
-        trigger: [
-            { subscriber: subscribeToPosition, triggerFunction: updatePosition }
-        ]
-    })
     
-    const originalCursor = document.body.style.cursor;
-    
-    document.body.style.cursor = "none";
-
     function moveCursor(event: Event) {
-        console.log('activado')
         if (!(event instanceof MouseEvent)) return;
         setPosition({
             x: `${event.clientX}px`,
@@ -37,16 +23,38 @@ export default function PacketCursor() {
         })
     }
 
-    document.addEventListener("mousemove", moveCursor);
+    // function clickHandler(event: Event){
+    //     event.stopPropagation();
+    //     event.preventDefault();
+    //     console.log('click');
+    // }
 
-    const originalCleanup = component._cleanup;
+    const effectCleanup = ultraEffect(() => {
+        document.body.style.cursor = "none";
+        document.addEventListener("mousemove", moveCursor);
+        //document.addEventListener("click", clickHandler);
+    }, []);
 
-    component._cleanup = () => {
-        if (originalCleanup) originalCleanup();
+    const cursorCleanup = () => {
         document.removeEventListener("mousemove", moveCursor);
         document.body.style.cursor = originalCursor;
+        //document.removeEventListener("click", clickHandler);
     } 
 
-    return component;
+    return UltraComponent({
+        
+        component: (
+            `<article class="pack-cursor">
+                <img src="/assets/board/pack.svg" />
+            </article>`
+        ),
+        
+        trigger: [
+            { subscriber: subscribeToPosition, triggerFunction: updatePosition }
+        ],
+
+        cleanup: [cursorCleanup, effectCleanup]
+
+    })
 
 }

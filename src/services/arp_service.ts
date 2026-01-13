@@ -29,7 +29,8 @@ export default async function arp(
         iface.mac
     );
 
-    elementApi.setPendingReply(true);
+    elementApi
+    .setPendingReply(true);
 
     return new Promise<string|null>((resolve) => {
 
@@ -52,7 +53,6 @@ export default async function arp(
                 timeoutId = null;
             }
 
-            elementApi.setPendingReply(false);
             resolve(result);
 
         };

@@ -43,5 +43,7 @@ export default function QuickPingTool() {
         eventHandler: {
             'click': clickHandler 
         }
+
     });
+    
 }

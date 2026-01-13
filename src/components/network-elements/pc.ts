@@ -8,13 +8,16 @@ import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "../core/work-space";
 import { IUltraPcConfig, TNewNetworkElementProperties } from "@/types/TConfig";
 import { getActiveInterfaces } from "@/utils/component";
+import { ENV } from "@/context/env";
 import styles from "./pc.module.css";
+import { quick_ping } from "@/commands/ping";
 
 export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
     const elementAPI: IUltraPcConfig = ultraPcConfig({ id });
     const [arpTableState, setArpTableState, subscribeArpTableState] = ultraState(false);
     const [advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
+    const [packetState, setPacketState, subscribePacketState] = ultraState(false);
     const [contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
     const [, setIsDeleting, subscribeIsDeleting] = ultraState(false);
 
@@ -30,6 +33,18 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
     const clickHandler = () => {
         
+        if (ENV.get().quickPingMode === true) {
+
+            setPacketState(true);
+            
+            quick_ping(elementAPI, () => {
+                setPacketState(false);
+            })
+
+            return;
+
+        }
+
         if (pmCtx.get()?.isVisible) return;
 
         pmCtx.set({
@@ -163,6 +178,22 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
                     mode: {
                         state: advOptionsState,
                         subscriber: subscribeAdvOptionsState
+                    }
+
+                }),
+
+                UltraActivity({
+
+                    component: (`
+                        <img 
+                            src="/assets/packets/unicast.png"
+                            class=${styles['packet-animation']}
+                        />
+                    `),
+
+                    mode: {
+                        state: packetState,
+                        subscriber: subscribePacketState
                     }
 
                 })
