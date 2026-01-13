@@ -80,13 +80,6 @@ export interface TPcElementProperties {
      * Returns true or false based on whether IPv4 forwarding is enabled for the network element.
      */
     "ipv4-forwarding"?: boolean;
-    /**
-     * Returns the ARP cache of the network element.
-     */
-    "arp-cache": Record<string, {
-        "mac": string;
-        "timeOutId": NodeJS.Timeout;
-    }>;
 }
 
 export interface ICableElementProperties {
@@ -105,6 +98,26 @@ export type TNewNetworkElementProperties = {
     y: number;
 }
 
+//CABLE CONFIG
+export interface IUltraCableConfig {
+    properties: () => ICableElementProperties;
+    propertiesSubscriber: (fn: (value: ICableElementProperties) => void) => () => void;
+    updatePosition: (newPositions: ICableElementPosition) => void;
+}
+
+//ANIMATIONS
+export interface IUltraAnimations {
+    /**
+     * Generates an animation for a packet between two elements.
+     * @param itemId1 
+     * @param itemId2 
+     * @param packet 
+     * @returns 
+     */
+    visualize: (itemId1: string, itemId2: string, packet: Packet) => Promise<void>;
+}
+
+//ROUTING CONFIG
 export interface IUltraRoutingConfig {
     /**
      * Returns the routing rules of the network element.
@@ -139,7 +152,40 @@ export interface IUltraRoutingConfig {
     editRoutingRule: (newRule: IRoutingRule) => void;
 }
 
-export interface IUltraPcConfig extends IUltraRoutingConfig {
+//ARP CONFIG
+export type ArpCache = Record<string, {
+    "mac": string;
+    "timeOutId": NodeJS.Timeout;
+}>;
+
+export interface IUltraARPConfig {
+    /**
+     * Returns the ARP cache of the network element.
+     */
+    getARPCache: () => ArpCache;
+    /**
+     * Subscriber function for the ARP cache of the network element.
+     * @param fn 
+     * @returns 
+     */
+    subscribeToArpCache: (fn: (value: ArpCache) => void) => () => void;
+    /**
+     * Adds an ARP cache to the network element. It expires after $ARPENTRYTTL seconds.
+     * @param ip 
+     * @param mac 
+     * @returns 
+     */
+    addArpCache: (ip: string, mac: string) => void;
+    /**
+     * Deletes an ARP cache from the network element.
+     * @param ip 
+     * @returns 
+     */
+    deleteArpCache: (ip: string) => void;
+}
+
+//PC CONFIG
+export interface IUltraPcConfig extends IUltraARPConfig, IUltraRoutingConfig {
     /**
      * Returns the properties of the network element.
      * @returns 
@@ -238,6 +284,107 @@ export interface IUltraPcConfig extends IUltraRoutingConfig {
     getNewIfaceId: () => string;
 }
 
+//ROUTER CONFIG
+export interface IUltraRouterConfig extends IUltraPcConfig {
+    /**
+     * Returns the properties of the network element.
+     * @returns 
+     */
+    properties: () => TPcElementProperties;
+    /**
+     * Subscriber function for the properties of the network element.
+     * @param fn 
+     * @returns 
+     */
+    subscribeToProperties: (fn: (value: TPcElementProperties) => void) => () => void;
+    /**
+     * Sends a packet to the network element asynchronously.
+     * @param packet 
+     * @param originId 
+     * @returns 
+     */
+    sendPacket: (packet: Packet, originId: string) => Promise<void>;
+    /**
+     * Updates the properties of an interface in the network element.
+     * @param interfaceId 
+     * @param updates 
+     * @returns 
+     */
+    updateInterface: (interfaceId: string, updates: Partial<iface>) => void;
+    /**
+     * Updates the properties of an interface in the network element by index.
+     * @param index 
+     * @param updates 
+     * @returns 
+     */
+    updateInterfaceByIndex: (index: number, updates: Partial<iface>) => void;
+    /**
+     * Adds an interface to the network element.
+     * @param interfaceId 
+     * @returns 
+     */
+    addInterface: (interfaceId: string) => void;
+    /**
+     * Removes an interface from the network element.
+     * @param interfaceId 
+     * @returns 
+     */
+    removeInterface: (interfaceId: string) => void;
+    /**
+     * Updates ALL the properties of the network element.
+     * @param newProperties 
+     * @returns 
+     */
+    replaceProperties: (newProperties: TPcElementProperties) => void;
+    /**
+     * Adds a new connection to the network element.
+     * @param param0 
+     * @returns 
+     */
+    addConnection: ({ itemId, api }: TConnection) => void;
+    /**
+     * Removes a connection from the network element.
+     * @param itemId 
+     * @returns 
+     */
+    removeConnection: (itemId: string) => void;
+    /**
+     * Sets the pending reply flag to true or false.
+     * @param value 
+     * @returns 
+     */
+    setPendingReply: (value: boolean) => void;
+    /**
+     * Returns the current buffer of packets.
+     * @returns 
+     */
+    currentBuffer: () => Packet[];
+    /**
+     * Subscriber function for the buffer of packets.
+     * @param fn 
+     * @returns 
+     */
+    subscribeToBuffer: (fn: (value: Packet[]) => void) => () => void;
+    /**
+     * Adds an ARP cache to the network element. It expires after $ARPENTRYTTL seconds.
+     * @param ip 
+     * @param mac 
+     * @returns 
+     */
+    addArpCache: (ip: string, mac: string) => void;
+    /**
+     * Returns the default gateway of the network element.
+     * @returns 
+     */
+    getDefaultGateway: () => string;
+    /**
+     * Returns the id of the new interface that will be created.
+     * @returns 
+     */
+    getNewIfaceId: () => string;
+}
+
+//SWITCH CONFIG
 export interface IUltraSwitchConfig {
     properties: () => ISwitchElementProperties;
     subscribeToProperties: (fn: (value: ISwitchElementProperties) => void) => () => void;
@@ -256,26 +403,3 @@ export interface IUltraSwitchConfig {
      */
     broadcast: (packet: Packet, originId: string) => void;
 }
-
-export interface IUltraCableConfig {
-    properties: () => ICableElementProperties;
-    propertiesSubscriber: (fn: (value: ICableElementProperties) => void) => () => void;
-    updatePosition: (newPositions: ICableElementPosition) => void;
-}
-
-export interface IUltraAnimations {
-    /**
-     * Generates an animation for a packet between two elements.
-     * @param itemId1 
-     * @param itemId2 
-     * @param packet 
-     * @returns 
-     */
-    visualize: (itemId1: string, itemId2: string, packet: Packet) => Promise<void>;
-}
-
-//UNION TYPES
-export type TLayer3Properties = TPcElementProperties;
-export type TLayer2Properties = ISwitchElementProperties;
-export type TLayer3Config = IUltraPcConfig;
-export type TLayer2Config = IUltraSwitchConfig;

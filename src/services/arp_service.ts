@@ -100,7 +100,7 @@ function getARPRecord(
     elementApi: IUltraPcConfig
 ) {
 
-    const arpTable = elementApi.properties()["arp-cache"]
+    const arpTable = elementApi.getARPCache();
     const arpRecord = arpTable[ip];
 
     return (arpRecord) 

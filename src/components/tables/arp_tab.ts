@@ -1,14 +1,13 @@
-import { TPcElementProperties } from "@/types/TConfig";
 import { UltraComponent, UltraLightElement } from "@ultra-light";
 
 export function ARPTable({ 
     onClose,
     arpCache,
-    subscribeToProperties
+    arpSubscriber
 }: { 
     onClose?: () => void ;
     arpCache: () => Record<string, {mac: string, timeOutId: NodeJS.Timeout | null}>;
-    subscribeToProperties: (fn: (value: TPcElementProperties) => void) => () => void;
+    arpSubscriber: (fn: (value: Record<string, {mac: string, timeOutId: NodeJS.Timeout | null}>) => void) => () => void;
 }) {
 
     const clickHandler = (event: Event) => {
@@ -55,7 +54,12 @@ export function ARPTable({
                                 })
                             }),
 
-                            trigger: [{ subscriber: subscribeToProperties, triggerFunction: updateTable }]
+                            trigger: [
+                                { 
+                                    subscriber: arpSubscriber,
+                                    triggerFunction: updateTable 
+                                }
+                            ]
 
                         })
 

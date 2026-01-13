@@ -8,6 +8,7 @@ import { ENV } from "@/context/env";
 import { packetProcessor } from "@/utils/processors";
 import ultraRoutingConfig from "./ultraRoutingConfig";
 import ultraAnimations from "./ultraAnimations";
+import ultraARPConfig from "./ultraARPConfig";
 
 export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
 
@@ -27,8 +28,7 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
         },
         "resolved": true,
         "ipv4-forwarding": false,
-        "filesystem": createFilesystem(),
-        "arp-cache": {}
+        "filesystem": createFilesystem()
     }
 
     const [properties, setProperties, subscribeToProperties] = ultraState<TPcElementProperties>(initialProperties);
@@ -38,6 +38,7 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
 
     const self: IUltraPcConfig = {
         ...ultraRoutingConfig(),
+        ...ultraARPConfig(),
         properties,
         subscribeToProperties,
         updateInterface,
@@ -51,7 +52,6 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
         setPendingReply,
         currentBuffer: buffer,
         subscribeToBuffer,
-        addArpCache,
         getDefaultGateway,
         getNewIfaceId
     }
@@ -103,12 +103,6 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
             if (ifaceProperties.connection.itemId === '') return ifaceId;
         }
         return '';
-    }
-
-    function deleteArpCache(ip: string) {
-        const currentArpCache = properties()["arp-cache"];
-        const { [ip]: _removed, ...remainingArpCache } = currentArpCache;
-        updateProperty('arp-cache', remainingArpCache);
     }
 
     function updateInterface(interfaceId: string, updates: Partial<iface>) {
@@ -179,26 +173,6 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
             iface.connection.api = null;
         }
         updateProperty('ifaces', newIfaces)
-    }
-
-    function addArpCache(ip: string, mac: string) {
-
-        const currentArpCache = properties()["arp-cache"];
-
-        if (Object.hasOwn(currentArpCache, ip)) {
-            const currentEntry = currentArpCache[ip];
-            clearTimeout(currentEntry.timeOutId);
-        }
-
-        currentArpCache[ip] = {
-            mac: mac,
-            timeOutId: setTimeout(() => {
-                deleteArpCache(ip);
-            }, ENV.get().$ARPENTRYTTL * 1000)
-        };
-        
-        updateProperty('arp-cache', currentArpCache);
-
     }
 
     async function sendPacket(packet: Packet, originId: string) {

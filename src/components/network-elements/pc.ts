@@ -155,8 +155,8 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
                     
                     component: ARPTable({ 
                         onClose: () => setArpTableState(false),
-                        arpCache: () => elementAPI.properties()["arp-cache"],
-                        subscribeToProperties: elementAPI.subscribeToProperties
+                        arpCache: elementAPI.getARPCache,
+                        arpSubscriber: elementAPI.subscribeToArpCache,
                     }),
 
                     mode: {
