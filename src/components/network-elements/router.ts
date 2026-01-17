@@ -1,25 +1,55 @@
 import { UltraLightElement, UltraComponent, ultraState, UltraActivity } from "@ultra-light";
 import { AdvancedOptions } from "@components/core/adv-options";
-import { TERMINAL_CONTEXT as tCtx} from "../../context/terminal-context";
-import { WORK_SPACE_CONTEXT } from "../core/work-space";
+import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
+import { WORK_SPACE_CONTEXT } from "@/context/workspace-context";
 import ultraRouterConfig from "@/hooks/ultraRouterConfig";
 import { TNewNetworkElementProperties } from "@/types/TConfig";
 import styles from "./router.module.css";
+import { RoutingTable } from "../tables/routing_tab";
+import { ENV } from "@/context/env";
+import { quick_ping } from "@/utils/quick_ping";
+import { ROUTER_MENU_CTX as rmCtx } from "@/context/modals";
 
 export default function Router({ x, y, id }: TNewNetworkElementProperties) {
 
     const elementAPI = ultraRouterConfig({ itemIndex: id });
-    const [advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
-    const [contextClickEvent, setContextClickEvent] = ultraState<null | Event>(null);
-    const [, setIsDeleting, subscribeIsDeleting] = ultraState(false);
 
-    const contextMenuHandler = (event: Event) => {
-        event.preventDefault();
-        setContextClickEvent(event);
-        setAdvOptionsState(!advOptionsState());
-    }
+    const [
+        advOptionsState,
+        setAdvOptionsState,
+        subscribeAdvOptionsState
+    ] = ultraState(false);
 
-    const showTerminal = () => {
+    const [
+        routingTableState,
+        setRoutingTableState,
+        subscribeRoutingTableState
+    ] = ultraState(false);
+
+    const [
+        contextClickEvent,
+        setContextClickEvent
+    ] = ultraState<null | Event>(null);
+
+    const [
+        ,
+        setIsDeleting,
+        subscribeIsDeleting
+    ] = ultraState(false);
+
+    const [
+        packetState,
+        setPacketState,
+        subscribePacketState
+    ] = ultraState(false);
+
+    const options = [
+        { message: "Terminal", callback: onTerminalOption },
+        { message: "Routing Table", callback: () => setRoutingTableState(true) },
+        { message: "Delete", callback: () => setIsDeleting(true) }
+    ]
+
+    function onTerminalOption() {
         if (tCtx.get().isVisible) return;
         tCtx.set({
             ...tCtx.get(),
@@ -27,8 +57,34 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
             "elementAPI": elementAPI,
         })
     }
-    
-    const dragStartHandler = (event: Event) => {
+
+    function onClick() {
+
+        if (ENV.get().quickPingMode === true) {
+            setPacketState(true);
+            quick_ping(elementAPI, () => {
+                setPacketState(false);
+            })
+            return;
+        }
+
+        if (rmCtx.get().isVisible) return;
+
+        rmCtx.set({
+            ...rmCtx.get(),
+            "isVisible": true,
+            "routerElementAPI": elementAPI
+        })
+
+    }
+
+    function onRightClick(event: Event) {
+        event.preventDefault();
+        setContextClickEvent(event);
+        setAdvOptionsState(!advOptionsState());
+    }
+
+    function onDragStart(event: Event) {
 
         const dragEvent = event as DragEvent;
         const self = event.currentTarget;
@@ -49,16 +105,10 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
 
     }
 
-    function deleteHandler(self: UltraLightElement) {
+    function onDelete(self: UltraLightElement) {
         self._cleanup?.();
         self.remove();
     }
-
-    const options = [
-        { message: "Terminal", callback: showTerminal },
-        { message: "Routing Table", callback: () => alert("routing table") },
-        { message: "Delete", callback: () => setIsDeleting(true) }
-    ]
 
     return (
 
@@ -84,7 +134,7 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
             children: [
 
                 UltraActivity({
-                    
+
                     component: AdvancedOptions({
                         onClose: () => setAdvOptionsState(false),
                         subscribeAdvOptionsState,
@@ -97,16 +147,48 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
                         subscriber: subscribeAdvOptionsState
                     }
 
+                }),
+
+                UltraActivity({
+
+                    component: RoutingTable({
+                        onClose: () => setRoutingTableState(false),
+                        routingRules: elementAPI.routingRules,
+                        subscribeToRoutingRules: elementAPI.subscribeToRoutingRules
+                    }),
+
+                    mode: {
+                        state: routingTableState,
+                        subscriber: subscribeRoutingTableState
+                    }
+
+                }),
+
+                UltraActivity({
+
+                    component: (`
+                        <img 
+                            src="/assets/packets/unicast.png"
+                            class=${styles['packet-animation']}
+                        />
+                    `),
+
+                    mode: {
+                        state: packetState,
+                        subscriber: subscribePacketState
+                    }
+
                 })
 
             ],
 
             eventHandler: {
-                'contextmenu': contextMenuHandler,
-                'dragstart': dragStartHandler
+                'contextmenu': onRightClick,
+                'dragstart': onDragStart,
+                'click': onClick
             },
 
-            trigger: [{ subscriber: subscribeIsDeleting, triggerFunction: deleteHandler }]
+            trigger: [{ subscriber: subscribeIsDeleting, triggerFunction: onDelete }]
 
         })
 

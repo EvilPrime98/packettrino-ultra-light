@@ -1,4 +1,9 @@
-import { iface, IUltraPcConfig } from "./TConfig";
+import { iface, IUltraPcConfig, IUltraRouterConfig } from "./TConfig";
+
+export type WritableKeys<T> = {
+  [K in keyof T]-?: (<F>() => F extends { [Q in K]: T[K] } ? 1 : 2) extends
+    (<F>() => F extends { -readonly [Q in K]: T[K] } ? 1 : 2) ? K : never
+}[keyof T];
 
 export interface IToasterContext {
   /**
@@ -41,6 +46,11 @@ export type PcMenuInfo = {
 export type PcMenuCtx = {
   isVisible: boolean;
   pcElementAPI: IUltraPcConfig | null;
+}
+
+export type RouterMenuCtx = {
+  isVisible: boolean;
+  routerElementAPI: IUltraRouterConfig | null;
 }
 
 export interface TerminalContextInterface {

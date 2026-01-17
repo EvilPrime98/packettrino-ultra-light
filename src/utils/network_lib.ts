@@ -1,3 +1,5 @@
+import { IUltraPcConfig, IUltraRouterConfig } from "@/types/TConfig";
+
 /**
  * Returns a random 48-bit MAC address
  * @returns 
@@ -93,7 +95,6 @@ export function netmaskToCidr(netmask: string) {
     return cidr;
 }
 
-/**ESTA FUNCION DEVUELVE UNA IP Y NETMASK A PARTIR DE UNA DIRECCION IP EN NOTACION CIDR */
 /**
  * Returns an IP and netmask from a CIDR notation as an array.
  * It does NOT validate if the ip or netmask are valid ipv4 addresses.
@@ -136,101 +137,32 @@ export function isValidIp(ip: string) {
     return /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test(ip);
 }
 
-/**ESTA FUNCION ACTUALIZA UNA ENTRADA DE LA TABLA DE MACS DE UN SWITCH*/
-function updateMacEntry(switchObjectId, networkObjectId, newMac) {
-
-    const switchObject = document.getElementById(switchObjectId);
-    const macTable = switchObject.querySelector("table");
-    const rows = macTable.querySelectorAll("tr");
-
-    //añadimos el registro de la tabla MAC
-
-    for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        const cells = row.querySelectorAll("td");
-        if (cells[0].innerHTML === networkObjectId) {
-            cells[1].innerHTML = newMac;
-            break;
-        }
+/**
+ * Returns an array of available IPs for the network element.
+ * @param elementApi A network element API with Layer3 properties.
+ * @returns 
+ */
+export function getAvailableIps(
+    elementApi: IUltraPcConfig | IUltraRouterConfig
+){
+    const ifaces = elementApi.getIfaces();
+    const availableIps = [];
+    for (const ifaceId of Object.keys(ifaces)) {
+        const iface = ifaces[ifaceId];
+        availableIps.push(iface.ip);
     }
-
-
-    //reiniciamos o inicamos el temporizador de MAC
-
-    if (!macEntryTimers[`${switchObjectId}-${networkObjectId}`]) {
-
-        macEntryTimers[`${switchObjectId}-${networkObjectId}`] = setTimeout(() => {
-            deleteMacEntry(switchObjectId, networkObjectId);
-        }, $MACENTRYTTL * 1000);
-
-        console.log(`Temporizador de MAC iniciado para ${switchObjectId}-${networkObjectId}`);
-
-    } else {
-
-        clearTimeout(macEntryTimers[`${switchObjectId}-${networkObjectId}`]);
-        macEntryTimers[`${switchObjectId}-${networkObjectId}`] = setTimeout(() => {
-            deleteMacEntry(switchObjectId, networkObjectId);
-        }, $MACENTRYTTL * 1000);
-
-        console.log(`Temporizador de MAC reiniciado para ${switchObjectId}-${networkObjectId}`);
-
-    }
-
+    return availableIps;
 }
 
-/**ESTA FUNCION ELIMINA UNA ENTRADA DE LA TABLA DE MACS DE UN SWITCH*/
-function deleteMacEntry(switchObjectId, networkObjectId) {
-
-    const $switchObject = document.getElementById(switchObjectId);
-    const $macTable = $switchObject.querySelector("table");
-    const $records = $macTable.querySelectorAll("tr");
-
-    for (let i = 1; i < $records.length; i++) {
-        const $record = $records[i];
-        const $fields = $record.querySelectorAll("td");
-        if ($fields[0].innerHTML === networkObjectId) {
-            $fields[1].innerHTML = "";
-            delete macEntryTimers[`${switchObjectId}-${networkObjectId}`];
-            console.log(`Temporizador de MAC eliminado para ${switchObjectId}-${networkObjectId}`);
-            break;
-        }
-    }
-
-}
-
-/**ESTA FUNCION AÑADE UNA ENTRADA A LA TABLA DE MACS DE UN SWITCH*/
-function addSwitchPort(switchId, itemdId) {
-    const $switchObject = document.getElementById(switchId);
-    const $macTable = $switchObject.querySelector("table");
-    const $records = $macTable.querySelectorAll("tr");
-    const $newMac = document.createElement("tr");
-    $newMac.innerHTML = `
-        <tr>
-            <td class="device-name">${itemdId}</td>
-            <td class="mac-address"></td>
-            <td class="physical-port">FA0/${$records.length}</td>
-        </tr>`;
-    $macTable.appendChild($newMac);
-}
-
-/**ESTA FUNCION ELIMINA UNA ENTRADA DE LA TABLA DE MACS DE UN SWITCH*/
-function deleteSwitchPort(switchId, networkObjectId) {
-    const switchObject = document.getElementById(switchId);
-    const table = switchObject.querySelector("table");
-    const tds = table.querySelectorAll("td");
-
-    for (let i = 0; i < tds.length; i++) {
-        const td = tds[i];
-        if (td.innerHTML === networkObjectId) {
-            const tr = td.parentElement;
-            tr.remove();
-            break;
-        }
-    }
-}
-
-/**ESTA FUNCION DEVUELVE TRUE SI LA DIRECCION IP EN NOTACION CIDR ES VALIDA. TAMBIEN VALIDA SI LA DIRECCION IP ES VALIDA */
-function isValidCidrIp(cidr) {
+/**
+ * Returns true or false based on whether a decimal ipv4 address is in valid CIDR notation.
+ * It also validates if the ipv4 address is valid.
+ * @param cidr 
+ * @returns 
+ */
+export function isValidCidrIp(
+    cidr: string
+) {
     const ip = cidr.split("/")[0];
     const netmask = parseInt(cidr.split("/")[1]);
     let response = true;
@@ -239,8 +171,12 @@ function isValidCidrIp(cidr) {
     return response;
 }
 
-/**ESTA FUNCION DEVUELVE TRUE SI EL DOMINIO ES VALIDO */
-function isValidDomain(domain) {
+/**
+ * Returns true or false based on whether a domain is valid.
+ * @param domain 
+ * @returns 
+ */
+export function isValidDomain(domain: string) {
     return /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])\.?$/.test(domain);
 }
 
@@ -251,110 +187,6 @@ function isValidDomain(domain) {
  */
 export function isValidMac(mac: string) {
     return /^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})$/.test(mac);
-}
-
-/**ESTA FUNCION LAS MACS ALMACENADAS EN UN SWITCH COMO ARRAY*/
-function getMACTable(switchObjectId) {
-
-    const switchOriginObject = document.getElementById(switchObjectId);
-
-    const macElements = switchOriginObject.querySelector("table").querySelectorAll(".mac-address");
-
-    const macs = [];
-
-    for (let i = 0; i < macElements.length; i++) {
-        macs.push(macElements[i].innerHTML);
-    }
-
-    return macs;
-
-}
-
-/**ESTA FUNCION DEVUELVE TRUE SI LA TABLA DE DIRECCIONES MACS DE UN SWITCH ESTA VACIA */
-function isMacTableEmpty(switchObjectId) {
-
-    const tabla = document.getElementById(switchObjectId).querySelector("table");
-    const matriz = [];
-
-    for (const fila of tabla.rows) {
-        const filaArray = [];
-        for (const celda of fila.cells) {
-            filaArray.push(celda.innerText.trim());
-        }
-        matriz.push(filaArray);
-    }
-
-    if (matriz.length === 1) {
-        return true;
-    } else {
-        return false;
-    }
-
-}
-
-/**ESTA FUNCION DEVUELVE TRUE SI UNA DIRECCION MAC ESTA ALMACENADA EN UN SWITCH */
-function isMacInMACTable(switchObjectId, macAddress) {
-
-    const macs = getMACTable(switchObjectId);
-
-    for (let i = 0; i < macs.length; i++) {
-
-        const mac = macs[i];
-
-        if (mac === macAddress) {
-            return true;
-        }
-
-    }
-
-    return false;
-
-}
-
-/**ESTA FUNCION DEVUELVE EL DISPOSITIVO (PUERTO) QUE CORRESPONDE CON UNA DIRECCION MAC EN UN SWITCH */
-function getDeviceFromMac(switchObjectId, mac) {
-
-    const switchObject = document.getElementById(switchObjectId);
-    const macTable = switchObject.querySelector("table");
-    const rows = macTable.querySelectorAll("tr");
-
-    for (let i = 1; i < rows.length; i++) {
-
-        const row = rows[i];
-        const cells = row.querySelectorAll("td");
-        if (cells[1].innerHTML === mac) {
-            return cells[0].innerHTML;
-        }
-
-    }
-}
-
-/**ESTA FUNCION DEVUELVE LA TABLA DE DISPOSITIVOS (PUERTOS) ACTIVOS EN UN SWITCH */
-function getDeviceTable(switchObjectId) {
-
-    const switchOriginObject = document.getElementById(switchObjectId);
-
-    const devices = switchOriginObject.querySelector("table").querySelectorAll(".device-name");
-
-    const devicesArray = [];
-
-    for (let i = 0; i < devices.length; i++) {
-        devicesArray.push(devices[i].innerHTML);
-    }
-
-    return devicesArray;
-
-}
-
-/**ESTA FUNCION ESCAPEA EL HTML DE UN STRING */
-function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, match => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-    }[match]));
 }
 
 /**
@@ -461,258 +293,60 @@ export function catchopts(options: string[], args: string[]): {
 
 }
 
-/**ESTA FUNCION DEVUELVE LAS INTERFACES DE UN DISPOSITIVO COMO ARRAY [INTERFAZ1, INTERFAZ2, ...] */
-export function getInterfaces(ref: HTMLElement | null) {
+/**
+ * Returns true or false based on whether an IP is local for the network element.
+ * @param elementApi 
+ * @param ip 
+ * @returns 
+ */
+export function isLocalIp(
+    elementApi: IUltraPcConfig | IUltraRouterConfig,
+    ip: string
+) {
 
-    if (!ref) return [];
-    const response = [];
-    let index = 3;
-    let networkInterface = ref.getAttribute("ip-enp0s" + index);
-
-    while (networkInterface !== null) {
-        response.push(`enp0s` + index);
-        if (index === 3) index = 8;
-        else index++;
-        networkInterface = ref.getAttribute("ip-enp0s" + index);
-    }
-
-    return response;
-
+    const availableIps = getAvailableIps(elementApi);
+    return [...availableIps].includes(ip)
+    || getNetwork(ip, "255.0.0.0") === "127.0.0.0";
 }
 
-/**ESTA FUNCION DEVUELVE TRUE SI EL DISPOSITIVO TIENE AL MENOS 1 CONEXION ACTIVA */
-function isConnected(networkObjectId) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    let index = 3;
-    let switchAttribute = $networkObject.getAttribute("data-switch-enp0s" + index);
-
-    while (switchAttribute !== null) {
-        if (switchAttribute !== "") return true;
-        if (index === 3) index = 8;
-        else index++;
-        switchAttribute = $networkObject.getAttribute("data-switch-enp0s" + index);
-    }
-
-    if (networkObjectId.startsWith("switch-")) return getDeviceTable(networkObjectId).length !== 0;
-
-    return false;
-
+/**
+ * Returns an array with the first element of the text and the second element.
+ * If the separator is not found, the first element is the entire text.
+ * @param text 
+ * @param separator 
+ * @returns 
+ */
+export function splitFirst(
+    text: string, 
+    separator: string
+) {
+    const index = text.indexOf(separator);
+    if (index === -1) return [text];
+    return [text.substring(0, index), text.substring(index + separator.length)];
 }
 
-/**ESTA FUNCION DEVUELVE LA PRIMERA INTERFAZ LIBRE DEL DISPOSITIVO */
-function getAvailableInterface(networkObjectId) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    let index = 3;
-    let switchConn = $networkObject.getAttribute("data-switch-enp0s" + index);
-
-    while (switchConn !== null) {
-        if (switchConn === "") return `enp0s${index}`;
-        if (index === 3) index = 8;
-        else index++;
-        switchConn = $networkObject.getAttribute("data-switch-enp0s" + index);
-    }
-
-    return false;
+/**
+ * Returns an array with the first element of the text and the second element.
+ * If the separator is not found, the first element is the entire text.
+ * @param text 
+ * @param separator 
+ * @returns 
+ */
+export function splitLast(
+    text: string, 
+    separator: string
+) {
+    const index = text.lastIndexOf(separator);
+    if (index === -1) return [text];
+    return [text.substring(0, index), text.substring(index + separator.length)];
 }
 
-/**ESTA FUNCION DEVUELVE LA INFORMACION DE UNA INTERFAZ COMO ARRAY [IP, NETMASK, MAC] */
-function getIfaceData(networkObjectId, iface) {
-    const $networkObject = document.getElementById(networkObjectId);
-    return [$networkObject.getAttribute("ip-" + iface), $networkObject.getAttribute("netmask-" + iface), $networkObject.getAttribute("mac-" + iface)];
-}
-
-/**ESTA FUNCION DEVUELVE LA INFORMACION DE UNA INTERFAZ QUE ESTE CONECTADA A UN SWITCH EN CONCRETO */
-function getInterfaceSwitchInfo(networkObjectId, switchObjectId) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    let index = 3;
-    let switchConn = $networkObject.getAttribute("data-switch-enp0s" + index);
-    const response = [];
-
-    while (switchConn !== null) {
-
-        if (switchConn === switchObjectId) {
-            response.push($networkObject.getAttribute("ip-enp0s" + index));
-            response.push($networkObject.getAttribute("netmask-enp0s" + index));
-            response.push($networkObject.getAttribute("mac-enp0s" + index));
-            return response;
-        }
-
-        if (index === 3) index = 8;
-        else index++;
-        switchConn = $networkObject.getAttribute("data-switch-enp0s" + index);
-    }
-
-    return [false, false, false];
-
-}
-
-/**ESTA FUNCION DEVUELVE LA INTERFAZ DE UN DISPOSITIVO QUE ESTÁ CONECTADA A UN SWITCH */
-function switchToInterface(networkObjectId, switchId) {
-    const $networkObject = document.getElementById(networkObjectId);
-    const interfaces = getInterfaces(networkObjectId);
-    let response = false;
-    interfaces.forEach(iface => { if ($networkObject.getAttribute(`data-switch-${iface}`) === switchId) response = iface; });
-    return response;
-}
-
-/**ESTA FUNCION DEVUELVE LAS IPS DISPONIBLES EN UN DISPOSITIVO COMO ARRAY [IP1, IP2, ...] */
-function getAvailableIps(networkObjectId) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    let index = 3;
-    let networkObjectIp = $networkObject.getAttribute("ip-enp0s" + index);
-    const availableIps = [];
-
-    while (networkObjectIp !== null) {
-        if (networkObjectIp !== "") availableIps.push(networkObjectIp);
-        if (index === 3) index = 8;
-        else index++;
-        networkObjectIp = $networkObject.getAttribute("ip-enp0s" + index);
-    }
-
-    return availableIps;
-
-}
-
-/**ESTA FUNCION DEVUELVE LA INFORMACION DE UNA INTERFAZ COMO ARRAY [INTERFAZ, SWITCH AL QUE ESTÁ CONECTADA, DIRECCIÓN MAC ]*/
-function getInfoFromIp(networkObjectId, ip) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    const response = [false, false, false];
-    let index = 3;
-    let interfaceIp = $networkObject.getAttribute("ip-enp0s" + index);
-
-    while (interfaceIp !== null) {
-
-        if (interfaceIp === ip) {
-            response[0] = `enp0s${index}`;
-            response[1] = $networkObject.getAttribute("data-switch-enp0s" + index);
-            response[2] = $networkObject.getAttribute("mac-enp0s" + index);
-        }
-
-        if (index === 3) index = 8;
-        else index++;
-
-        interfaceIp = $networkObject.getAttribute("ip-enp0s" + index);
-
-    }
-
-    return response;
-
-}
-
-/**ESTA FUNCION DEVUELVE UN ARRAY CON LAS DIRECCIONES MAC DE TODAS LAS INTERFAZ DE UN DISPOSITIVO */
-function getMacAddresses(networkObjectId) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    let index = 3;
-    let mac = $networkObject.getAttribute("mac-enp0s" + index);
-    const macs = [];
-
-    while (mac !== null) {
-        macs.push(mac);
-        if (index === 3) index = 8;
-        else index++;
-        mac = $networkObject.getAttribute("mac-enp0s" + index);
-    }
-
-    return macs;
-
-}
-
-/**ESTA FUNCIÓN DEVUELVE TRUE SI LA IP ES LOCAL PARA EL DISPOSITIVO */
-function isLocalIp(networkObjectId, ip) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    const interfaces = getInterfaces(networkObjectId);
-    let response = false;
-
-    //si forma parte de alguna interfaz
-    for (const iface of interfaces) if ($networkObject.getAttribute(`ip-${iface}`) === ip) response = true;
-
-    //si forma parte del bucle local
-    if (getNetwork(ip, "255.0.0.0") === "127.0.0.0") response = true;
-
-    return response;
-}
-
-//FUNCIONES DE SIMULACION DE CONSTRUCCION DE REDES
-function getLastElement(selector, position = -1) {
-    const elements = document.querySelectorAll(selector);
-    return elements[elements.length + position];
-}
-
-function createConn(elementoOrigen, elementoDestino) {
-
-    const dragstartEvent = new DragEvent('dragstart', {
-        bubbles: true,
-        cancelable: true,
-        view: window
-    });
-
-    const dataTransfer = new DataTransfer();
-
-    Object.defineProperty(dragstartEvent, 'dataTransfer', {
-        value: dataTransfer,
-        writable: false
-    });
-
-    elementoOrigen.dispatchEvent(dragstartEvent);
-
-    const dropEvent = new DragEvent('drop', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-        dataTransfer: dataTransfer
-    });
-
-    elementoDestino.dispatchEvent(dropEvent);
-
-    return {
-        originElement: elementoOrigen,
-        targetElement: elementoDestino,
-        dataTransfer: dataTransfer
-    };
-}
-
-function setRouterIps($router, ip1, ip2 = "", ip3 = "") {
-
-    const [newIpEnp0s3, newNetmaskEnp0s3] = parseCidr(ip1);
-    const [newIpEnp0s8, newNetmaskEnp0s8] = parseCidr(ip2);
-    const [newIpEnp0s9, newNetmaskEnp0s9] = parseCidr(ip3);
-
-    $router.setAttribute("ip-enp0s3", newIpEnp0s3);
-    $router.setAttribute("ip-enp0s8", newIpEnp0s8);
-    $router.setAttribute("ip-enp0s9", newIpEnp0s9);
-    $router.setAttribute("netmask-enp0s3", newNetmaskEnp0s3);
-    $router.setAttribute("netmask-enp0s8", newNetmaskEnp0s8);
-    $router.setAttribute("netmask-enp0s9", newNetmaskEnp0s9);
-
-    const routingTable = $router.querySelector(".routing-table").querySelector("table");
-    const rows = routingTable.querySelectorAll("tr");
-
-    const ifaces = [
-        { ip: newIpEnp0s3, netmask: newNetmaskEnp0s3, interface: "enp0s3" },
-        { ip: newIpEnp0s8, netmask: newNetmaskEnp0s8, interface: "enp0s8" },
-        { ip: newIpEnp0s9, netmask: newNetmaskEnp0s9, interface: "enp0s9" }
-    ];
-
-    ifaces.forEach((iface, index) => {
-        const row = rows[index + 1];
-        const cells = row.querySelectorAll("td");
-        if (getNetwork(iface.ip, iface.netmask) !== "0.0.0.0") cells[0].innerHTML = getNetwork(iface.ip, iface.netmask);
-        cells[1].innerHTML = iface.netmask;
-        cells[2].innerHTML = iface.ip;
-        cells[3].innerHTML = iface.interface;
-    });
-
-}
-
-/**ESTA FUNCION PARSEA UNA DIRECCIÓN DE BÚSQUEDA EN [PROTOCOLO, IP, PUERTO] */
-function parseSearch(input) {
+/**
+ * This function parses a search string in the format [protocol, ip, port].
+ * @param input 
+ * @returns 
+ */
+export function parseSearch(input: string) {
 
     let protocol;
     let addressPortResource;
@@ -721,15 +355,12 @@ function parseSearch(input) {
     let port;
     let resource;
 
-    //definimos los mapas
-
     const protocolMap = {
         http: 80,
         https: 443,
         ptt: 80
-    };
+    } as Record<string, number>;
 
-    //
     const dividebyProtocol = splitFirst(input, "://");
 
     if (dividebyProtocol.length < 2) {
@@ -766,110 +397,5 @@ function parseSearch(input) {
         port: port,
         resource: resource
     }
-
-}
-
-/**DEVUELVE EL INDICE MÁS ALTO DE INTERFAZ DE UN DISPOSITIVO (3, 8, 9, ...) */
-function maxIfaceIndex(networkObjectId) {
-    return getInterfaces(networkObjectId)
-        .map(iface => parseInt(iface.split("enp0s")[1]))
-        .sort((a, b) => a - b)
-        .pop();
-}
-
-/**ESTA FUNCION ELIMINA UNA INTERFAZ DE UN DISPOSITIVO, JUNTO CON LAS CONFIGURACIONES RELACIONADAS */
-function deleteInterface(networkObjectId, iface) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-
-    //si la interfaz está configurada en dhcp, hacemos un release primero
-
-    //TODO -> hacer release de dhcp
-
-    //eliminamos los atributos del elemento de red
-
-    $networkObject.removeAttribute(`ip-${iface}`);
-    $networkObject.removeAttribute(`netmask-${iface}`);
-    $networkObject.removeAttribute(`mac-${iface}`);
-    $networkObject.removeAttribute(`data-switch-${iface}`);
-
-    //eliminamos las reglas de enrutamiento que usen esa interfaz
-
-    const $routingTable = $networkObject.querySelector(".routing-table").querySelector("table");
-    const $routingRules = $routingTable.querySelectorAll("tr");
-
-    $routingRules.forEach($rule => {
-        const $fields = $rule.querySelectorAll("td");
-        if ($fields.length === 0) return;
-        if ($fields[3].innerHTML === iface) $rule.remove();
-    });
-
-}
-
-/**ESTA FUNCION AÑADE UNA INTERFAZ A UN DISPOSITIVO */
-function addInterface(networkObjectId) {
-
-    const $networkObject = document.getElementById(networkObjectId);
-    const availableInterfaces = getInterfaces(networkObjectId);
-    const ifaceMaxIndex = maxIfaceIndex(networkObjectId);
-    const newInterface = (ifaceMaxIndex === 3) ? "enp0s8" : `enp0s${ifaceMaxIndex + 1}`;
-
-    //añadimos los atributos de la nueva interfaz
-    $networkObject.setAttribute(`ip-${newInterface}`, "");
-    $networkObject.setAttribute(`netmask-${newInterface}`, "");
-    $networkObject.setAttribute(`mac-${newInterface}`, getRandomMac());
-    $networkObject.setAttribute(`data-switch-${newInterface}`, "");
-
-    //habilitamos el drag and drop para la nueva interfaz
-    $networkObject.querySelector("img").draggable = true;
-
-    //si el servicio dhclient está activo, añadimos la configuración de la nueva interfaz
-    if ($networkObject.getAttribute("dhclient") === "true") {
-        $networkObject.setAttribute(`data-dhcp-server-${newInterface}`, "");
-        $networkObject.setAttribute(`data-dhcp-lease-time-${newInterface}`, "");
-        $networkObject.setAttribute(`data-dhcp-current-lease-time-${newInterface}`, "");
-        $networkObject.setAttribute(`data-dhcp-flag-t1-${newInterface}`, "false");
-        $networkObject.setAttribute(`data-dhcp-flag-t2-${newInterface}`, "false");
-    }
-
-}
-
-/**ESTA FUNCION DEVUELVE LA PUERTA DE ENLACE DE UN DISPOSITIVO */
-function getDefaultGateway(networkObjectId) {
-    const $networkObject = document.getElementById(networkObjectId);
-    const $defaultRule = $networkObject.querySelector(".routing-table table").querySelector(".default-route");
-    return $defaultRule?.querySelectorAll("td")[4]?.innerHTML || "";
-}
-
-/**ESTA FUNCION CONFIGURA LA PUERTA DE ENLACE DE UN DISPOSITIVO */
-function setDefaultGateway(networkObjectId, newGateway) {
-
-    if (!newGateway) return;
-
-    const $networkObject = document.getElementById(networkObjectId);
-    const $directRules = $networkObject.querySelector(".routing-table table").querySelectorAll(".direct-route");
-
-    for (let i = 0; i < $directRules.length; i++) {
-        const $rule = $directRules[i];
-        const $fields = $rule.querySelectorAll("td");
-        const ruleDestination = $fields[0].innerHTML;
-        const ruleNetmask = $fields[1].innerHTML;
-        const ruleGateway = $fields[2].innerHTML;
-        const ruleIface = $fields[3].innerHTML;
-        const ruleNextHop = $fields[4].innerHTML;
-
-        if (getNetwork(ruleDestination, ruleNetmask) === getNetwork(newGateway, ruleNetmask)) {
-            setRemoteRoutingRule(networkObjectId,
-                "0.0.0.0",
-                "0.0.0.0",
-                ruleGateway,
-                ruleIface,
-                newGateway
-            );
-            return;
-        }
-    }
-
-    throw new Error("networkd: Error: Puerta de enlace inalcanzable.");
 
 }

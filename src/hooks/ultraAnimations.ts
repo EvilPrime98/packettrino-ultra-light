@@ -1,4 +1,4 @@
-import { WORK_SPACE_CONTEXT as wsCtx } from "@/components/core/work-space";
+import { WORK_SPACE_CONTEXT as wsCtx } from "@/context/workspace-context";
 import { CANVAS_CONTEXT as csCtxd} from "@/components/core/svg-canvas";
 import { Packet } from "@/types/packets";
 import { IUltraAnimations } from "@/types/TConfig";

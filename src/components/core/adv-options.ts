@@ -1,6 +1,6 @@
 import { UltraComponent, ultraStyles } from "@ultra-light";
 import { Option } from "./option";
-import { WORK_SPACE_CONTEXT } from "@components/core/work-space";
+import { WORK_SPACE_CONTEXT as wCtx } from "@context/workspace-context";
 import { AdvancedOption } from "@/types/types";
 
 type Props = {
@@ -98,7 +98,8 @@ export function AdvancedOptions({
             return;
         }
 
-        const { boardHeight, boardWidth, boardRect } = WORK_SPACE_CONTEXT.get().getWorkSpaceProperties();
+        wCtx.get().measureBoard();
+        const { boardHeight, boardWidth, boardRect } = wCtx.get().boardProperties;
         const workRectLeft = boardRect?.left || 0;
         const workRectTop = boardRect?.top || 0;
         const x = clickEvent.clientX - workRectLeft;

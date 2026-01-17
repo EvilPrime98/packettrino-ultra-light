@@ -1,6 +1,7 @@
 import { UltraComponent } from "@ultra-light";
 import { Props } from "./pc-menu-types";
 import { PC_MENU_CTX as pmCtx } from "@context/modals";
+import styles from "./pc-menu.module.css";
 
 export default function GatewayField({ 
     getFields, 
@@ -32,7 +33,7 @@ export default function GatewayField({
 
         UltraComponent({
 
-            component: `<div class="form-item"></div>`,
+            component: `<div class="${styles['form-item']}"></div>`,
 
             children: [
 

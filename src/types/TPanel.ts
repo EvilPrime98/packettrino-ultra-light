@@ -3,4 +3,6 @@ export interface TPanelItem {
     image: string;
     draggable: boolean;
     tooltip: string;
+    onDragStart?: () => void;
+    onClick?: () => void;
 }

@@ -5,6 +5,7 @@ import { AlignmentError, ConnectionAlreadyEstablishedError, InvalidMacAddressErr
 import { ISwitchElementProperties, IUltraSwitchConfig, TConnection  } from "@/types/TConfig";
 import { Packet } from "@/types/packets";
 import { ENV } from "@/context/env";
+import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import ultraAnimations from "@/hooks/ultraAnimations";
 
 export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchConfig {
@@ -18,10 +19,10 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
     const [portIndex, setPortIndex,] = ultraState(0);
     const { visualize } = ultraAnimations();
 
-    const updateProperty = <K extends keyof ISwitchElementProperties>(
+    function updateProperty<K extends keyof ISwitchElementProperties>(
         key: K,
         value: ISwitchElementProperties[K]
-    ) => {
+    ) {
         setProperties({
             ...properties(),
             [key]: value
@@ -105,11 +106,11 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
     async function sendPacket(packet: Packet, itemId: string) {
         
         if (ENV.get().visualToggle) {
-            await visualize(
-                itemId, 
-                properties().elementId, 
-                packet
-            );
+            await visualize( itemId, properties().elementId, packet);
+        }
+
+        if (ENV.get().trackTraffic === true){
+            tmCtx.get().addPacket(packet, itemId);
         }
         
         updateMacRecords(packet, itemId);
@@ -117,21 +118,37 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
         const elementApi = getElementApiByMac(packet.destinationMac);
 
         if (!elementApi) {
-            broadcast(packet, itemId);
+
+            await broadcast(packet, itemId);
+
         }else {
-            elementApi
-            .sendPacket(packet, properties().elementId);
+
+            await elementApi.sendPacket(
+                packet, 
+                properties().elementId
+            );
+            
         }
 
     }
 
     async function broadcast(packet: Packet, itemId: string) {
+
         const connections = properties().connections;
+        
         connections.forEach((connection: TConnection) => {
+            
             if (connection.itemId === itemId) return; //we dont want to send the packet to the source
-            const copyPacket = structuredClone(packet); //we need to clone the packet to avoid mutating the original
-            connection.api?.sendPacket(copyPacket, properties().elementId)
+            
+            const copyPacket = structuredClone(packet);
+            
+            connection.api?.sendPacket(
+                copyPacket, 
+                properties().elementId
+            )
+
         })
+
     }
 
     return {

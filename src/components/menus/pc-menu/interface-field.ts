@@ -1,8 +1,10 @@
-import { UltraComponent, ultraState } from "@ultra-light";
+import { 
+    UltraComponent, 
+    ultraState 
+} from "@ultra-light";
 import { PC_MENU_CTX as pmCtx } from "@context/modals";
 import type { PcMenuFields } from "@/types/types";
-import { TOASTER_CONTEXT } from "@/components/core/toaster";
-import EditIcon from "@/components/icons/edit-icon";
+import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
 import AddIcon from "@/components/icons/add-icon";
 import styles from "./pc-menu.module.css";
 
@@ -10,55 +12,38 @@ type InterfaceFieldProps = {
     getFields: () => PcMenuFields;
     setFields: (newValue: PcMenuFields) => void;
     subscribeFields: (fn: (value: PcMenuFields) => void) => () => void;
-    isEditing: () => boolean;
-    setIsEditing: (newValue: boolean) => void;
 }
 
-export default function InterfaceField({ 
-    setFields, 
-    getFields, 
-    isEditing, 
-    setIsEditing 
+export default function InterfaceField({
+    setFields,
+    getFields
 }: InterfaceFieldProps) {
 
     const [
-        ifacesList, 
-        setIfacesList, 
+        ifacesList,
+        setIfacesList,
         subscribeIfacesList
     ] = ultraState<string[]>([]);
 
-    const loadIfaces = (self: HTMLElement) => {
-        
+    function onLoadIfaces(self: HTMLElement) {
         if (!pmCtx.get()?.isVisible) return;
-        
         if (!self || !(self instanceof HTMLSelectElement)) return;
-        
         const elementAPI = pmCtx.get().pcElementAPI;
-        
         if (!elementAPI) return;
-        
-        const ifaceIds = Object.keys(elementAPI.properties().ifaces);
-        
+        const ifaceIds = Object.keys(elementAPI.getIfaces());
         self.innerHTML = ifaceIds
         .map(ifaceId => `<option value="${ifaceId}">${ifaceId}</option>`)
         .join('');
-
         setIfacesList(ifaceIds);
-
     };
 
-    const ifaceChangeHandler = (event: Event) => {
-        
+    function onIfaceChanges(event: Event) {
+
         const element = event.target;
-        
         if (!element || !(element instanceof HTMLSelectElement)) return;
-        
         const elementProperties = pmCtx.get().pcElementAPI;
-        
         if (!elementProperties) return;
-        
-        const iface = elementProperties.properties().ifaces[element.value];
-        
+        const iface = elementProperties.getIfaces()[element.value];
         if (!iface) return;
 
         setFields({
@@ -71,79 +56,71 @@ export default function InterfaceField({
 
     }
 
-    const addInterfaceHandler = () => {
-        
+    function onAddIface() {
+
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
         const newIfaceId = elementAPI.getNewIfaceId();
 
         try {
 
-            elementAPI
-            .addInterface(newIfaceId);
+            elementAPI.addInterface(newIfaceId);
 
-            TOASTER_CONTEXT.get()
-            .createNotification(`Interface ${newIfaceId} added successfully`, 'success')
-            
+            toCtx.get().createNotification(
+                `Interface ${newIfaceId} added successfully`,
+                'success'
+            )
+
             setIfacesList([...ifacesList(), newIfaceId]);
 
         } catch (error: unknown) {
 
-            const message = error instanceof Error 
-            ? error.message 
+            const message = error instanceof Error
+            ? error.message
             : 'Unknown error';
 
-            TOASTER_CONTEXT.get()
-            .createNotification(message, 'error');
+            toCtx.get().createNotification(
+                message,
+                'error'
+            );
 
         }
-        
+
     }
 
-    const editInterfaceHandler = () => {
-        setIsEditing(!isEditing());
-    }
-
-    const sync = (self: HTMLElement) => {
+    function onSync(self: HTMLElement) {
         if (!self || !(self instanceof HTMLSelectElement)) return;
         self.innerHTML = ifacesList()
         .map(iface => `<option value="${iface}">${iface}</option>`)
         .join('');
     }
 
-    return (
+    return UltraComponent({
 
-        UltraComponent({
+            component: `<div class="${styles['form-item']}"></div>`,
 
-            component: `<div class="form-item"></div>`,
+        children: [
 
-            children: [
+            `<label for="iface">Interface:</label>`,
 
-                `<label for="iface">Interface:</label>`,
+            UltraComponent({
+                component: `<select id="iface" name="iface"></select>`,
+                eventHandler: { 'change': onIfaceChanges },
+                trigger: [
+                    { subscriber: pmCtx.subscribe, triggerFunction: onLoadIfaces },
+                    { subscriber: subscribeIfacesList, triggerFunction: onSync }
+                ]
+            }),
 
-                UltraComponent({
-                    component: `<select id="iface" name="iface"></select>`,
-                    eventHandler: { 'change': ifaceChangeHandler },
-                    trigger: [
-                        { subscriber: pmCtx.subscribe, triggerFunction: loadIfaces },
-                        { subscriber: subscribeIfacesList, triggerFunction: sync }
-                    ]
-                }),
+            UltraComponent({
+                component: AddIcon({ size: 55, className: styles['icon'] }),
+                eventHandler: { 'click': onAddIface },
+            })
 
-                UltraComponent({
-                    component: EditIcon({ size: 55, className: styles['icon'] }),
-                    eventHandler: { 'click': editInterfaceHandler },
-                }),
+        ],
 
-                UltraComponent({
-                    component: AddIcon({ size: 55, className: styles['icon'] }),
-                    eventHandler: { 'click': addInterfaceHandler },
-                })
+    })
 
-            ],
-
-        })
-
-    )
+    
 
 }

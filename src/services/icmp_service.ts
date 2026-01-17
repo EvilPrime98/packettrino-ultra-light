@@ -14,15 +14,15 @@ import { routing } from "@/kernel/routing";
 export async function ping(
     destinationIp: string,
     elementApi: IUltraPcConfig,
-    count: number = 4 
+    count: number = 4
 ) {
 
     const tCtx = TERMINAL_CONTEXT;
 
     tCtx.get()
-    .write(
-        `Pinging ${destinationIp} with 32 bytes of data:`
-    );
+        .write(
+            `Pinging ${destinationIp} with 32 bytes of data:`
+        );
 
     const results = {
         sent: 0,
@@ -77,9 +77,10 @@ async function sendSinglePing(
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
         let resolved = false;
 
-        const cleanup = (success: boolean, message?: string) => {
+        const cleanup = (success: boolean) => {
 
             if (resolved) return;
+
             resolved = true;
 
             if (unsubscribe) {
@@ -92,62 +93,44 @@ async function sendSinglePing(
                 timeoutId = null;
             }
 
-            elementApi.setPendingReply(false);
-
-            if (message) {
-                TERMINAL_CONTEXT.get().write(message);
-            }
-
             resolve(success);
 
         };
 
+        unsubscribe = elementApi.subscribeToBuffer(() => {
+            
+            const buffer = elementApi.currentBuffer();
+            if (buffer.length === 0) return;
+            const lastPacket = buffer[buffer.length - 1];
+
+            if (
+                lastPacket.protocol === "icmp" &&
+                lastPacket.type === "reply"
+            ) {
+                cleanup(true);
+            }
+
+        });
+
+        const ifaces = elementApi.getIfaces();
+        const firstIface = ifaces[Object.keys(ifaces)[0]];
+
         const icmpRequest = new IcmpEchoRequest(
-            '0.0.0.0',
+            firstIface.ip,
             destinationIp,
             'ff:ff:ff:ff:ff:ff',
             'ff:ff:ff:ff:ff:ff'
         );
 
-        elementApi
-        .setPendingReply(true);
-
         timeoutId = setTimeout(() => {
-            cleanup(false, `Request timed out.`);
+            cleanup(false);
         }, ENV.get().$REQUEST_TIMEOUT * 1000);
 
-        routing(
-            elementApi,
-            icmpRequest
-        ).then(() => {
-            
-            unsubscribe = elementApi.subscribeToBuffer(() => {
-
-                const buffer = elementApi.currentBuffer();
-
-                if (buffer.length === 0) return;
-
-                const lastPacket = buffer[buffer.length - 1];
-
-                if (
-                    lastPacket.protocol === "icmp" &&
-                    lastPacket.type === "reply" &&
-                    lastPacket.originIp === destinationIp
-                ) {
-                    cleanup(
-                        true,
-                        `Reply from ${lastPacket.originIp}: bytes=32 time<1ms TTL=64`
-                    );
-                }
-
+        routing(elementApi, icmpRequest)
+            .catch(error => {
+                console.error('Error routing request:', error);
+                cleanup(false);
             });
-
-        }).catch(error => {
-
-            console.error('Error routing request:', error);
-            cleanup(false, `Error routing request: ${error}`);
-            
-        });
 
     });
 

@@ -1,4 +1,4 @@
-import type { iface } from "@/types/TConfig";
+import type { iface, IUltraRouterConfig } from "@/types/TConfig";
 import { IUltraPcConfig } from "@/types/TConfig";
 import { ArpRequest } from "@/types/packets";
 import { ENV } from "@/context/env";
@@ -13,7 +13,7 @@ import { ENV } from "@/context/env";
  */
 export default async function arp(
     destinationIp: string,
-    elementApi: IUltraPcConfig,
+    elementApi: IUltraPcConfig | IUltraRouterConfig,
     iface: iface
 ): Promise<string|null> {
 
@@ -28,9 +28,6 @@ export default async function arp(
         destinationIp,
         iface.mac
     );
-
-    elementApi
-    .setPendingReply(true);
 
     return new Promise<string|null>((resolve) => {
 
@@ -58,11 +55,9 @@ export default async function arp(
         };
 
         unsubscribe = elementApi.subscribeToBuffer(() => {
-            
-            const buffer = elementApi.currentBuffer();
-            
-            if (buffer.length === 0) return;
 
+            const buffer = elementApi.currentBuffer();
+            if (buffer.length === 0) return;
             const lastPacket = buffer[buffer.length - 1];
 
             if (
@@ -97,7 +92,7 @@ export default async function arp(
  */
 function getARPRecord(
     ip: string, 
-    elementApi: IUltraPcConfig
+    elementApi: IUltraPcConfig | IUltraRouterConfig
 ) {
 
     const arpTable = elementApi.getARPCache();

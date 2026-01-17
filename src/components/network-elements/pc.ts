@@ -5,44 +5,55 @@ import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
 import { PC_MENU_CTX as pmCtx } from "../../context/modals";
 import ultraPcConfig from "@/hooks/ultraPcConfig"; 
 import type { AdvancedOption } from "@/types/types";
-import { WORK_SPACE_CONTEXT } from "../core/work-space";
+import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
 import { IUltraPcConfig, TNewNetworkElementProperties } from "@/types/TConfig";
-import { getActiveInterfaces } from "@/utils/component";
 import { ENV } from "@/context/env";
 import styles from "./pc.module.css";
-import { quick_ping } from "@/commands/ping";
+import { quick_ping } from "@/utils/quick_ping";
 
 export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
-    const elementAPI: IUltraPcConfig = ultraPcConfig({ id });
+    const pcAPI: IUltraPcConfig = ultraPcConfig({ id });
     const [arpTableState, setArpTableState, subscribeArpTableState] = ultraState(false);
     const [advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
     const [packetState, setPacketState, subscribePacketState] = ultraState(false);
     const [contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
     const [, setIsDeleting, subscribeIsDeleting] = ultraState(false);
+    const options: AdvancedOption[] = [
+        { message: "Show ARP Table", callback: () => setArpTableState(true) },
+        { message: "Terminal", callback: showTerminal },
+        { message: "Delete", callback: () => setIsDeleting(true) }
+    ]
 
-    const hasAvailableConnections = () => {
-        const numofConnections = getActiveInterfaces(
-            elementAPI.properties()
-        ).length;
-        const numofInterfaces = Object.keys(
-            elementAPI.properties().ifaces
+    function canConnect(){
+        const ifaces = pcAPI.getIfaces();
+        const numofInterfaces = Object.keys(ifaces).length;
+        const numofConnections = Object.keys(ifaces).filter(ifaceId => 
+            ifaces[ifaceId].connection.api !== null
         ).length;
         return numofConnections < numofInterfaces;
     }
 
-    const clickHandler = () => {
+    function showTerminal() {
+
+        if (tCtx.get().isVisible) return;
+
+        tCtx.set({
+            ...tCtx.get(),
+            "isVisible": true,
+            "elementAPI": pcAPI,
+        })
+
+    }
+
+    function onClick() {
         
         if (ENV.get().quickPingMode === true) {
-
             setPacketState(true);
-            
-            quick_ping(elementAPI, () => {
+            quick_ping(pcAPI, () => {
                 setPacketState(false);
             })
-
             return;
-
         }
 
         if (pmCtx.get()?.isVisible) return;
@@ -50,41 +61,23 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
         pmCtx.set({
             ...pmCtx.get(),
             "isVisible": true,
-            "pcElementAPI": elementAPI
+            "pcElementAPI": pcAPI
         })
         
     }
 
-    const contextMenuHandler = (event: Event) => {
+    function onRightClick(event: Event){
         event.preventDefault();
         setContextClickEvent(event);
         setAdvOptionsState(!advOptionsState());
     }
 
-    const showTerminal = () => {
-
-        if (tCtx.get().isVisible) return;
-
-        tCtx.set({
-            ...tCtx.get(),
-            "isVisible": true,
-            "elementAPI": elementAPI,
-        })
-
-    }
-
-    const handleDelete = (self: UltraLightElement) => {
+    function onDelete(self: UltraLightElement) {
         self._cleanup?.();
         self.remove();
     }
 
-    const options: AdvancedOption[] = [
-        { message: "Show ARP Table", callback: () => setArpTableState(true) },
-        { message: "Terminal", callback: showTerminal },
-        { message: "Delete", callback: () => setIsDeleting(true) }
-    ]
-
-    const dragStartHandler = (event: Event) => {
+    function onDragStart(event: Event) {
 
         const dragEvent = event as DragEvent;
         const self = event.currentTarget;
@@ -95,7 +88,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
         WORK_SPACE_CONTEXT.set({
             ...WORK_SPACE_CONTEXT.get(),
             elementAPI: {
-                config: elementAPI,
+                config: pcAPI,
                 originx: self.style.left,
                 originy: self.style.top,
                 state: 'dropped',
@@ -105,11 +98,11 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
     }
 
-    const handlePropertiesChanges = (self: UltraLightElement) => {
+    function onIfaceChanges(self: UltraLightElement) {
         const icon = self as HTMLImageElement;
         if (!icon) return;
-        icon.draggable = hasAvailableConnections();
-        icon.classList.toggle(styles['clickable'], hasAvailableConnections());
+        icon.draggable = canConnect();
+        icon.classList.toggle(styles['clickable'], canConnect());
     }
 
     return (
@@ -144,8 +137,8 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
                     trigger: [
                         { 
-                            subscriber: elementAPI.subscribeToProperties, 
-                            triggerFunction: handlePropertiesChanges 
+                            subscriber: pcAPI.subscribeToIfaces, 
+                            triggerFunction: onIfaceChanges 
                         }
                     ]
 
@@ -155,8 +148,8 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
                     
                     component: ARPTable({ 
                         onClose: () => setArpTableState(false),
-                        arpCache: elementAPI.getARPCache,
-                        arpSubscriber: elementAPI.subscribeToArpCache,
+                        arpCache: pcAPI.getARPCache,
+                        arpSubscriber: pcAPI.subscribeToArpCache,
                     }),
 
                     mode: {
@@ -201,15 +194,15 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
             ],
 
             eventHandler: {
-                'contextmenu': contextMenuHandler,
-                'click': clickHandler,
-                'dragstart': dragStartHandler
+                'contextmenu': onRightClick,
+                'click': onClick,
+                'dragstart': onDragStart
             },
 
             trigger: [
                 { 
                     subscriber: subscribeIsDeleting, 
-                    triggerFunction: handleDelete 
+                    triggerFunction: onDelete 
                 }
             ]
 

@@ -35,13 +35,11 @@ export function ip_route(
         throw new Error(`${nextHop} is not valid ipv4 address`);
     }
 
-    const properties = elementApi.properties();
-
-    if (!Object.hasOwn(properties.ifaces, ifaceId)) {
+    if (!Object.hasOwn(elementApi.getIfaces(), ifaceId)) {
         throw new Error(`Interface ${ifaceId} not found`);
     }
 
-    const iface = properties.ifaces[ifaceId]
+    const iface = elementApi.getIfaces()[ifaceId]
 
     if (iface.ip === "" || iface.netmask === "") {
         throw new Error(`Interface ${ifaceId} is not configured`);

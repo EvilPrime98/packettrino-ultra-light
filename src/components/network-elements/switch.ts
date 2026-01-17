@@ -4,7 +4,7 @@ import { UltraActivity, UltraLightElement, UltraComponent, ultraState } from "@u
 import { AdvancedOptions } from "../core/adv-options";
 import ultraSwitchConfig from "@/hooks/ultraSwitchConfig";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
-import { WORK_SPACE_CONTEXT as wCtx} from "../core/work-space";
+import { WORK_SPACE_CONTEXT as wCtx} from "@/context/workspace-context";
 import { IUltraSwitchConfig, TNewNetworkElementProperties } from "@/types/TConfig";
 import { CANVAS_CONTEXT as cCtx } from "../core/svg-canvas";
 

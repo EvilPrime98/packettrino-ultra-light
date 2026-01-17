@@ -20,6 +20,10 @@ interface IEnv {
     visualSpeed: number;
     paused: boolean;
     ignoreArpTraffic: boolean;
+    /**
+     * Returns true or false whether to track traffic.
+     */
+    trackTraffic: boolean;
     pcs: Record<string, string>;
     routers: Record<string, string>;
     switches: Record<string, string>;
@@ -58,23 +62,20 @@ interface IEnv {
 }
 
 const ENV = UltraContext<IEnv>({
-
     itemIndex: 0,
     darkMode: false,
     visualToggle: true,
     visualSpeed: 300,
     paused: false,
     ignoreArpTraffic: false,
-
+    trackTraffic: true,
     pcs: {},
     routers: {},
     switches: {},
     servers: {},
-
-    $REQUEST_TIMEOUT: 300,
+    $REQUEST_TIMEOUT: 100000,
     $ARPENTRYTTL: 120,
     $MACENTRYTTL: 120,
-
     arpFlag: {},
     icmpFlag: {},
     dhcpDiscoverFlag: {},
@@ -82,18 +83,14 @@ const ENV = UltraContext<IEnv>({
     dnsRequestFlag: {},
     tcpSyncFlag: {},
     traceFlag: {},
-
     quickPingMode: false,
     quickPingObject: [],
-    
     trace: {},
     traceReturn: {},
-
     nodes: {},
     nodesNetmask: {},
     nodesIp: {},
     defaultNetwork: "",
-    
     buffer: {},
     httpBuffer: {},
     dhcpOfferBuffer: {},
@@ -101,15 +98,12 @@ const ENV = UltraContext<IEnv>({
     traceBuffer: {},
     trafficBuffer: [],
     routerChangesBuffer: {},
-
     serverLeaseTimers: {},
     clientLeaseTimers: {},
     arpEntryTimers: {},
     macEntryTimers: {},
     dnsCacheTimers: {},
-
     connTrack: {}
-
 });
 
 export { ENV as ENV };

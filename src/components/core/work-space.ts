@@ -1,30 +1,10 @@
-import { UltraComponent, UltraContext, ultraEffect, ultraState } from "@ultra-light";
+import { UltraComponent, ultraEffect, UltraLightElement, ultraState } from "@ultra-light";
 import { checkObjectClip } from "@utils/checkObjectClip";
-import { TElementCoordinates, TElementType, WorkSpaceContextInterface } from "@/types/TWorkSpace";
+import { TElementCoordinates, TElementType } from "@/types/TWorkSpace";
 import { createElementMap, getNextElementId } from "@/utils/component";
 import { SvgCanvas } from "./svg-canvas";
-
-/**
- * This context is used to store the state of the WorkSpace component.
- * It contains the dimensions of the board, the coordinates of the elements,
- * and the API of the last element that was dragged over the board.
- * @returns {WorkSpaceContextInterface}
- */
-const WORK_SPACE_CONTEXT = UltraContext<WorkSpaceContextInterface>({
-
-    getWorkSpaceProperties: () => ({
-        boardHeight: 0,
-        boardWidth: 0,
-        boardRect: null
-    }),
-
-    elementAPI: null,
-
-    getCoordinatesByElementId: () => null,
-
-});
-
-export { WORK_SPACE_CONTEXT };
+import { WORK_SPACE_CONTEXT as wCtx, WORK_SPACE_CONTEXT } from "@/context/workspace-context";
+import styles from './work-space.module.css';
 
 /**
  * Component that represents the WorkSpace.
@@ -32,23 +12,11 @@ export { WORK_SPACE_CONTEXT };
  */
 export function WorkSpace() {
 
-    const [elements, setElements,] = ultraState<Record<string, TElementCoordinates>>({});
-    const [
-        pendingUpdate, 
-        setPendingUpdate, 
-        subscribeToPendingUpdate
-    ] = ultraState<string | null>(null);
+    const [ elements, setElements, ] = ultraState<Record<string, TElementCoordinates>>({});
+    const [ pendingUpdate, setPendingUpdate, subscribeToPendingUpdate] = ultraState<string | null>(null);
+    const [, setIsMeasuring, subscribeToIsMeasuring ] = ultraState<boolean>(false);
 
-    /**
-     * Creates a new element of the specified type at the specified coordinates within
-     * the WorkSpace.
-     * @param itemType 
-     * @param x 
-     * @param y 
-     * @param container 
-     * @returns 
-     */
-    const createNewElement = (
+    const onCreateItem = (
         itemType: TElementType,
         x: number,
         y: number,
@@ -66,13 +34,7 @@ export function WorkSpace() {
         setElements(newElements);
     };
 
-    /**
-     * Moves an existing element to the specified coordinates within the WorkSpace.
-     * @param elementId 
-     * @param x 
-     * @param y 
-     */
-    const moveExistingElement = (
+    const onMoveItem = (
         elementId: string,
         x: number,
         y: number
@@ -83,7 +45,7 @@ export function WorkSpace() {
         setPendingUpdate(elementId);
     };
 
-    const dropItemOverBoard = (event: Event): void => {
+    const onDropItem = (event: Event): void => {
 
         //type guard
         event.preventDefault();
@@ -92,7 +54,7 @@ export function WorkSpace() {
         if (!dropEvent.dataTransfer || !container) return;
 
         //handle data
-        const itemData = WORK_SPACE_CONTEXT.get().elementAPI;
+        const itemData = wCtx.get().elementAPI;
         const config = itemData?.config;
         const boardRect = container.getBoundingClientRect();
         let x = dropEvent.clientX - boardRect.left;
@@ -101,19 +63,19 @@ export function WorkSpace() {
 
         //move element
         if (itemData?.state === 'dropped' && config) {
-            moveExistingElement(config.properties().elementId, x, y);
+            onMoveItem(config.properties().elementId, x, y);
             return;
         }
 
         //create new element
         if (itemData?.state === 'undropped') {
             const itemType = itemData?.itemType as TElementType;
-            createNewElement(itemType, x, y, container);
+            onCreateItem(itemType, x, y, container);
         }
 
     };
 
-    const handlePendingUpdate = (self: HTMLElement): void => {
+    const onPendingUpdate = (self: HTMLElement): void => {
         //type guard
         const elementId = pendingUpdate();
         if (!elementId) return;
@@ -128,9 +90,42 @@ export function WorkSpace() {
         setPendingUpdate(null);
     };
 
-    const workSpace = UltraComponent({
+    const onMeasure = (self: UltraLightElement) => {
 
-        component: `<section class="board"></section>`,
+        const $workSpace = self as HTMLElement;
+        const computedStyles = window.getComputedStyle($workSpace, null);
+        const boardHeight = parseInt(computedStyles.getPropertyValue("height"));
+        const boardWidth = parseInt(computedStyles.getPropertyValue("width"));
+        const boardRect = $workSpace.getBoundingClientRect();
+
+        WORK_SPACE_CONTEXT.set({
+            ...WORK_SPACE_CONTEXT.get(),
+            boardProperties: {
+                boardHeight,
+                boardWidth,
+                boardRect
+            }
+        });
+
+    };
+
+    const getCoordinatesByElementId = (elementId: string) => {
+        return elements()[elementId] || null;
+    };
+
+    ultraEffect(() => {
+        
+        WORK_SPACE_CONTEXT.set({
+            ...WORK_SPACE_CONTEXT.get(),
+            measureBoard: () => setIsMeasuring(true),
+            getCoordinatesByElementId
+        });
+
+    }, []);
+
+    return UltraComponent({
+
+        component: `<section class="${styles['board']}"></section>`,
 
         styles: {
             position: "absolute",
@@ -140,9 +135,9 @@ export function WorkSpace() {
             height: "100%"
         },
 
-        eventHandler: { 
+        eventHandler: {
             'dragover': (event: Event) => event.preventDefault(),
-            'drop': dropItemOverBoard
+            'drop': onDropItem
         },
 
         children: [
@@ -150,36 +145,19 @@ export function WorkSpace() {
         ],
 
         trigger: [
-            { subscriber: subscribeToPendingUpdate, triggerFunction: handlePendingUpdate }
+
+            {
+                subscriber: subscribeToPendingUpdate,
+                triggerFunction: onPendingUpdate
+            },
+
+            {
+                subscriber: subscribeToIsMeasuring,
+                triggerFunction: onMeasure
+            }
+
         ]
 
     });
-
-    //API
-    const getWorkSpaceProperties = () => {
-        const workSpaceProperties = window.getComputedStyle(workSpace, null);
-        const boardHeight = parseInt(workSpaceProperties.getPropertyValue("height"));
-        const boardWidth = parseInt(workSpaceProperties.getPropertyValue("width"));
-        const boardRect = workSpace.getBoundingClientRect();
-        return { boardHeight, boardWidth, boardRect };
-    };
-
-    const getCoordinatesByElementId = (elementId: string) => {
-        return elements()[elementId];
-    }
-
-    ultraEffect(() => {
-
-        const { set, get } = WORK_SPACE_CONTEXT;
-
-        set({
-            ...get(),
-            getWorkSpaceProperties,
-            getCoordinatesByElementId
-        });
-
-    }, []);
-
-    return workSpace;
 
 }

@@ -76,34 +76,3 @@ export function isValidIface(api: TLayer3Properties, iface: string) {
     const availableIfaces = Object.keys(api.ifaces);
     return availableIfaces.includes(iface);
 }
-
-/**
- * Returns an array of IDs of the active interfaces in the provided network API.
- * @param api 
- * @returns 
- */
-export function getActiveInterfaces(api: TLayer3Properties): string[] {
-    const connections = api.ifaces;
-    const activeInterfaces = [];
-    for (const iface of Object.keys(connections)) {
-        const ifaceProperties = connections[iface];
-        const ifaceElementConnectionId = ifaceProperties.connection.itemId;
-        if (ifaceElementConnectionId) activeInterfaces.push(iface);
-    }
-    return activeInterfaces;
-}
-
-/**
- * Returns the ID of the first available interface in the provided network API, 
- * or an empty string if no interface is available.
- * @param api 
- * @returns 
- */
-export function getAvailableInterface(api: TLayer3Properties): string {
-    const ifaces = api.ifaces;
-    for (const ifaceId of Object.keys(ifaces)) {
-        const ifaceProperties = ifaces[ifaceId];
-        if (ifaceProperties.connection.itemId === '') return ifaceId;
-    }
-    return '';
-}

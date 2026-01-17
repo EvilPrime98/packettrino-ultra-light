@@ -4,8 +4,8 @@ import { getBroadcast, netmaskToCidr } from "@/utils/network_lib";
 
 /**
  * Allows interface configuration using the "ip addr" service. Returns the expected output,
- * or throws an error if the command is not valid in relation to the element API. It also
- * creates/removes routing rules.
+ * or throws an error if the command is not valid in relation to the arguments or element API.
+ *  It also creates and removes routing rules.
  * @param elementApi Network element API
  * @param $OPTS A valid "catchopts" object
  * @returns A string with the expected output
@@ -29,17 +29,15 @@ export function ip_addr(
     const ifaceId = $OPTS["dev"].toString();
 
     if (!isValidIp(ip)){
-        throw new Error(`${ip} is not valid ipv4 address`);
+        throw new Error(`"${ip}" is not valid ipv4 address`);
     }
 
     if (!isValidIp(netmask)){
-        throw new Error(`${netmask} is not valid ipv4 netmask`);
+        throw new Error(`"${netmask}" is not valid ipv4 netmask`);
     }
 
-    const properties = elementApi.properties();
-
-    if (!Object.hasOwn(properties.ifaces, ifaceId)) {
-        throw new Error(`Interface ${ifaceId} not found`);
+    if (!Object.hasOwn(elementApi.getIfaces(), ifaceId)) {
+        throw new Error(`Interface "${ifaceId}" not found`);
     }
 
     if (Object.hasOwn($OPTS, "add")) {
@@ -92,7 +90,7 @@ function getCurrIfaceInfo(
     elementApi: IUltraPcConfig
 ): string {
     
-    const ifaces = elementApi.properties().ifaces;
+    const ifaces = elementApi.getIfaces();
     const lines: string[] = [];
 
     lines.push("lo: <LOOPBACK,UP,LOWER_UP>");

@@ -1,59 +1,75 @@
 import { Packet } from "@/types/packets";
-import { IUltraPcConfig } from "@/types/TConfig";
+import { IUltraPcConfig, IUltraRouterConfig } from "@/types/TConfig";
 import { getNetwork } from "@/utils/network_lib";
+import type { WritableKeys } from "@/types/types";
 import arp from "@services/arp_service";
 
 export async function routing(
-    elementApi: IUltraPcConfig,
+    elementApi: IUltraPcConfig | IUltraRouterConfig,
     packet: Packet
-){
-    
+) {
+
     const destinationIp = packet.destinationIp;
-    const routingRules = [...elementApi.routingRules()];    
-    const result = Object.groupBy(routingRules, rule =>
-        (rule.destinationIp === '0.0.0.0' 
-            && rule.destinationNetmask === '0.0.0.0')
-        ? 'defaultRules'
-        : (rule.nextHop === '0.0.0.0') ? 'directRules' : 'remoteRules'
-    );
+    const routingRules = [...elementApi.routingRules()];
     
-    const { directRules } = result;
+    const result = Object.groupBy(routingRules, rule =>
+        (rule.destinationIp === '0.0.0.0' && rule.destinationNetmask === '0.0.0.0')
+            ? 'defaultRules'
+            : (rule.nextHop === '0.0.0.0') ? 'directRules' : 'remoteRules'
+    );
 
-    if (directRules){
+    const { directRules = [], remoteRules = [], defaultRules = [] } = result;
 
-        for (const rule of directRules){
+    function alterPacketProperty(
+        property: WritableKeys<typeof packet>,
+        value: string
+    ) {
+        packet[property] = value;
+    }
 
-            if (rule.destinationIp === getNetwork(destinationIp, rule.destinationNetmask)){
-                
-                const iface = elementApi.properties().ifaces[rule.iface]
-                const connectionApi = iface.connection.api;
-                
-                if (connectionApi) {
+    async function sendPacket(
+        rule: typeof routingRules[0], 
+        nextHopIp: string
+    ) {
+        
+        const iface = elementApi.getIfaces()[rule.iface];
+        const connectionApi = iface.connection.api;
+        if (!connectionApi) return false;
 
-                    const destinationMac = await arp(
-                        destinationIp,
-                        elementApi,
-                        iface
-                    );
+        const destinationMac = await arp(nextHopIp, elementApi, iface);
+        if (!destinationMac) return false;
 
-                    if (!destinationMac) return;
+        alterPacketProperty('destinationMac', destinationMac);
+        alterPacketProperty('originMac', iface.mac);
+        
+        if (packet.originIp === '0.0.0.0') {
+            alterPacketProperty('originIp', iface.ip);
+        }
+        
+        await connectionApi.sendPacket(
+            packet, 
+            elementApi.properties().elementId
+        );        
 
-                    packet.originIp = iface.ip;
-                    packet.destinationMac = destinationMac;
-                    packet.originMac = iface.mac;
+        return true;
 
-                    await connectionApi
-                    .sendPacket(
-                        packet, 
-                        elementApi.properties().elementId
-                    );
+    }
 
-                }
-
-            }
-
+    for (const rule of directRules) {
+        if (rule.destinationIp === getNetwork(destinationIp, rule.destinationNetmask)) {
+            if (await sendPacket(rule, destinationIp)) return;
         }
     }
 
- 
+    for (const rule of remoteRules) {
+        if (rule.destinationIp === getNetwork(destinationIp, rule.destinationNetmask)) {
+            if (await sendPacket(rule, rule.nextHop)) return;
+        }
+    }
+
+    if (defaultRules.length > 0) {
+        const rule = defaultRules[0];
+        await sendPacket(rule, rule.nextHop);
+    }
+
 }

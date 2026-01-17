@@ -1,5 +1,7 @@
 import { UltraComponent } from "@ultra-light";
 import { Props } from "./pc-menu-types";
+import styles from "./pc-menu.module.css";
+
 export default function NetmaskField({ getFields, setFields, subscribeFields }: Props) {
 
     const fieldsHandler = (event: Event) => {
@@ -23,7 +25,7 @@ export default function NetmaskField({ getFields, setFields, subscribeFields }: 
 
         UltraComponent({
 
-            component: `<div class="form-item"></div>`,
+            component: `<div class="${styles['form-item']}"></div>`,
 
             children: [
 

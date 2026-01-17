@@ -2,16 +2,13 @@ import {
     UltraComponent, 
     ultraState, 
     UltraActivity,
-    ultraEffect
 } from "@ultra-light";
 import { PC_MENU_CTX as pmCtx } from "@context/modals";
 import type { PcMenuFields } from "@/types/types";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
 import { PcFormValidator } from "@/schemas/pc-menu-schema";
-import { dragModal } from "../../../utils/dragModal";
 //import { DhcpMode, WebServerMode } from "./modes";
 import InterfaceField from "./interface-field";
-import InterfaceEditor from "./interface-editor";
 import styles from "./pc-menu.module.css";
 //import type { Props } from "./pc-menu-types";
 import IpField from "./ip-field";
@@ -22,6 +19,8 @@ import BasicButtons from "./basic-buttons";
 import { ip_addr } from "@/services/ifaces_service";
 import { ip_route } from "@/services/routing_service";
 import { encodeCidr } from "@/utils/network_lib";
+import PcMenuFrame from "./pc-menu-frame";
+import Ipv4Forwarding from "./ipv4-forwarding";
 
 export default function pc_menu() {
 
@@ -33,16 +32,13 @@ export default function pc_menu() {
         dhcpField: false
     })
 
-    const [isEditing, setIsEditing, subscribeIsEditing] = ultraState(false);
-    const initialClass = `${(pmCtx.get()?.isVisible) 
-    ? '' 
-    : styles['hidden']}`;
+    function onStart() {
 
-    function dataDumpHandler() {
-        
+        window.addEventListener("keydown", onKeydown);
+
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
-        const ifaces = elementAPI?.properties().ifaces;     
+        const ifaces = elementAPI.getIfaces();     
         const initialIfaceId = Object.keys(ifaces)[0];
         
         setFields({
@@ -55,31 +51,23 @@ export default function pc_menu() {
 
     }
 
-    function pcKeyboardHandler(event: KeyboardEvent) {
-        if (event.key === "Escape") closeHandler();
-        if (event.key === "Enter") saveHandler();
+    function onKeydown(event: KeyboardEvent) {
+        if (event.key === "Escape") onClose();
+        if (event.key === "Enter") onSave();
     }
 
-    function closeHandler() {
+    function onClose() {
+
+        onCleanup();
 
         pmCtx.set({
             isVisible: false,
             pcElementAPI: null,
         });
 
-        setFields({
-            interfaceField: "",
-            ipField: "",
-            netmaskField: "",
-            gatewayField: "",
-            dhcpField: false
-        })
-
-        window.removeEventListener("keydown", pcKeyboardHandler);
-
     }
 
-    function saveHandler() {
+    function onSave() {
 
         if (!pmCtx.get()?.isVisible) return;
 
@@ -138,20 +126,29 @@ export default function pc_menu() {
 
     }
 
-    const effectCleanup = ultraEffect(() => {
-        if (!pmCtx.get()?.isVisible) return;
-        window.addEventListener("keydown", pcKeyboardHandler);
-    }, [pmCtx.subscribe]);
+    function onCleanup() {
+        
+        window.removeEventListener("keydown", onKeydown);
 
-    return (
+        setFields({
+            interfaceField: "",
+            ipField: "",
+            netmaskField: "",
+            gatewayField: "",
+            dhcpField: false
+        })
 
-        UltraComponent({
+    }
 
-            component: `<form class="modal draggable-modal pc-form ${initialClass}"></form>`,
+    return UltraActivity({
+
+        component: UltraComponent({
+
+            component: `<form class="modal draggable-modal ${styles['pc-form']} "></form>`,
 
             children: [
 
-                PcMenuFrame(),
+                PcMenuFrame({ onClose }),
 
                 UltraComponent({
                     
@@ -162,31 +159,22 @@ export default function pc_menu() {
                         InterfaceField({ 
                             getFields, 
                             setFields, 
-                            subscribeFields, 
-                            isEditing, 
-                            setIsEditing 
+                            subscribeFields
                         }),
 
-                        UltraActivity({
-                            component: InterfaceEditor(),
-                            mode: {
-                                state: isEditing,
-                                subscriber: subscribeIsEditing
-                            },
-                            type: 'display'
-                        }),
-                        
                         IpField({ getFields, setFields, subscribeFields }),
+                        
                         NetmaskField({ getFields, setFields, subscribeFields }),
+                        
                         GatewayField({ getFields, setFields, subscribeFields }),
+
+                        Ipv4Forwarding()
 
                     ],
 
                 }),
 
-                //ModesWrapper({ getFields, setFields, subscribeFields }),
-                //DhcpButtons({ getFields, setFields, subscribeFields }),
-                BasicButtons({ closeHandler, saveHandler }),
+                BasicButtons({ saveHandler: onSave }),
 
             ],
 
@@ -194,37 +182,18 @@ export default function pc_menu() {
                 subscriber: pmCtx.subscribe,
                 triggerFunction: (self: HTMLElement) => {
                     self.classList.toggle(styles["hidden"], !pmCtx.get()?.isVisible);
-                    if (pmCtx.get()?.isVisible) dataDumpHandler();
+                    if (pmCtx.get()?.isVisible) onStart();
                 }
             }],
-            
-            cleanup: [effectCleanup]
+        
+        }),
 
-        })
+        mode: {
+            state: () => pmCtx.get()?.isVisible,
+            subscriber: pmCtx.subscribe
+        }
 
-    )
-
-}
-
-function PcMenuFrame() {
-
-    const { subscribe: subscribePcInfo } = pmCtx;
-
-    const titleHandler = (self: HTMLElement) => {
-        const menuData = pmCtx.get();
-        if (!menuData?.isVisible) return;
-        const { pcElementAPI: propertiesHandler } = menuData;
-        if (!propertiesHandler) return;
-        self.innerHTML = propertiesHandler.properties().elementId;
-    }
-
-    return (
-        UltraComponent({
-            component: `<div class="window-frame"></div>`,
-            eventHandler: { "mousedown": dragModal },
-            trigger: [{ subscriber: subscribePcInfo, triggerFunction: titleHandler }]
-        })
-    )
+    })
 
 }
 

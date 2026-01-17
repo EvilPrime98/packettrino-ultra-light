@@ -1,5 +1,6 @@
 import { UltraComponent } from "@ultra-light";
 import { Props } from "./pc-menu-types";
+import styles from "./pc-menu.module.css";
 
 export default function IpField({ getFields, setFields, subscribeFields }: Props) {
 
@@ -24,7 +25,7 @@ export default function IpField({ getFields, setFields, subscribeFields }: Props
 
         UltraComponent({
 
-            component: `<div class="form-item"></div>`,
+            component: `<div class="${styles['form-item']}"></div>`,
 
             children: [
 
