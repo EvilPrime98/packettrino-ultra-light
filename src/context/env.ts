@@ -18,47 +18,42 @@ interface IEnv {
      * Returns the speed of visual effects.
      */
     visualSpeed: number;
-    paused: boolean;
-    ignoreArpTraffic: boolean;
     /**
      * Returns true or false whether to track traffic.
      */
     trackTraffic: boolean;
-    pcs: Record<string, string>;
-    routers: Record<string, string>;
-    switches: Record<string, string>;
-    servers: Record<string, string>;
+    /**
+     * Returns true or false whete ARP traffic is ignored.
+     */
+    ignoreArpTraffic: boolean;
+    /**
+     * Returns the current request timeout in seconds.
+     */
     $REQUEST_TIMEOUT: number;
+    /**
+     * Returns the current ARP entry TTL in seconds.
+     */
     $ARPENTRYTTL: number;
+    /**
+     * Returns the minimum ARP entry TTL in seconds.
+     */
+    $MINARPENTRYTTL: number;
+    /**
+     * Returns the maximum ARP entry TTL in seconds.
+     */
+    $MAXARPENTRYTTL: number;
+    /**
+     * Returns the current MAC entry TTL in seconds.
+     */
     $MACENTRYTTL: number;
-    arpFlag: Record<string, boolean>;
-    icmpFlag: Record<string, boolean>;
-    dhcpDiscoverFlag: Record<string, boolean>;
-    dhcpRequestFlag: Record<string, boolean>;
-    dnsRequestFlag: Record<string, boolean>;
-    tcpSyncFlag: Record<string, boolean>;
-    traceFlag: Record<string, boolean>;
+    /**
+     * Returns true or false whether Quick Ping mode is enabled.
+     */
     quickPingMode: boolean;
+    /**
+     * Returns the current Quick Ping object.
+     */
     quickPingObject: Array<IUltraPcConfig>;
-    trace: Record<string, string>;
-    traceReturn: Record<string, string>;
-    nodes: Record<string, string>;
-    nodesNetmask: Record<string, string>;
-    nodesIp: Record<string, string>;
-    defaultNetwork: string;
-    buffer: Record<string, string>;
-    httpBuffer: Record<string, string>;
-    dhcpOfferBuffer: Record<string, string>;
-    tcpBuffer: Record<string, string>;
-    traceBuffer: Record<string, string>;
-    trafficBuffer: Array<string>;
-    routerChangesBuffer: Record<string, string>;
-    serverLeaseTimers: Record<string, ReturnType<typeof setTimeout>>;
-    clientLeaseTimers: Record<string, ReturnType<typeof setTimeout>>;
-    arpEntryTimers: Record<string, ReturnType<typeof setTimeout>>;
-    macEntryTimers: Record<string, ReturnType<typeof setTimeout>>;
-    dnsCacheTimers: Record<string, ReturnType<typeof setTimeout>>;
-    connTrack: Record<string, string>;
 }
 
 const ENV = UltraContext<IEnv>({
@@ -66,44 +61,15 @@ const ENV = UltraContext<IEnv>({
     darkMode: false,
     visualToggle: true,
     visualSpeed: 300,
-    paused: false,
     ignoreArpTraffic: false,
     trackTraffic: true,
-    pcs: {},
-    routers: {},
-    switches: {},
-    servers: {},
     $REQUEST_TIMEOUT: 100000,
-    $ARPENTRYTTL: 120,
+    $ARPENTRYTTL: 400,
+    $MINARPENTRYTTL: 120,
+    $MAXARPENTRYTTL: 600,
     $MACENTRYTTL: 120,
-    arpFlag: {},
-    icmpFlag: {},
-    dhcpDiscoverFlag: {},
-    dhcpRequestFlag: {},
-    dnsRequestFlag: {},
-    tcpSyncFlag: {},
-    traceFlag: {},
     quickPingMode: false,
-    quickPingObject: [],
-    trace: {},
-    traceReturn: {},
-    nodes: {},
-    nodesNetmask: {},
-    nodesIp: {},
-    defaultNetwork: "",
-    buffer: {},
-    httpBuffer: {},
-    dhcpOfferBuffer: {},
-    tcpBuffer: {},
-    traceBuffer: {},
-    trafficBuffer: [],
-    routerChangesBuffer: {},
-    serverLeaseTimers: {},
-    clientLeaseTimers: {},
-    arpEntryTimers: {},
-    macEntryTimers: {},
-    dnsCacheTimers: {},
-    connTrack: {}
+    quickPingObject: []
 });
 
 export { ENV as ENV };

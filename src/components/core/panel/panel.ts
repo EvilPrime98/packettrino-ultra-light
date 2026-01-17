@@ -5,6 +5,7 @@ import { TPanelItem } from "@/types/TPanel";
 import QuickPingTool from "./quick-ping";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { WORK_SPACE_CONTEXT as wCtx } from "@/context/workspace-context";
+import { SETTINGS_MENU_CTX as smCtx } from "@/context/settings-context";
 
 // const panelItems: TPanelItem[] = [
 //     // {
@@ -224,6 +225,20 @@ export default function Panel({ isLoaded, subscribeIsLoaded }: Props) {
                                 const currentState = tmCtx.get().isVisible;
                                 tmCtx.set({ 
                                     ...tmCtx.get(),
+                                    isVisible: !currentState 
+                                });
+                            }
+                        }),
+
+                        PanelItem({
+                            name: "settings",
+                            image: "./assets/panel/settings.svg",
+                            draggable: false,
+                            tooltip: "Settings",
+                            onClick: () => {
+                                const currentState = smCtx.get().isVisible;
+                                smCtx.set({ 
+                                    ...smCtx.get(),
                                     isVisible: !currentState 
                                 });
                             }
