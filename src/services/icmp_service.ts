@@ -3,6 +3,7 @@ import { IcmpEchoRequest } from "@/types/packets";
 import { IUltraPcConfig } from "@/types/TConfig";
 import { ENV } from "@/context/env";
 import { routing } from "@/kernel/routing";
+import { TOASTER_CONTEXT } from "@/components/core/toaster";
 
 /**
  * Sends a series of ICMP echo requests to a specified destination ipv4 address
@@ -77,7 +78,14 @@ async function sendSinglePing(
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
         let resolved = false;
 
-        const cleanup = (success: boolean) => {
+        const cleanup = (success: boolean, message?: string) => {
+
+            if (message) {
+                TOASTER_CONTEXT.get().createNotification(
+                    message,
+                    success ? 'success' : 'error'
+                )
+            }
 
             if (resolved) return;
 
@@ -127,10 +135,13 @@ async function sendSinglePing(
         }, ENV.get().$REQUEST_TIMEOUT * 1000);
 
         routing(elementApi, icmpRequest)
-            .catch(error => {
-                console.error('Error routing request:', error);
-                cleanup(false);
-            });
+        .then(wasRouted => {
+            if (!wasRouted) cleanup(false, 'Packet could not be routed');
+        })
+        .catch(error => {
+            console.error('Error routing request:', error);
+            cleanup(false);
+        });
 
     });
 
