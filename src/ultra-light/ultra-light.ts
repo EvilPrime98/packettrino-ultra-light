@@ -499,30 +499,53 @@ export function UltraComponent({
 
 /**
  * This component is used to control the visibility of a component based on a state.
- * @param {Object} props - Object containing the component, mode, trigger, type, and cleanup.
- * @param {UltraRenderableElement | UltraLightElement} props.component - The component to be rendered.
- * @param {Object} props.mode - Object containing the state and subscriber functions.
- * @param {Function} props.mode.state - Function that returns the boolean state of the component.
- * @param {Function} props.mode.subscriber - Function that subscribes to the state changes.
- * @param {Array} props.trigger - Array of trigger objects.
- * @param {String} props.type - Type of activity (display or visibility). Default is 'display'.
- * @param {Array} props.cleanup - Array of cleanup functions.
+ * @param {Object} props - Object containing the component, eventHandler, styles, children, mode, trigger, type, and cleanup.
  * @returns 
  */
 export function UltraActivity({
     component,
+    eventHandler = {},
+    styles = {},
+    children = [],
     mode,
     trigger = [],
     type = 'display',
     cleanup = []
 }: {
+    /**
+     * The parent component to be rendered. It accepts children in plain HTML.
+     */
     component: UltraRenderableElement | UltraLightElement;
+    /**
+     * Object containing the event handlers.
+     */
+    eventHandler?: Partial<Record<keyof HTMLElementEventMap, EventListenerOrEventListenerObject>>;
+    /**
+     * Object containing the CSS styles.
+     */
+    styles?: Partial<CSSStyleDeclaration>;
+    /**
+     * Array of child components.
+     */
+    children?: (UltraRenderableElement | Node | UltraLightElement)[];
+    /**
+     * Object containing the state and subscriber functions to control visibility.
+     */
     mode: {
-    state: () => boolean;
-    subscriber: (fn: () => void) => () => void;
-    }
+        state: () => boolean;
+        subscriber: (fn: () => void) => () => void;
+    };
+    /**
+     * Array of trigger objects.
+     */
     trigger?: UltraTrigger[];
+    /**
+     * Type of activity (display or visibility). Default is 'display'.
+     */
     type?: 'display' | 'visibility';
+    /**
+     * Array of cleanup functions.
+     */
     cleanup?: UltraCleanupFunction[];
 }): UltraLightElement {
 
@@ -542,6 +565,36 @@ export function UltraActivity({
 
     const cleanupFunctions: UltraCleanupFunction[] = [];
 
+    // Add cleanup functions for event handlers
+    (Object.keys(eventHandler) as (keyof HTMLElementEventMap)[]).forEach((event: keyof HTMLElementEventMap) => {
+        const handler = eventHandler[event];
+        if (handler) {
+            element.addEventListener(event, handler);
+            cleanupFunctions.push(() => element.removeEventListener(event, handler));
+        }
+    });
+
+    // Add styles
+    Object.keys(styles).forEach(key => {
+        try {
+            (element as HTMLElement).style[key as any] = styles[key as keyof CSSStyleDeclaration] as string;
+        } catch (error) {
+            console.error(`Error al aplicar estilo ${key}:`, error);
+        }
+    });
+
+    // Add children
+    children.forEach(child => {
+        const childElement = parseHTMLString(child);
+        if (childElement) {
+            element.appendChild(childElement);
+            if (hasCleanup(childElement)) {
+                cleanupFunctions.push(childElement._cleanup!);
+            }
+        }
+    });
+
+    // Update visibility based on mode
     const update = (): void => {
         try {
             const current = mode.state();
@@ -564,6 +617,7 @@ export function UltraActivity({
 
     update();
 
+    // Add cleanup functions for triggers
     trigger.forEach(t => {
         const { subscriber, triggerFunction } = t;
         if (subscriber && triggerFunction) {
@@ -578,6 +632,7 @@ export function UltraActivity({
         }
     });
 
+    // Add special cleanup functions
     cleanup.forEach(fn => {
         try {
             cleanupFunctions.push(fn);
@@ -586,6 +641,7 @@ export function UltraActivity({
         }
     });
 
+    // Add cleanup function for element
     element._cleanup = () => {
         cleanupFunctions.forEach(cleanup => {
             try {
