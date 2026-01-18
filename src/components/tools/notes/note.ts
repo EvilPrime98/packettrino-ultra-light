@@ -2,6 +2,7 @@ import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "@/
 import styles from './note.module.css';
 import { AdvancedOptions } from "@/components/core/adv-options";
 import type { AdvancedOption } from "@/types/types";
+import DragIcon from "@/components/icons/drag-icon";
 
 interface TextObjectProps {
     id: string;
@@ -53,7 +54,8 @@ export default function TextObject({ id, x, y }: TextObjectProps) {
             document.body.appendChild(temp);
             const { width } = temp.getBoundingClientRect();
             temp.remove();
-            const newWidth = Math.max(40, width + 20);
+            const dragIconWidth = 30;
+            const newWidth = Math.max(40, width + dragIconWidth + 20);
             $textObject.style.width = `${newWidth}px`;
             $textObject.style.marginLeft = `-${newWidth / 2}px`;
             $textObject.setAttribute("data-text", content);
@@ -61,24 +63,22 @@ export default function TextObject({ id, x, y }: TextObjectProps) {
 
     }
 
-    function onMouseDown(event: Event) {
-        
+    function onDragIconMouseDown(event: Event) {
+
+        event.preventDefault();
         const mEvent = event as MouseEvent;
-        const $textObject = mEvent.target as HTMLElement;
-        
-        if ($textObject.tagName === 'INPUT') return;
-        
-        const dEvent = event as DragEvent;
+        const $dragIcon = mEvent.currentTarget as HTMLElement;
+        const $textObject = $dragIcon.closest('article') as HTMLElement;
+
         const rect = $textObject.getBoundingClientRect();
-        const offsetX = dEvent.clientX - rect.left - rect.width / 2;
-        const offsetY = dEvent.clientY - rect.top - rect.height / 2;
-        
-        $textObject.style.position = 'absolute';
+        const offsetX = mEvent.clientX - rect.left;
+        const offsetY = mEvent.clientY - rect.top;
+        const marginLeft = parseFloat(getComputedStyle($textObject).marginLeft) || 0;
 
         function moveText(moveEvent: Event) {
             const mEvent = moveEvent as MouseEvent;
-            document.body.style.cursor = "none";
-            const x = mEvent.clientX - offsetX;
+            document.body.style.cursor = "grabbing";
+            const x = mEvent.clientX - offsetX - marginLeft;
             const y = mEvent.clientY - offsetY;
             const maxX = window.innerWidth - $textObject.offsetWidth;
             const maxY = window.innerHeight - $textObject.offsetHeight;
@@ -134,8 +134,15 @@ export default function TextObject({ id, x, y }: TextObjectProps) {
             }),
 
             UltraComponent({
+                component: DragIcon({ size: 30 }),
+                eventHandler: {
+                    'mousedown': onDragIconMouseDown
+                }
+            }),
 
-                component: `<input type="text" />`,
+            UltraComponent({
+
+                component: `<input type="text" placeholder="Your Thoughts..." />`,
 
                 eventHandler: {
                     'input': onInput
@@ -146,7 +153,6 @@ export default function TextObject({ id, x, y }: TextObjectProps) {
         ],
 
         eventHandler: {
-            "mousedown": onMouseDown,
             "contextmenu": onRightClick
         },
 
