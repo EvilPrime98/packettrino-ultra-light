@@ -1,5 +1,4 @@
-import { IUltraPcConfig, IUltraSwitchConfig } from "./TConfig";
-
+import { TLayer3Config } from "./TConfig";
 
 export type TElementCoordinates = {
     x: number;
@@ -11,7 +10,7 @@ export type TElementFactory = (id: string) => HTMLElement;
 export type TElementType = "pc" | "router" | "switch";
 
 export interface TElementApi {
-    config: IUltraPcConfig | IUltraSwitchConfig | null;
+    config: TLayer3Config | null;
     originx: string;
     originy: string;
     state: 'undropped' | 'dropped';

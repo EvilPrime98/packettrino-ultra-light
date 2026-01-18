@@ -1,6 +1,6 @@
 import { TERMINAL_CONTEXT } from "@/context/terminal-context";
 import { IcmpEchoRequest } from "@/types/packets";
-import { IUltraPcConfig } from "@/types/TConfig";
+import { TLayer3Config } from "@/types/TConfig";
 import { ENV } from "@/context/env";
 import { routing } from "@/kernel/routing";
 import { TOASTER_CONTEXT } from "@/components/core/toaster";
@@ -14,7 +14,7 @@ import { TOASTER_CONTEXT } from "@/components/core/toaster";
  */
 export async function ping(
     destinationIp: string,
-    elementApi: IUltraPcConfig,
+    elementApi: TLayer3Config,
     count: number = 4
 ) {
 
@@ -69,7 +69,7 @@ export async function ping(
  */
 async function sendSinglePing(
     destinationIp: string,
-    elementApi: IUltraPcConfig
+    elementApi: TLayer3Config
 ): Promise<boolean> {
 
     return new Promise<boolean>((resolve) => {

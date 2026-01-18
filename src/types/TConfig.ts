@@ -455,3 +455,6 @@ export interface IUltraSwitchConfig {
      */
     broadcast: (packet: Packet, originId: string) => void;
 }
+
+//UNION TYPES
+export type TLayer3Config = IUltraPcConfig | IUltraRouterConfig;

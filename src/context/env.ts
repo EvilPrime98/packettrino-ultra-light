@@ -1,4 +1,4 @@
-import { IUltraPcConfig } from "@/types/TConfig";
+import { TLayer3Config } from "@/types/TConfig";
 import { UltraContext, UltraFragment } from "@ultra-light";
 
 interface IEnv {
@@ -53,7 +53,7 @@ interface IEnv {
     /**
      * Returns the current Quick Ping object.
      */
-    quickPingObject: Array<IUltraPcConfig>;
+    quickPingObject: Array<TLayer3Config>;
 }
 
 const ENV = UltraContext<IEnv>({

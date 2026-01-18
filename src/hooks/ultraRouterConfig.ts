@@ -113,7 +113,8 @@ export default function ultraRouterConfig({ itemIndex }: { itemIndex: string }):
         }
 
         if ( !wasProcessed
-            && !getAvailableIps().includes(packet.destinationIp) 
+            && !getAvailableIps().includes(packet.destinationIp)
+            && self.properties()['ipv4-forwarding'] === true
         ){
             if (packet.destinationMac === 'ff:ff:ff:ff:ff:ff' || packet.destinationIp === '255.255.255.255') return;
             await routing(self, packet);

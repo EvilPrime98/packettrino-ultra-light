@@ -1,4 +1,4 @@
-import { iface, IUltraPcConfig, IUltraRouterConfig } from "./TConfig";
+import { iface, IUltraPcConfig, IUltraRouterConfig, TLayer3Config } from "./TConfig";
 
 export type WritableKeys<T> = {
   [K in keyof T]-?: (<F>() => F extends { [Q in K]: T[K] } ? 1 : 2) extends
@@ -73,7 +73,7 @@ export interface TerminalContextInterface {
   /**
    * Returns the API of the element connected to the terminal.
    */
-  elementAPI: IUltraPcConfig | null;
+  elementAPI: TLayer3Config | null;
   /**
    * Returns the input string of the terminal.
    */
