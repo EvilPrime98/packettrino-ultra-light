@@ -1,6 +1,6 @@
 import { UltraComponent, ultraEffect, ultraState } from "@ultra-light";
 import PanelItem from "./panel-item";
-import { ENV } from "@/context/env";
+import { ENV } from "@/context/env-context";
 
 export default function QuickPingTool() {
 

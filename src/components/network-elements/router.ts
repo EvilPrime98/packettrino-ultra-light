@@ -6,7 +6,7 @@ import ultraRouterConfig from "@/hooks/ultraRouterConfig";
 import { TNewNetworkElementProperties } from "@/types/TConfig";
 import styles from "./router.module.css";
 import { RoutingTable } from "../tables/routing_tab";
-import { ENV } from "@/context/env";
+import { ENV } from "@/context/env-context";
 import { quick_ping } from "@/utils/quick_ping";
 import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
 

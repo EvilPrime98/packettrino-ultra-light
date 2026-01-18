@@ -1,5 +1,5 @@
 import { TLayer3Config } from "@/types/TConfig";
-import { UltraContext, UltraFragment } from "@ultra-light";
+import { UltraContext } from "@ultra-light";
 
 interface IEnv {
     /**
@@ -73,13 +73,3 @@ const ENV = UltraContext<IEnv>({
 });
 
 export { ENV as ENV };
-
-export function ENV_PROVIDER(...children: string[] | HTMLElement[] | Node[]) {
-
-    return (
-        UltraFragment(
-            ...children
-        )
-    )
-
-}

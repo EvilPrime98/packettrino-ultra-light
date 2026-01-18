@@ -1,7 +1,7 @@
 import type { iface, IUltraRouterConfig } from "@/types/TConfig";
 import { IUltraPcConfig } from "@/types/TConfig";
 import { ArpRequest } from "@/types/packets";
-import { ENV } from "@/context/env";
+import { ENV } from "@/context/env-context";
 
 /**
  * Sends an ARP request to a specified destination ipv4 address and returns a valid 48-bit MAC address 

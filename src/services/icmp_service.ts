@@ -1,7 +1,7 @@
 import { TERMINAL_CONTEXT } from "@/context/terminal-context";
 import { IcmpEchoRequest } from "@/types/packets";
 import { TLayer3Config } from "@/types/TConfig";
-import { ENV } from "@/context/env";
+import { ENV } from "@/context/env-context";
 import { routing } from "@/kernel/routing";
 import { TOASTER_CONTEXT } from "@/components/core/toaster";
 

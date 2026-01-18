@@ -2,7 +2,7 @@ import { ultraState } from "@ultra-light";
 import { createFilesystem } from "@/utils/component";
 import { TPcElementProperties, IUltraPcConfig } from "@/types/TConfig";
 import { Packet } from "@/types/packets";
-import { ENV } from "@/context/env";
+import { ENV } from "@/context/env-context";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { packetProcessor } from "@/kernel/processors";
 import ultraRoutingConfig from "./ultraRoutingConfig";

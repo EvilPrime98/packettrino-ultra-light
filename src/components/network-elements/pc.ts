@@ -7,7 +7,7 @@ import ultraPcConfig from "@/hooks/ultraPcConfig";
 import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
 import { IUltraPcConfig, TNewNetworkElementProperties } from "@/types/TConfig";
-import { ENV } from "@/context/env";
+import { ENV } from "@/context/env-context";
 import styles from "./pc.module.css";
 import { quick_ping } from "@/utils/quick_ping";
 

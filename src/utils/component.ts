@@ -2,7 +2,7 @@ import Pc from "@/components/network-elements/pc";
 import Router from "@/components/network-elements/router";
 import SwitchElement from "@/components/network-elements/switch";
 import TextObject from "@/components/tools/notes/note";
-import { ENV } from "@/context/env";
+import { ENV } from "@/context/env-context";
 import { TElementFactory, TElementType } from "@/types/TWorkSpace";
 
 /**
