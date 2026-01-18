@@ -13,7 +13,7 @@
     }
 }
 
-.router-animated img {
+.clickable {
     transition: scale 0.2s ease-in-out;
 
     &:active {

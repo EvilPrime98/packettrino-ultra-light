@@ -49,6 +49,15 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
         { message: "Delete", callback: () => setIsDeleting(true) }
     ]
 
+    function canConnect() {
+        const ifaces = elementAPI.getIfaces();
+        const numofInterfaces = Object.keys(ifaces).length;
+        const numofConnections = Object.keys(ifaces).filter(ifaceId =>
+            ifaces[ifaceId].connection.api !== null
+        ).length;
+        return numofConnections < numofInterfaces;
+    }
+
     function onTerminalOption() {
         if (tCtx.get().isVisible) return;
         tCtx.set({
@@ -110,6 +119,13 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
         self.remove();
     }
 
+    function onIfaceChanges(self: UltraLightElement) {
+        const icon = self as HTMLImageElement;
+        if (!icon) return;
+        icon.draggable = canConnect();
+        icon.classList.toggle(styles['clickable'], canConnect());
+    }
+
     return (
 
         UltraComponent({
@@ -119,11 +135,6 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
                 id="${id}"
                 class="item-dropped router ${styles["router-animated"]}"
             >
-                <img 
-                    src="./assets/board/router.svg"
-                    alt="pc"
-                    draggable="true"
-                >
             </article>`,
 
             styles: {
@@ -132,6 +143,24 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
             },
 
             children: [
+
+                UltraComponent({
+                    component: (`
+                        <img 
+                            src="./assets/board/router.svg"
+                            alt="pc"
+                            draggable="true"
+                            class="${styles['clickable']}"
+                        />
+                    `),
+
+                    trigger: [
+                        { 
+                            subscriber: elementAPI.subscribeToIfaces, 
+                            triggerFunction: onIfaceChanges
+                        }
+                    ]
+                }),
 
                 UltraActivity({
 

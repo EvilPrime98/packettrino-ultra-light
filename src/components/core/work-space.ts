@@ -4,7 +4,9 @@ import { TElementCoordinates, TElementType } from "@/types/TWorkSpace";
 import { createElementMap, getNextElementId } from "@/utils/component";
 import { SvgCanvas } from "./svg-canvas";
 import { WORK_SPACE_CONTEXT as wCtx, WORK_SPACE_CONTEXT } from "@/context/workspace-context";
+import { TOASTER_CONTEXT as toCtx } from "./toaster";
 import styles from './work-space.module.css';
+import { isLayer3, TLayer2Config, TLayer3Config } from "@/types/TConfig";
 
 /**
  * Component that represents the WorkSpace.
@@ -15,6 +17,25 @@ export function WorkSpace() {
     const [ elements, setElements, ] = ultraState<Record<string, TElementCoordinates>>({});
     const [ pendingUpdate, setPendingUpdate, subscribeToPendingUpdate] = ultraState<string | null>(null);
     const [, setIsMeasuring, subscribeToIsMeasuring ] = ultraState<boolean>(false);
+
+    function canMove(
+        elementAPI: TLayer2Config | TLayer3Config,
+    ){
+
+        if (isLayer3(elementAPI)) {
+            const ifaces = elementAPI.getIfaces();
+            const numofConnections = Object.keys(ifaces).filter(ifaceId => 
+                ifaces[ifaceId].connection.api !== null
+            ).length;
+            return numofConnections === 0;
+        }
+
+        const activeConnections = elementAPI.properties().connections
+        .filter(connection => connection.api !== null);
+
+        return activeConnections.length === 0;
+
+    }
 
     const onCreateItem = (
         itemType: TElementType,
@@ -47,13 +68,12 @@ export function WorkSpace() {
 
     const onDropItem = (event: Event): void => {
 
-        //type guard
         event.preventDefault();
         const dropEvent = event as DragEvent;
         const container = event.currentTarget as HTMLElement;
+
         if (!dropEvent.dataTransfer || !container) return;
 
-        //handle data
         const itemData = wCtx.get().elementAPI;
         const config = itemData?.config;
         const boardRect = container.getBoundingClientRect();
@@ -61,13 +81,24 @@ export function WorkSpace() {
         let y = dropEvent.clientY - boardRect.top;
         [x, y] = checkObjectClip(x, y, container);
 
-        //move element
         if (itemData?.state === 'dropped' && config) {
+            
+            if (!canMove(config)) {
+                
+                toCtx.get().createNotification(
+                    "Cannot move an element while it has active connections.",
+                    'error'
+                );
+
+                return;
+
+            }
+
             onMoveItem(config.properties().elementId, x, y);
             return;
+
         }
 
-        //create new element
         if (itemData?.state === 'undropped') {
             const itemType = itemData?.itemType as TElementType;
             onCreateItem(itemType, x, y, container);

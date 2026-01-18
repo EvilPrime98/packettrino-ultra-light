@@ -4,7 +4,7 @@ import { UltraActivity, UltraLightElement, UltraComponent, ultraState } from "@u
 import { AdvancedOptions } from "../core/adv-options";
 import ultraSwitchConfig from "@/hooks/ultraSwitchConfig";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
-import { WORK_SPACE_CONTEXT as wCtx} from "@/context/workspace-context";
+import { WORK_SPACE_CONTEXT as wCtx } from "@/context/workspace-context";
 import { IUltraSwitchConfig, TNewNetworkElementProperties } from "@/types/TConfig";
 import { CANVAS_CONTEXT as cCtx } from "../core/svg-canvas";
 
@@ -16,57 +16,65 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
     const [, setIsDeleting, subscribeIsDeleting] = ultraState<boolean>(false);
     const [macTableState, setMacTableState, subscribeToMacTable] = ultraState<boolean>(false);
 
-    const macTableHandler = () => {
+    const options: AdvancedOption[] = [
+        { message: "Delete", callback: () => setIsDeleting(true) }
+    ]
+
+    function canMove() {
+        const activeConnections = selfApi.properties().connections
+        .filter(connection => connection.api !== null);
+        return activeConnections.length === 0;
+    }
+
+    function macTableHandler(){
         setMacTableState(!macTableState())
     }
 
-    const contextMenuHandler = (event: Event) => {
+    function onRightClick(event: Event) {
         event.preventDefault();
         setContextClickEvent(event);
         setAdvOptionsState(!advOptionsState());
     }
 
-    const handleDelete = (self: UltraLightElement) => {
+    function onDelete(self: UltraLightElement){
         self._cleanup?.();
         self.remove();
     }
 
-    const dropHandler = (event: Event) => {
+    function onDropOver(event: Event) {
 
         event.preventDefault();
         event.stopPropagation();
 
         if (wCtx.get().elementAPI
-        ?.itemType === "switch") return;
+            ?.itemType === "switch") return;
 
         const self = event.currentTarget;
-        
+
         if (!self || !(self instanceof HTMLElement)) return;
-        
+
         const elementApi = wCtx.get()
-        .elementAPI?.config;
+            .elementAPI?.config;
 
         if (!elementApi) return;
 
         try {
 
-            selfApi
-            .addConnection({ 
-                itemId: elementApi.properties().elementId, 
-                api: elementApi 
+            selfApi.addConnection({
+                itemId: elementApi.properties().elementId,
+                api: elementApi
             });
 
-            elementApi
-            .addConnection({ 
-                itemId: selfApi.properties().elementId, 
-                api: selfApi 
+            elementApi.addConnection({
+                itemId: selfApi.properties().elementId,
+                api: selfApi
             });
 
-            selfApi
-            .addMacRecord(elementApi.properties().elementId)
+            selfApi.addMacRecord(
+                elementApi.properties().elementId
+            )
 
-            cCtx.get()
-            .addCableElement?.({
+            cCtx.get().addCableElement?.({
                 x1: wCtx.get().elementAPI?.originx || "0px",
                 y1: wCtx.get().elementAPI?.originy || "0px",
                 x2: self.style.left || "0px",
@@ -74,10 +82,9 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
                 item1Api: selfApi,
                 item2Api: elementApi
             });
-            
-            toCtx.get()
-            .createNotification(
-                `Connection created succesfully!`, 
+
+            toCtx.get().createNotification(
+                `Connection created succesfully!`,
                 'success'
             );
 
@@ -86,20 +93,16 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
             if (!(error instanceof Error)) return;
 
             toCtx.get()
-            .createNotification(
-                error.message, 
-                'error'
-            );
+                .createNotification(
+                    error.message,
+                    'error'
+                );
 
         }
 
     }
 
-    const options: AdvancedOption[] = [
-        { message: "Delete", callback: () => setIsDeleting(true) }
-    ]
-
-    const dragStartHandler = (event: Event) => {
+    function onDragStart(event: Event) {
 
         const dragEvent = event as DragEvent;
         const self = event.currentTarget;
@@ -120,6 +123,13 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
 
     }
 
+    function onConnectionChanges(self: UltraLightElement) {
+        const icon = self as HTMLImageElement;
+        if (!icon) return;
+        icon.draggable = canMove();
+        icon.classList.toggle(styles['clickable'], canMove());
+    }
+
     return (
 
         UltraComponent({
@@ -129,11 +139,6 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
                 id="${id}"
                 class="item-dropped switch ${styles['switch-animated']}"
                 >
-                    <img 
-                        src="./assets/board/switch.svg"
-                        alt="switch"
-                        draggable="true"
-                    >
                 </article>
             `),
 
@@ -143,6 +148,24 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
             },
 
             children: [
+
+                UltraComponent({
+                    component: (`
+                        <img 
+                            src="./assets/board/switch.svg"
+                            alt="switch"
+                            draggable="true"
+                            class="${styles['clickable']}"
+                        />
+                    `),
+
+                    trigger: [
+                        { 
+                            subscriber: selfApi.subscribeToProperties, 
+                            triggerFunction: onConnectionChanges 
+                        }
+                    ]
+                }),
 
                 UltraActivity({
 
@@ -157,7 +180,7 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
                         state: advOptionsState,
                         subscriber: subscribeAdvOptionsState
                     }
-            
+
                 }),
 
                 UltraActivity({
@@ -177,15 +200,15 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
 
             ],
 
-            eventHandler: { 
-                'contextmenu': contextMenuHandler ,
+            eventHandler: {
+                'contextmenu': onRightClick,
                 'click': macTableHandler,
-                'drop': dropHandler,
-                'dragstart': dragStartHandler
+                'drop': onDropOver,
+                'dragstart': onDragStart
             },
 
             trigger: [
-                { subscriber: subscribeIsDeleting, triggerFunction: handleDelete }
+                { subscriber: subscribeIsDeleting, triggerFunction: onDelete }
             ]
 
         })
@@ -246,7 +269,7 @@ function macTable({ macTableHandler, getAllRecords, subscribeToRecords }: MacTab
 
             ],
 
-            eventHandler: { 
+            eventHandler: {
                 'click': (event: Event) => event.stopPropagation(),
                 'contextmenu': (event: Event) => event.stopPropagation()
             },
