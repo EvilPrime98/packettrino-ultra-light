@@ -9,7 +9,7 @@ export type TConnection = {
     /**
      * Api of the device connected to the interface.
      */
-    api: IUltraPcConfig | IUltraSwitchConfig | null;
+    api: TLayer2Config | TLayer3Config |null;
 }
 
 export interface ICableElementPosition {
@@ -457,4 +457,35 @@ export interface IUltraSwitchConfig {
 }
 
 //UNION TYPES
+/**
+ * Devices that only work at layer 2.
+ */
+export type TLayer2Config = IUltraSwitchConfig;
+/**
+ * Devices that work at layer 2 and 3.
+ */
 export type TLayer3Config = IUltraPcConfig | IUltraRouterConfig;
+
+//TYPE GUARDS
+
+/**
+ * Returns true if the config is a layer 2 config, false otherwise.
+ * @param config 
+ * @returns 
+ */
+export function isLayer2(
+    config: TLayer2Config | TLayer3Config
+): config is TLayer2Config {
+    return 'connections' in config.properties();
+}
+
+/**
+ * Returns true if the config is a layer 3 config, false otherwise.
+ * @param config 
+ * @returns 
+ */
+export function isLayer3(
+    config: TLayer2Config | TLayer3Config
+): config is TLayer3Config {
+    return 'getIfaces' in config;
+}
