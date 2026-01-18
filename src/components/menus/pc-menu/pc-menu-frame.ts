@@ -1,6 +1,6 @@
 import { UltraComponent, UltraLightElement } from "@ultra-light";
 import { dragModal } from "@/utils/dragModal";
-import { PC_MENU_CTX as pmCtx } from "@context/modals";
+import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import CrossIcon from "@/components/icons/cross-icon";
 import styles from "./pc-menu.module.css";
 

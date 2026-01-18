@@ -2,7 +2,7 @@ import { UltraActivity, UltraComponent, ultraState, type UltraLightElement } fro
 import { ARPTable } from "../tables/arp_tab";
 import { AdvancedOptions } from "@components/core/adv-options";
 import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
-import { PC_MENU_CTX as pmCtx } from "../../context/modals";
+import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import ultraPcConfig from "@/hooks/ultraPcConfig"; 
 import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";

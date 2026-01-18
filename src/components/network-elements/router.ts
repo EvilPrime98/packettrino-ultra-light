@@ -8,7 +8,7 @@ import styles from "./router.module.css";
 import { RoutingTable } from "../tables/routing_tab";
 import { ENV } from "@/context/env";
 import { quick_ping } from "@/utils/quick_ping";
-import { ROUTER_MENU_CTX as rmCtx } from "@/context/modals";
+import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
 
 export default function Router({ x, y, id }: TNewNetworkElementProperties) {
 

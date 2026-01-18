@@ -3,7 +3,7 @@ import { UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ult
 import styles from './router-menu.module.css';
 import { ip_route } from "@/services/routing_service";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
-import { ROUTER_MENU_CTX as rmCtx } from "@/context/modals";
+import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
 
 export interface IRouterMenuRoutingFields {
     destinationIp: string;

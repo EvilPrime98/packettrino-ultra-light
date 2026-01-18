@@ -3,7 +3,7 @@ import {
     ultraState, 
     UltraActivity,
 } from "@ultra-light";
-import { PC_MENU_CTX as pmCtx } from "@context/modals";
+import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import type { PcMenuFields } from "@/types/types";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
 import { PcFormValidator } from "@/schemas/pc-menu-schema";
@@ -22,7 +22,7 @@ import { encodeCidr } from "@/utils/network_lib";
 import PcMenuFrame from "./pc-menu-frame";
 import Ipv4Forwarding from "./ipv4-forwarding";
 
-export default function pc_menu() {
+export default function PcMenu() {
 
     const [getFields, setFields, subscribeFields] = ultraState<PcMenuFields>({
         interfaceField: "",

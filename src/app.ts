@@ -4,7 +4,7 @@ import {
 } from "@ultra-light";
 import AppLoader from "@components/core/app-loader.ts";
 import { ENV_PROVIDER } from "./context/env.ts";
-import { MODALS_PROVIDER } from "./context/modals.ts";
+import { MODALS_PROVIDER } from "@/context/modals.ts";
 import { WorkSpace } from "@components/core/work-space.ts";
 import Panel from "@components/core/panel/panel.ts";
 import { Toaster } from "./components/core/toaster.ts";

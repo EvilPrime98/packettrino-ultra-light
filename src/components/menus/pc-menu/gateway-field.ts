@@ -1,6 +1,6 @@
 import { UltraComponent } from "@ultra-light";
 import { Props } from "./pc-menu-types";
-import { PC_MENU_CTX as pmCtx } from "@context/modals";
+import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import styles from "./pc-menu.module.css";
 
 export default function GatewayField({ 

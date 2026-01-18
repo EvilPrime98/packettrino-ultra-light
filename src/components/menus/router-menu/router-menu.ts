@@ -1,7 +1,7 @@
 import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
 import BasicSection from "./basic-section";
 import RoutingRulesSection from "./routing-rules-section";
-import { ROUTER_MENU_CTX as rmCtx } from "@/context/modals";
+import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
 import { IRoutingRule } from "@/types/TConfig";
 import styles from './router-menu.module.css';
 import MenuFrame from "../menu-frame";
@@ -13,7 +13,7 @@ export interface IRouterMenuFields {
 
 type TPages = "basic" | "routing";
 
-export function router_menu() {
+export function RouterMenu() {
 
     const [getIfaces, setIfaces, subscribeToIfaces] = ultraState<string[]>([]);
     const [getRoutingRules, setRoutingRules, subscribeToRoutingRules] = ultraState<IRoutingRule[]>([]);
