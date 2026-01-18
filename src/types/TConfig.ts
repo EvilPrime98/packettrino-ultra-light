@@ -229,9 +229,9 @@ export interface IUltraIfaceConfig {
     /**
      * Adds a new connection to the network element.
      * @param param0 
-     * @returns 
+     * @returns The id of the interface that was connected to.
      */
-    addConnection: ({ itemId, api }: TConnection) => void;
+    addConnection: ({ itemId, api }: TConnection) => string;
     /**
      * Removes a connection from the network element.
      * @param itemId 

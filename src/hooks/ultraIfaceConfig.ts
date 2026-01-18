@@ -88,7 +88,7 @@ export default function ultraIfaceConfig({
 
     }
 
-    function addConnection({ itemId, api }: TConnection): void {
+    function addConnection({ itemId, api }: TConnection): string {
         const availableIface = getAvailableInterface();
         if (!availableIface) {
             throw new NoAvailableInterfaceError("The Element Does Not Have An Available Interface.")
@@ -100,6 +100,7 @@ export default function ultraIfaceConfig({
                 connection: { itemId, api }
             }
         });
+        return availableIface;
     }
 
     function removeConnection(itemId: string) {

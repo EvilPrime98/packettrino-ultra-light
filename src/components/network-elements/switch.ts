@@ -65,7 +65,7 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
                 api: elementApi
             });
 
-            elementApi.addConnection({
+            const ifaceId = elementApi.addConnection({
                 itemId: selfApi.properties().elementId,
                 api: selfApi
             });
@@ -84,7 +84,7 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
             });
 
             toCtx.get().createNotification(
-                `Connection created succesfully!`,
+                `Connection created with ${ifaceId} succesfully!`,
                 'success'
             );
 
