@@ -1,8 +1,8 @@
 import Pc from "@/components/network-elements/pc";
 import Router from "@/components/network-elements/router";
 import SwitchElement from "@/components/network-elements/switch";
+import TextObject from "@/components/tools/notes/note";
 import { ENV } from "@/context/env";
-import { TLayer3Properties } from "@/types/TConfig";
 import { TElementFactory, TElementType } from "@/types/TWorkSpace";
 
 /**
@@ -60,19 +60,8 @@ export function createElementMap(x: number, y: number): Record<TElementType, TEl
         {
             "pc": (id) => Pc({ x, y, id }),
             "router": (id) => Router({ x, y, id }),
-            "switch": (id) => SwitchElement({ x, y, id })
+            "switch": (id) => SwitchElement({ x, y, id }),
+            "note": (id) => TextObject({ id, x, y })
         }
     );
-}
-
-/**
- * Returns true or false based on whether the provided interface ID 
- * is valid for the provided network API.
- * @param api 
- * @param iface 
- * @returns 
- */
-export function isValidIface(api: TLayer3Properties, iface: string) {
-    const availableIfaces = Object.keys(api.ifaces);
-    return availableIfaces.includes(iface);
 }

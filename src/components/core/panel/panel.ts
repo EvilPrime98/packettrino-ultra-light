@@ -242,6 +242,14 @@ export default function Panel({ isLoaded, subscribeIsLoaded }: Props) {
                                     isVisible: !currentState 
                                 });
                             }
+                        }),
+
+                        PanelItem({
+                            name: "note",
+                            image: "./assets/panel/annotation.svg",
+                            draggable: true,
+                            tooltip: "Note",
+                            onDragStart: () => onItemDragStart("note")
                         })
 
                     ],

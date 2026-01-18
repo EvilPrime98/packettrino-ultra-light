@@ -1,3 +1,4 @@
+import { UltraLightElement } from "@/ultra-light/types";
 import { TLayer3Config } from "./TConfig";
 
 export type TElementCoordinates = {
@@ -5,9 +6,9 @@ export type TElementCoordinates = {
     y: number;
 }
 
-export type TElementFactory = (id: string) => HTMLElement;
+export type TElementFactory = (id: string) => UltraLightElement;
 
-export type TElementType = "pc" | "router" | "switch";
+export type TElementType = "pc" | "router" | "switch" | "note";
 
 export interface TElementApi {
     config: TLayer3Config | null;
