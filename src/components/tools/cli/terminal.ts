@@ -1,4 +1,4 @@
-import { UltraComponent, ultraStyles, ultraState } from "@ultra-light";
+import { UltraComponent, ultraState } from "@ultra-light";
 import TerminalEditor from "./terminal-editor";
 import { TERMINAL_CONTEXT as tCtx } from "../../../context/terminal-context";
 import { dragModal } from "@utils/dragModal";
@@ -6,101 +6,7 @@ import TerminalInput from "./terminal-input";
 import TerminalOutput from "./terminal-output";
 import TerminalPrompt from "./terminal-prompt";
 import unix from "@/components/tools/cli/unix";
-
-const transitionDuration = '0.2s';
-
-const styles = ultraStyles(`
-    
-    .terminal-component {
-        position: fixed;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: #333;
-        color: white;
-        width: 1000px;
-        height: 500px;
-        border-radius: 5px;
-        box-sizing: border-box;
-        box-shadow: 0px 0px 10px black;
-        z-index: 2;
-        overflow-y: auto;
-        opacity: 1;
-        scale: 1;
-        transition: opacity, scale, display allow-discrete;
-        transition-duration: ${transitionDuration};
-        
-        @starting-style {
-            opacity: 0;
-            scale: 0;
-        }
-    }
-
-    .hidden {
-        display: none;
-        opacity: 0;
-        scale: 0;
-    }
-
-    .window-frame {
-
-        margin: 0px;
-        padding: 0px;
-        width: 100%;
-        height: 30px;
-        background-color: var(--darkblue);
-        color: #fff;
-        z-index: -1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        p {
-            text-transform: uppercase;
-            font-weight: bolder;
-            color: #fff;
-            margin-top: auto;
-            margin-bottom: auto;
-        }
-
-    }
-
-    .terminal-component&.dragging {
-        transform: none;
-        transition: none;
-    }
-
-    .terminal-component * {
-        font-family: monospace;
-        font-size: 20px;
-        padding: 20px;
-    }
-
-    .terminal-component input {
-        border: none;
-        outline: none;
-        background-color: transparent;
-        color: white;
-        width: 100%;
-        height: fit-content;
-        word-wrap: break-word;
-        padding: 0px;
-        margin-left: 10px;
-    }
-
-    .terminal-component p {
-        display: flex;
-        align-items: center;
-    }
-
-    .terminal-component span {
-        width: fit-content;
-        padding: 0px;
-        white-space: nowrap;
-        user-select: none;
-    }
-
-`);
+import styles from "./terminal.module.css";
 
 export default function Terminal() {
 
@@ -108,7 +14,7 @@ export default function Terminal() {
         tCtx.get().isVisible
     );
 
-    function terminalKeyboard(event: Event) {
+    function onKeydown(event: Event) {
 
         const keydownEvent = event as KeyboardEvent;
 
@@ -204,13 +110,13 @@ export default function Terminal() {
 
     }
 
-    function clickTerminal(event: Event) {
+    function onClick(event: Event) {
         const self = event.currentTarget as HTMLElement;
         const input = self.querySelector("input") as HTMLInputElement;
         if (input) input.focus();
     }
 
-    function terminalContextTrigger(self: HTMLElement) {
+    function onContextChange(self: HTMLElement) {
 
         const { isVisible, elementAPI: propertiesHandler } = tCtx.get();
 
@@ -260,44 +166,41 @@ export default function Terminal() {
 
     }
 
-    const initialClass = `${tCtx.get().isVisible ? "" : styles["hidden"]}`;
+    return UltraComponent({
 
-    return (
+        component: `<div></div>`,
 
-        UltraComponent({
+        className: [
+            styles["terminal-component"], 
+            styles["draggable-modal"], 
+            tCtx.get().isVisible ? "" : styles["hidden"]
+        ],
 
-            component: `<div class="${styles["terminal-component"]} draggable-modal ${initialClass}"></div>`,
+        children: [
 
-            children: [
+            UltraComponent({
+                component: `<div class=${styles["window-frame"]}>Terminal</div>`,
+                eventHandler: { "mousedown": dragModal }
+            }),
 
-                UltraComponent({
-                    component: `<div class=${styles["window-frame"]}>Terminal</div>`,
-                    eventHandler: { "mousedown": dragModal }
-                }),
+            UltraComponent({
+                component: '<p></p>',
+                children: [ TerminalPrompt(), TerminalInput() ]
+            }),
 
-                UltraComponent({
+            TerminalOutput(),
+            TerminalEditor()
+        ],
 
-                    component: `<p class="terminal-line"></p>`,
+        eventHandler: {
+            "keydown": onKeydown,
+            "click": onClick
+        },
 
-                    children: [
-                        TerminalPrompt(),
-                        TerminalInput()
-                    ]
+        trigger: [
+            { subscriber: tCtx.subscribe, triggerFunction: onContextChange }
+        ]
 
-                }),
-
-                TerminalOutput(),
-                TerminalEditor()
-            ],
-
-            eventHandler: {
-                "keydown": terminalKeyboard,
-                "click": clickTerminal
-            },
-
-            trigger: [{ subscriber: tCtx.subscribe, triggerFunction: terminalContextTrigger }]
-
-        })
-    );
+    });
 
 }

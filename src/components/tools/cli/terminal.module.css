@@ -1,0 +1,88 @@
+.terminal-component {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #333;
+    color: white;
+    width: 1000px;
+    height: 500px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 10px black;
+    z-index: 2;
+    overflow-y: auto;
+    opacity: 1;
+    scale: 1;
+    transition: opacity, scale, display allow-discrete;
+    transition-duration: 0.2s;
+    
+    @starting-style {
+        opacity: 0;
+        scale: 0;
+    }
+}
+
+.hidden {
+    display: none;
+    opacity: 0;
+    scale: 0;
+}
+
+.window-frame {
+
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 30px;
+    background-color: var(--darkblue);
+    color: #fff;
+    z-index: -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    p {
+        text-transform: uppercase;
+        font-weight: bolder;
+        color: #fff;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+}
+
+.terminal-component.dragging {
+    transform: none;
+    transition: none;
+}
+
+.terminal-component * {
+    font-family: monospace;
+    font-size: 20px;
+    padding: 20px;
+}
+
+.terminal-component input {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: white;
+    width: 100%;
+    height: fit-content;
+    word-wrap: break-word;
+    padding: 0px;
+    margin-left: 10px;
+}
+
+.terminal-component p {
+    display: flex;
+    align-items: center;
+}
+
+.terminal-component span {
+    width: fit-content;
+    padding: 0px;
+    white-space: nowrap;
+    user-select: none;
+}
