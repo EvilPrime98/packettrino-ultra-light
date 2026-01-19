@@ -1,11 +1,15 @@
 .terminal-component {
 
+    /**variables**/
+    --fSize: 25px;
+
+    /******/
     position: fixed;
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #333;
-    font-size: 20px;
+    font-size: var(--fSize);
     color: white;
     width: 1000px;
     height: 500px;
@@ -21,6 +25,7 @@
 
     * {
         padding: 20px;
+        font-family: var(--ubuntu-mono);
     }
 
     svg {
@@ -37,7 +42,7 @@
         word-wrap: break-word;
         padding: 0px;
         margin-left: 10px;
-        font-size: 20px;
+        font-size: var(--fSize);
     }
 
     p {
@@ -71,7 +76,7 @@
     padding-top: 0px;
     padding-bottom: 0px;
     margin-bottom: 12px;
-    margin-top: -31px;
+    margin-top: 0px;
 
     p {
         margin: 0px;
