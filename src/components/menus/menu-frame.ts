@@ -26,13 +26,18 @@ type MenuFrameProps = {
      * @returns 
      */
     titleSubscriber?: (fn: (title: string) => void) => () => void;
+    /**
+     * Optional styles to be applied to the menu frame.
+     */
+    customStyles?: Record<string, string>;
 }
 
 export default function MenuFrame({
     onClose,
     initTitle,
     getTitle,
-    titleSubscriber
+    titleSubscriber,
+    customStyles = {}
 }: MenuFrameProps) {
 
     if (!titleSubscriber || !getTitle) {
@@ -40,6 +45,8 @@ export default function MenuFrame({
         return UltraComponent({
 
             component: `<div class="${styles['window-frame']}"></div>`,
+
+            styles: customStyles,
 
             children: [
 
@@ -89,6 +96,8 @@ export default function MenuFrame({
 
         component: `<div class="${styles['window-frame']}"></div>`,
 
+        styles: customStyles,
+
         children: [
 
             UltraComponent({
@@ -107,7 +116,20 @@ export default function MenuFrame({
                     className: "close-icon"
                 }),
 
-                eventHandler: { "click": onClose }
+                eventHandler: { 
+                    
+                    "click": (event: Event) => {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        onClose();
+                    },
+
+                    "mousedown": (event: Event) => {
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }
+
+                }
 
             })
 
