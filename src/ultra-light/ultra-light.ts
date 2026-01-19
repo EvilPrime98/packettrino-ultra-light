@@ -384,6 +384,7 @@ export function UltraComponent({
     component,
     eventHandler = {},
     styles = {},
+    className = [],
     children = [],
     trigger = [],
     cleanup = []
@@ -400,6 +401,10 @@ export function UltraComponent({
      * Object containing the CSS styles.
      */
     styles?: Partial<CSSStyleDeclaration>;
+    /** 
+     * Array of class names.
+     */
+    className?: string[];
     /**
      * Array of child components.
      */
@@ -440,6 +445,16 @@ export function UltraComponent({
             (node as HTMLElement).style[key as any] = styles[key as keyof CSSStyleDeclaration] as string;
         } catch (error) {
             console.error(`Error al aplicar estilo ${key}:`, error);
+        }
+    });
+
+    //add class names
+
+    className.forEach(className => {
+        try {
+            node.classList.add(className);
+        } catch (error) {
+            console.error(`Error al aplicar clase ${className}:`, error);
         }
     });
 
@@ -506,6 +521,7 @@ export function UltraActivity({
     component,
     eventHandler = {},
     styles = {},
+    className = [],
     children = [],
     mode,
     trigger = [],
@@ -524,6 +540,10 @@ export function UltraActivity({
      * Object containing the CSS styles.
      */
     styles?: Partial<CSSStyleDeclaration>;
+    /** 
+     * Array of class names.
+     */
+    className?: string[];
     /**
      * Array of child components.
      */
@@ -580,6 +600,15 @@ export function UltraActivity({
             (element as HTMLElement).style[key as any] = styles[key as keyof CSSStyleDeclaration] as string;
         } catch (error) {
             console.error(`Error al aplicar estilo ${key}:`, error);
+        }
+    });
+
+    // Add class names
+    className.forEach(className => {
+        try {
+            element.classList.add(className);
+        } catch (error) {
+            console.error(`Error al aplicar clase ${className}:`, error);
         }
     });
 
