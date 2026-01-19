@@ -1,20 +1,17 @@
-import { 
-    UltraComponent, 
-    ultraState, 
+import {
+    UltraComponent,
+    ultraState,
     UltraActivity,
 } from "@ultra-light";
 import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import type { PcMenuFields } from "@/types/types";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
 import { PcFormValidator } from "@/schemas/pc-menu-schema";
-//import { DhcpMode, WebServerMode } from "./modes";
 import InterfaceField from "./interface-field";
 import styles from "./pc-menu.module.css";
-//import type { Props } from "./pc-menu-types";
 import IpField from "./ip-field";
 import NetmaskField from "./netmask-field";
 import GatewayField from "./gateway-field";
-//import DhcpButtons from "./dhcp-buttons";
 import BasicButtons from "./basic-buttons";
 import { ip_addr } from "@/services/ifaces_service";
 import { ip_route } from "@/services/routing_service";
@@ -32,15 +29,17 @@ export default function PcMenu() {
         dhcpField: false
     })
 
+    const [eventCleaner, setEventCleaner] = ultraState<(() => void) | null>(null);
+
     function onStart() {
 
-        window.addEventListener("keydown", onKeydown);
+        setEventCleaner(onGlobalEvents());
 
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
-        const ifaces = elementAPI.getIfaces();     
+        const ifaces = elementAPI.getIfaces();
         const initialIfaceId = Object.keys(ifaces)[0];
-        
+
         setFields({
             interfaceField: initialIfaceId,
             ipField: ifaces[initialIfaceId].ip,
@@ -72,7 +71,7 @@ export default function PcMenu() {
         if (!pmCtx.get()?.isVisible) return;
 
         const { pcElementAPI } = pmCtx.get();
-        
+
         if (!pcElementAPI) return;
 
         const {
@@ -105,30 +104,40 @@ export default function PcMenu() {
             }
 
             toCtx.get()
-            .createNotification(
-                `Interface ${getFields().interfaceField.toUpperCase()} updated successfully!`,
-                'success'
-            )
+                .createNotification(
+                    `Interface ${getFields().interfaceField.toUpperCase()} updated successfully!`,
+                    'success'
+                )
 
         } catch (error: unknown) {
 
-            const errorMessage = error instanceof Error 
-            ? error.message 
-            : 'Unknown error';
+            const errorMessage = error instanceof Error
+                ? error.message
+                : 'Unknown error';
 
             toCtx.get()
-            .createNotification(
-                errorMessage,
-                'error'
-            )
+                .createNotification(
+                    errorMessage,
+                    'error'
+                )
 
         }
 
     }
 
+    function onGlobalEvents() {
+
+        window.addEventListener("keydown", onKeydown);
+
+        return () => {
+            window.removeEventListener("keydown", onKeydown);
+        }
+
+    }
+
     function onCleanup() {
-        
-        window.removeEventListener("keydown", onKeydown);
+
+        eventCleaner()?.();
 
         setFields({
             interfaceField: "",
@@ -142,74 +151,53 @@ export default function PcMenu() {
 
     return UltraActivity({
 
-        component: UltraComponent({
-
-            component: `<form class="modal draggable-modal ${styles['pc-form']} "></form>`,
-
-            children: [
-
-                PcMenuFrame({ onClose }),
-
-                UltraComponent({
-                    
-                    component: `<section class="basic-section"></section>`,
-                    
-                    children: [
-                        
-                        InterfaceField({ 
-                            getFields, 
-                            setFields, 
-                            subscribeFields
-                        }),
-
-                        IpField({ getFields, setFields, subscribeFields }),
-                        
-                        NetmaskField({ getFields, setFields, subscribeFields }),
-                        
-                        GatewayField({ getFields, setFields, subscribeFields }),
-
-                        Ipv4Forwarding()
-
-                    ],
-
-                }),
-
-                BasicButtons({ saveHandler: onSave }),
-
-            ],
-
-            trigger: [{
-                subscriber: pmCtx.subscribe,
-                triggerFunction: (self: HTMLElement) => {
-                    self.classList.toggle(styles["hidden"], !pmCtx.get()?.isVisible);
-                    if (pmCtx.get()?.isVisible) onStart();
-                }
-            }],
-        
-        }),
-
         mode: {
             state: () => pmCtx.get()?.isVisible,
             subscriber: pmCtx.subscribe
-        }
+        },
+
+        component: `<form class="modal draggable-modal ${styles['pc-form']} "></form>`,
+
+        children: [
+
+            PcMenuFrame({ onClose }),
+
+            UltraComponent({
+
+                component: `<section class="basic-section"></section>`,
+
+                children: [
+
+                    InterfaceField({
+                        getFields,
+                        setFields,
+                        subscribeFields
+                    }),
+
+                    IpField({ getFields, setFields, subscribeFields }),
+
+                    NetmaskField({ getFields, setFields, subscribeFields }),
+
+                    GatewayField({ getFields, setFields, subscribeFields }),
+
+                    Ipv4Forwarding()
+
+                ],
+
+            }),
+
+            BasicButtons({ saveHandler: onSave }),
+
+        ],
+
+        trigger: [{
+            subscriber: pmCtx.subscribe,
+            triggerFunction: (self: HTMLElement) => {
+                self.classList.toggle(styles["hidden"], !pmCtx.get()?.isVisible);
+                if (pmCtx.get()?.isVisible) onStart();
+            }
+        }]
 
     })
 
 }
-
-// function ModesWrapper({ getFields, setFields, subscribeFields }: Props) {
-
-//     return (
-//         UltraComponent({
-            
-//             component: `<section class="modes-wrapper"></section>`,
-
-//             children: [
-//                 DhcpMode({ getFields, setFields, subscribeFields }),
-//                 WebServerMode()
-//             ],
-
-//         })
-//     )
-
-// }
