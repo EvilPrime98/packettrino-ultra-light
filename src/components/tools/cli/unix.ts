@@ -3,6 +3,7 @@ import command_pwd from "@/commands/pwd";
 import { command_ls, command_cd } from "@/commands/filesystem";
 import { command_ip }from "@/commands/ip";
 import { command_ping } from "@/commands/ping";
+import { command_history } from "@/commands/history";
 
 /**
  * Compiles, interprets and executes a terminal command
@@ -20,13 +21,19 @@ export default function unix() {
         "cd": () => command_cd(),
         "ip": () => command_ip(),
         "ping": () => command_ping(),
+        "history": () => command_history()
     }
 
     if (Object.hasOwn(unixMap, keyWord)) {
+
         unixMap[keyWord]()
+        
     } else {
-        tCtx.get()
-        .write(`Unknown command: ${keyWord}`);
+
+        tCtx.get().write(
+            `Unknown command: ${keyWord}`
+        );
+
     }
 
 }
