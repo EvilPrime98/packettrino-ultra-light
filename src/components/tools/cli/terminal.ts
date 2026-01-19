@@ -1,7 +1,7 @@
 import { UltraComponent, ultraState } from "@ultra-light";
 import TerminalEditor from "./terminal-editor";
 import { TERMINAL_CONTEXT as tCtx } from "../../../context/terminal-context";
-import { dragModal } from "@utils/dragModal";
+import MenuFrame from "@/components/menus/menu-frame";
 import TerminalInput from "./terminal-input";
 import TerminalOutput from "./terminal-output";
 import TerminalPrompt from "./terminal-prompt";
@@ -166,21 +166,28 @@ export default function Terminal() {
 
     }
 
+    function onClose() {
+        tCtx.set({
+            ...tCtx.get(),
+            isVisible: false
+        });
+    }
+
     return UltraComponent({
 
         component: `<div></div>`,
 
         className: [
             styles["terminal-component"], 
-            styles["draggable-modal"], 
+            "draggable-modal",
             tCtx.get().isVisible ? "" : styles["hidden"]
         ],
 
         children: [
 
-            UltraComponent({
-                component: `<div class=${styles["window-frame"]}>Terminal</div>`,
-                eventHandler: { "mousedown": dragModal }
+            MenuFrame({
+                onClose,
+                initTitle: "Terminal",
             }),
 
             UltraComponent({

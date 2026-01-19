@@ -28,15 +28,15 @@ export default function TerminalInput() {
 
         UltraComponent({
 
-            component: `
-            <input
-                type="text"
-                class="terminal-input"
-                autofocus
-                autocomplete="off"
-                spellcheck="false"
-                value="${TERMINAL_CONTEXT.get().input}"
-            >`,
+            component: (`
+                <input
+                    type="text"
+                    autofocus
+                    autocomplete="off"
+                    spellcheck="false"
+                    value="${TERMINAL_CONTEXT.get().input}"
+                />
+            `),
 
             eventHandler: { 'input': changeHandler },
 

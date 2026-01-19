@@ -1,46 +1,6 @@
-import { UltraComponent, ultraStyles } from "@ultra-light";
+import { UltraComponent } from "@ultra-light";
 import { TERMINAL_CONTEXT } from "@/context/terminal-context";
-
-const styles = ultraStyles(`
-
-    .terminal-output {
-
-        white-space: pre-wrap;
-        box-sizing: border-box;
-        padding-top: 0px;
-        padding-bottom: 0px;
-        margin-bottom: 12px;
-        margin-top: -31px;
-
-        p {
-            margin: 0px;
-            padding: 3px;
-        }
-
-        li {
-            padding: 5px;
-            list-style-position: outside;
-            margin-left: 20px;
-            text-indent: -25px;
-        }
-
-        table {
-
-            width: 60%;
-            border-collapse: collapse;
-
-            * {
-                border: 1px solid white;
-                border-collapse: collapse;
-                text-align: center;
-                padding: 5px;
-            }
-
-        }
-
-    }
-
-`);
+import styles from "./terminal.module.css";
 
 export default function TerminalOutput() {
 
