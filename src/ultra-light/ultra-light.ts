@@ -452,7 +452,7 @@ export function UltraComponent({
 
     className.forEach(className => {
         try {
-            node.classList.add(className);
+            if (className) node.classList.add(className);
         } catch (error) {
             console.error(`Error al aplicar clase ${className}:`, error);
         }
@@ -606,7 +606,7 @@ export function UltraActivity({
     // Add class names
     className.forEach(className => {
         try {
-            element.classList.add(className);
+            if (className) element.classList.add(className);
         } catch (error) {
             console.error(`Error al aplicar clase ${className}:`, error);
         }
