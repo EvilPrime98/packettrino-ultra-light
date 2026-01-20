@@ -27,6 +27,10 @@ interface IEnv {
      */
     ignoreArpTraffic: boolean;
     /**
+     * Returns true or false whether layer 2 devices traffic is ignored.
+     */
+    ignoreLayer2Traffic: boolean;
+    /**
      * Returns the current request timeout in seconds.
      */
     $REQUEST_TIMEOUT: number;
@@ -62,6 +66,7 @@ const ENV = UltraContext<IEnv>({
     visualToggle: true,
     visualSpeed: 300,
     ignoreArpTraffic: false,
+    ignoreLayer2Traffic: false,
     trackTraffic: true,
     $REQUEST_TIMEOUT: 100000,
     $ARPENTRYTTL: 400,

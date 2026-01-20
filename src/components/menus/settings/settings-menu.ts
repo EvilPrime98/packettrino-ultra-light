@@ -1,8 +1,9 @@
 import { UltraActivity, UltraComponent, ultraState } from "@/ultra-light/ultra-light";
-import { SETTINGS_MENU_CTX  as smCtx } from "@/context/settings-context";
+import { SETTINGS_MENU_CTX as smCtx } from "@/context/settings-context";
 import { ENV } from "@/context/env-context";
 import styles from "./settings.module.css";
 import MenuFrame from "@/components/menus/menu-frame";
+import Option from "./option";
 
 export default function SettingsMenu() {
 
@@ -13,16 +14,17 @@ export default function SettingsMenu() {
     ] = ultraState({
         'dark-mode': false,
         'visual-toggle': false,
-        'ignore-arp-traffic': false
+        'ignore-arp-traffic': false,
+        'ignore-layer2-traffic': false
     });
 
     const [
-        arpTTL, 
-        setArpTTL, 
+        arpTTL,
+        setArpTTL,
         subcribeToArpTTL
     ] = ultraState(0);
 
-    function onStart(){
+    function onStart() {
 
         if (!smCtx.get().isVisible) return;
 
@@ -31,7 +33,8 @@ export default function SettingsMenu() {
         setCheckBoxes({
             'dark-mode': ENV.get().darkMode,
             'visual-toggle': ENV.get().visualToggle,
-            'ignore-arp-traffic': ENV.get().ignoreArpTraffic
+            'ignore-arp-traffic': ENV.get().ignoreArpTraffic,
+            'ignore-layer2-traffic': ENV.get().ignoreLayer2Traffic
         })
 
     }
@@ -41,7 +44,8 @@ export default function SettingsMenu() {
         setCheckBoxes({
             'dark-mode': false,
             'visual-toggle': false,
-            'ignore-arp-traffic': false
+            'ignore-arp-traffic': false,
+            'ignore-layer2-traffic': false
         })
 
         setArpTTL(0);
@@ -69,9 +73,9 @@ export default function SettingsMenu() {
             isVisible: false
         })
     }
-    
+
     return UltraActivity({
-        
+
         component: UltraComponent({
 
             component: `<form class="modal draggable-modal ${styles['settings-modal']}"></form>`,
@@ -83,148 +87,77 @@ export default function SettingsMenu() {
                     initTitle: "General Settings",
                 }),
 
-                UltraComponent({
-
-                    component: `<div class="${styles['options-group']}"></div>`,
-
-                    children: [
-                        
-                        '<label for="dark-mode"> Dark Mode </label>',
-
-                        UltraComponent({
-                            
-                            component: (`
-                                <input 
-                                    type="checkbox" 
-                                    class="btn-toggle"
-                                    id="dark-mode" 
-                                    name="dark-mode"
-                                />
-                            `),
-
-                            trigger: [{ 
-                                subscriber: subscribeCheckBoxes,
-                                triggerFunction: (self: HTMLElement) => {
-                                    (self as HTMLInputElement).checked = getCheckBoxes()['dark-mode'];
-                                }
-                            }]
-
+                Option({
+                    type: 'checkbox',
+                    id: "visual-toggle",
+                    label: "Visual Mode",
+                    triggers: [{
+                        subscriber: subscribeCheckBoxes,
+                        triggerFunction: (self: HTMLElement) => {
+                            (self as HTMLInputElement).checked = getCheckBoxes()['visual-toggle'];
+                        }
+                    }],
+                    onChange: (event: Event) => {
+                        ENV.set({
+                            ...ENV.get(),
+                            visualToggle: (event.target as HTMLInputElement).checked
                         })
-
-                    ]
-
+                    }
                 }),
 
-                UltraComponent({
-
-                    component: `<div class="${styles['options-group']}"></div>`,
-
-                    children: [
-                        
-                        '<label for="visual-toggle"> Visual Mode </label>',
-
-                        UltraComponent({
-                            
-                            component: (`
-                                <input 
-                                    type="checkbox" 
-                                    class="btn-toggle" 
-                                    id="visual-toggle" 
-                                    name="visual-toggle"
-                                />
-                            `),
-
-                            trigger: [{ 
-                                subscriber: subscribeCheckBoxes,
-                                triggerFunction: (self: HTMLElement) => {
-                                    (self as HTMLInputElement).checked = getCheckBoxes()['visual-toggle'];
-                                }
-                            }],
-
-                            eventHandler: {
-                                change: function () {
-                                    ENV.get().visualToggle = (this as HTMLInputElement).checked;
-                                }
-                            }
-
+                Option({
+                    type: 'checkbox',
+                    id: "ignore-arp-traffic",
+                    label: "Hide ARP Traffic",
+                    triggers: [{
+                        subscriber: subscribeCheckBoxes,
+                        triggerFunction: (self: HTMLElement) => {
+                            (self as HTMLInputElement).checked = getCheckBoxes()['ignore-arp-traffic'];
+                        }
+                    }],
+                    onChange: (event: Event) => {
+                        ENV.set({
+                            ...ENV.get(),
+                            ignoreArpTraffic: (event.target as HTMLInputElement).checked
                         })
-
-                    ]
-
+                    }
                 }),
 
-                UltraComponent({
-                    
-                    component: `<div class="${styles['options-group']}"></div>`,
-                    
-                    children: [
-                        
-                        '<label for="ignore-arp-traffic"> Hide ARP Traffic </label>',
-                        
-                        UltraComponent({
-                            
-                            component: (`
-                                <input 
-                                    type="checkbox" 
-                                    class="btn-toggle" 
-                                    id="ignore-arp-traffic" 
-                                    name="ignore-arp-traffic"
-                                />
-                            `),
-
-                            eventHandler: { change: function () {
-                                ENV.get().ignoreArpTraffic = (this as HTMLInputElement).checked;
-                            }},
-                            
-                            trigger: [{ 
-                                subscriber: subscribeCheckBoxes,
-                                triggerFunction: (self: HTMLElement) => {
-                                    (self as HTMLInputElement).checked = getCheckBoxes()['ignore-arp-traffic'];
-                                }
-                            }]
-                            
+                Option({
+                    type: 'checkbox',
+                    id: "ignore-layer2-traffic",
+                    label: "Hide Layer 2 Traffic",
+                    triggers: [{
+                        subscriber: subscribeCheckBoxes,
+                        triggerFunction: (self: HTMLElement) => {
+                            (self as HTMLInputElement).checked = getCheckBoxes()['ignore-layer2-traffic'];
+                        }
+                    }],
+                    onChange: (event: Event) => {
+                        ENV.set({
+                            ...ENV.get(),
+                            ignoreLayer2Traffic: (event.target as HTMLInputElement).checked
                         })
-
-                    ]
-
+                    }
                 }),
 
-                UltraComponent({
-
-                    component: `<div class="${styles['options-group']}"></div>`,
-
+                Option({
+                    type: 'range',
+                    range: {
+                        min: ENV.get().$MINARPENTRYTTL,
+                        max: ENV.get().$MAXARPENTRYTTL,
+                        value: ENV.get().$ARPENTRYTTL
+                    },
+                    id: "arp-ttl",
+                    label: "ARP TTL",
+                    onInput: onInputARPTTL,
                     children: [
-                        
-                        '<label for="arp-ttl"> ARP TTL </label>',
-
-                        UltraComponent({
-
-                            component: (`
-                                <input 
-                                    type="range" 
-                                    class="btn-input" 
-                                    id="arp-ttl" 
-                                    name="arp-ttl" 
-                                    min="${ENV.get().$MINARPENTRYTTL}"
-                                    max="${ENV.get().$MAXARPENTRYTTL}"
-                                    value="${ENV.get().$ARPENTRYTTL}"
-                                />
-                            `),
-
-                            eventHandler: { 
-                                'input': onInputARPTTL 
-                            },
-
-                        }),
-
                         UltraComponent({
                             component: `<span id="arp-ttl-value">${ENV.get().$ARPENTRYTTL}s</span>`,
-                            trigger:[{ subscriber: subcribeToArpTTL, triggerFunction: onChangeARPTTL }]
+                            trigger: [{ subscriber: subcribeToArpTTL, triggerFunction: onChangeARPTTL }]
                         })
-
                     ]
-
-                })
+                }),
 
             ]
 
