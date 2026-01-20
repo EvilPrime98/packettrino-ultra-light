@@ -23,7 +23,8 @@ export default function FilterTraffic({
         children: [
 
             UltraComponent({
-                component: '<input type="text"/>',
+                component: '<input type="text" id="filter"/>',
+                className: [styles['filter-input']],
                 eventHandler: {
                     'input': onInput
                 }
@@ -35,7 +36,12 @@ export default function FilterTraffic({
             }),
 
             UltraComponent({
-                component: '<select id="filter-by-device"></select>',
+                component: '<div></div>',
+                className: [styles['options-group']],
+                children: [
+                    '<input type="checkbox" id="exclude-layer-2-devices" class="btn-toggle"/>',
+                    '<label for="exclude-layer-2-devices">Exclude Layer 2 devices</label>'
+                ],
                 eventHandler: { change: onFilterbyDevice }
             })
 
