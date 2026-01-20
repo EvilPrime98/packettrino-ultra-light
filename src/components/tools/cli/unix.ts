@@ -1,6 +1,7 @@
 import { TERMINAL_CONTEXT } from "@/context/terminal-context";
-import command_pwd from "@/commands/pwd";
-import { command_ls, command_cd } from "@/commands/filesystem";
+import { command_pwd } from "@/commands/pwd";
+import { command_ls } from "@/commands/ls";
+import { command_cd } from "@/commands/cd";
 import { command_ip }from "@/commands/ip";
 import { command_ping } from "@/commands/ping";
 import { command_history } from "@/commands/history";

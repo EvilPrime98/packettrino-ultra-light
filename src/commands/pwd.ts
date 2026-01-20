@@ -1,6 +1,23 @@
 import { TERMINAL_CONTEXT } from "@/context/terminal-context";
 
-export default function command_pwd(): string {
-    const $PWD = TERMINAL_CONTEXT.get().pwd;
-    return `/${$PWD.join('/')}`;
+export function command_pwd(): void {
+
+    try {
+        
+        const $PWD = TERMINAL_CONTEXT.get().pwd;
+
+        TERMINAL_CONTEXT.get().write(
+            `/${$PWD.join('/')}`
+        );
+
+    }catch (error: unknown) {
+        
+        const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Unknown error';
+
+        TERMINAL_CONTEXT.get().write(`pwd: ${errorMessage}`);
+
+    }
+
 }
