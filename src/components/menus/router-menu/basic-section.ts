@@ -82,6 +82,10 @@ export default function BasicSection({
             const ifaceId = getSelectedIface();
             const { ip, netmask } = getFields();
 
+            if (!ip || !netmask) {
+                throw new Error("Some of the fields are empty");
+            }
+
             ip_addr(routerAPI, {
                 'add': encodeCidr(ip, netmask),
                 'dev': ifaceId,
