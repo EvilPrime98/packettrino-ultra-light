@@ -15,24 +15,28 @@ type TPages = "basic" | "routing";
 
 export function RouterMenu() {
 
+    //ifaces information
     const [
         getIfaces, 
         setIfaces, 
         subscribeToIfaces
     ] = ultraState<string[]>([]);
 
+    //routing rules information
     const [
         getRoutingRules, 
         setRoutingRules, 
         subscribeToRoutingRules
     ] = ultraState<IRoutingRule[]>([]);
 
+    //current page
     const [
         getPage, 
         setPage, 
         subscribeToPage
     ] = ultraState<TPages>("basic");
 
+    //current title
     const [
         getTitle, 
         setTitle, 
@@ -87,11 +91,11 @@ export function RouterMenu() {
      * API into the state variables.
      * @returns
      */
-    function onContextChange() {
+    function onContextChange(self: UltraLightElement) {
         if (rmCtx.get().isVisible) {
             onLoad();
         } else {
-            onCleanup();
+            onCleanup(self);
         }
     }
 
@@ -100,7 +104,9 @@ export function RouterMenu() {
      * event listeners and sets the state variables to their initial values.
      * @returns
      */
-    function onCleanup() {
+    function onCleanup(self: UltraLightElement) {
+        (self as HTMLFormElement).reset();
+        setPage('basic');
         setIfaces([]);
         setRoutingRules([]);
         setTitle('');
@@ -113,7 +119,6 @@ export function RouterMenu() {
      * @returns
      */
     function onClose() {
-        onCleanup();
         rmCtx.set({
             ...rmCtx.get(),
             "isVisible": false
