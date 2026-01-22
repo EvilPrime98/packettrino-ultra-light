@@ -88,3 +88,10 @@ export class InvalidIpAddressError extends Error {
         this.name = "InvalidIpAddressError";
     }
 }
+
+export class MaxInterfacesError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "MaxInterfacesError";
+    }
+}
