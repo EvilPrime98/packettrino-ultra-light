@@ -406,9 +406,9 @@ export function UltraComponent({
      */
     className?: string[];
     /**
-     * Array of child components.
+     * Array of child components. It accepts null values for conditional rendering.
      */
-    children?: (UltraRenderableElement | Node | UltraLightElement)[];
+    children?: (UltraRenderableElement | Node | UltraLightElement | null)[];
     /**
      * Array of trigger objects.
      */
@@ -461,6 +461,7 @@ export function UltraComponent({
     //add children
     
     children.forEach(child => {
+        if (!child) return;
         const childElement = parseHTMLString(child);
         if (childElement) {
             node.appendChild(childElement);
@@ -545,9 +546,9 @@ export function UltraActivity({
      */
     className?: string[];
     /**
-     * Array of child components.
+     * Array of child components. It accepts null values for conditional rendering.
      */
-    children?: (UltraRenderableElement | Node | UltraLightElement)[];
+    children?: (UltraRenderableElement | Node | UltraLightElement | null)[];
     /**
      * Object containing the state and subscriber functions to control visibility.
      */
@@ -614,6 +615,7 @@ export function UltraActivity({
 
     // Add children
     children.forEach(child => {
+        if (!child) return;
         const childElement = parseHTMLString(child);
         if (childElement) {
             element.appendChild(childElement);
