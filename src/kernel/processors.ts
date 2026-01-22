@@ -1,5 +1,5 @@
 import { ArpReply, IcmpEchoReply, Packet } from "@/types/packets";
-import { IUltraPcConfig, IUltraRouterConfig } from "@/types/TConfig";
+import { IUltraPcConfig, IUltraRouterConfig, TLayer3Config } from "@/types/TConfig";
 import { getAvailableIps } from "@/utils/network_lib";
 
 /**
@@ -37,10 +37,14 @@ export async function packetProcessor(
  */
 function arpProcessor(
     packet: Packet,
-    elementApi: IUltraPcConfig | IUltraRouterConfig
+    elementApi: TLayer3Config
 ): [Packet | null, boolean] {
 
     if (packet.type === 'request') {
+
+        if (!elementApi.getAvailableIps().includes(packet.destinationIp)) {
+            return [null, false];
+        }
 
         elementApi.addArpCache(
             packet.originIp,
@@ -81,7 +85,7 @@ function arpProcessor(
  */
 function icmpProcessor(
     packet: Packet,
-    elementApi: IUltraPcConfig | IUltraRouterConfig
+    elementApi: TLayer3Config
 ): [Packet | null, boolean] {
 
     const availableIps = getAvailableIps(elementApi);

@@ -46,15 +46,6 @@ export default function ultraRouterConfig({ itemIndex }: { itemIndex: string }):
         }
         return macs;
     }
-
-    function getAvailableIps() {
-        const ifaces = self.getIfaces();
-        const ips = [];
-        for (const ifaceID of Object.keys(ifaces)) {
-            ips.push(ifaces[ifaceID].ip);
-        }
-        return ips;
-    }
     
     function replaceProperties(newProperties: IRouterElementProperties) {
         setProperties(newProperties);
@@ -113,7 +104,7 @@ export default function ultraRouterConfig({ itemIndex }: { itemIndex: string }):
         }
 
         if ( !wasProcessed
-            && !getAvailableIps().includes(packet.destinationIp)
+            && !self.getAvailableIps().includes(packet.destinationIp)
             && self.properties()['ipv4-forwarding'] === true
         ){
             if (packet.destinationMac === 'ff:ff:ff:ff:ff:ff' || packet.destinationIp === '255.255.255.255') return;

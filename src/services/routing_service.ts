@@ -1,4 +1,4 @@
-import { IUltraPcConfig } from "@/types/TConfig";
+import { TLayer3Config } from "@/types/TConfig";
 import { getNetwork, isValidIp, netmaskToCidr, parseCidr } from "@/utils/network_lib";
 
 /**
@@ -10,7 +10,7 @@ import { getNetwork, isValidIp, netmaskToCidr, parseCidr } from "@/utils/network
  * @throws Error if the command is not valid in relation to the element API
  */
 export function ip_route(
-    elementApi: IUltraPcConfig,
+    elementApi: TLayer3Config,
     $OPTS: Record<string, string | number>
 ): string | undefined {
 
@@ -84,7 +84,7 @@ export function ip_route(
  * @returns 
  */
 function getCurrentRoutingRules(
-    elementApi: IUltraPcConfig
+    elementApi: TLayer3Config
 ): string {
     
     const rules = elementApi

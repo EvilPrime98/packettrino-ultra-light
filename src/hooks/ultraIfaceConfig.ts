@@ -169,6 +169,15 @@ export default function ultraIfaceConfig({
         });
     }
 
+    function getAvailableIps() {
+        const ifaces = getIfaces();
+        const ips = [];
+        for (const ifaceID of Object.keys(ifaces)) {
+            ips.push(ifaces[ifaceID].ip);
+        }
+        return ips;
+    }
+
     for (let i = 0; i < initialIfaces; i++) {
         addInterface(getNewIfaceId());
     }
@@ -178,6 +187,7 @@ export default function ultraIfaceConfig({
         subscribeToIfaces,
         removeInterface,
         getAvailableInterface,
+        getAvailableIps,
         updateInterface,
         updateInterfaceByIndex,
         addInterface,

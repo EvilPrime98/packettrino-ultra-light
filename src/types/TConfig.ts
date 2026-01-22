@@ -264,6 +264,11 @@ export interface IUltraIfaceConfig {
      * @returns 
      */
     promiscuousMode: (ifaceId: string, value: boolean) => void;
+    /**
+     * Returns the available IPs of the network element.
+     * @returns
+     */
+    getAvailableIps: () => string[];
 }
 
 //PC CONFIG

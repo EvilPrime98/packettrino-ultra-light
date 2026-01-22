@@ -38,15 +38,6 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
         getDefaultGateway,
     }
 
-    function getAvailableIps() {
-        const ifaces = self.getIfaces();
-        const ips = [];
-        for (const ifaceID of Object.keys(ifaces)) {
-            ips.push(ifaces[ifaceID].ip);
-        }
-        return ips;
-    }
-
     function replaceProperties(newProperties: TPcElementProperties) {
         setProperties(newProperties);
     }
@@ -111,7 +102,7 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
         }
 
         if ( !wasProcessed
-            && !getAvailableIps().includes(packet.destinationIp) 
+            && !self.getAvailableIps().includes(packet.destinationIp) 
             && self.properties()['ipv4-forwarding'] === true
         ){
             if (packet.destinationMac === 'ff:ff:ff:ff:ff:ff' || packet.destinationIp === '255.255.255.255') return;
