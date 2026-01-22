@@ -41,15 +41,15 @@ export function ip_addr(
     }
 
     if (Object.hasOwn($OPTS, "add")) {
+
+        deconfigureInterface(elementApi, ifaceId);
         
-        elementApi
-        .updateInterface(ifaceId, { 
+        elementApi.updateInterface(ifaceId, { 
             ip, 
             netmask 
         });
 
-        elementApi
-        .addRoutingRule({
+        elementApi.addRoutingRule({
             destinationIp: getNetwork(ip, netmask),
             destinationNetmask: netmask,
             gateway: ip,
@@ -62,21 +62,8 @@ export function ip_addr(
     }
 
     if (Object.hasOwn($OPTS, "del")) {
-        
-        elementApi
-        .updateInterface(ifaceId, { 
-            ip: '', 
-            netmask: '' 
-        });
-
-        elementApi
-        .removeRoutingRule(
-            getNetwork(ip, netmask),
-            netmask
-        );
-
+        deconfigureInterface(elementApi, ifaceId);
         return `ip: deleted ${ip}/${netmask} from ${ifaceId}`;
-
     }
 
 }
@@ -116,5 +103,34 @@ function getCurrIfaceInfo(
     }
 
     return lines.join("\n");
+
+}
+
+/**
+ * This function deconfigures an interface 
+ * by resetting its ip and netmask and removing 
+ * all the routing rules that use it.
+ * @param elementApi 
+ * @param ifaceId 
+ */
+function deconfigureInterface(
+    elementApi: TLayer3Config,
+    ifaceId: string
+) {
+
+    const currRules = elementApi.routingRules();
+
+    elementApi.updateInterface(ifaceId, { 
+        ip: '', 
+        netmask: '' 
+    });
+
+    currRules.forEach(rule => {
+        if (rule.iface !== ifaceId) return; //skip rules for other interfaces
+        elementApi.removeRoutingRule(
+            rule.destinationIp,
+            rule.destinationNetmask
+        );
+    });
 
 }
