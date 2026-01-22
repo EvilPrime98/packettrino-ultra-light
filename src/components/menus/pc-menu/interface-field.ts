@@ -97,7 +97,7 @@ export default function InterfaceField({
 
     return UltraComponent({
 
-            component: `<div class="${styles['form-item']}"></div>`,
+        component: `<div class="${styles['form-item']}"></div>`,
 
         children: [
 

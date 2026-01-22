@@ -15,12 +15,78 @@ type TPages = "basic" | "routing";
 
 export function RouterMenu() {
 
-    const [getIfaces, setIfaces, subscribeToIfaces] = ultraState<string[]>([]);
-    const [getRoutingRules, setRoutingRules, subscribeToRoutingRules] = ultraState<IRoutingRule[]>([]);
-    const [getPage, setPage, subscribeToPage] = ultraState<TPages>("basic");
-    const [getTitle, setTitle, subscribeToTitle] = ultraState<string>("");
-    const [getEventCleanup, setEventCleanup] = ultraState<(() => void) | null>(null);
+    const [
+        getIfaces, 
+        setIfaces, 
+        subscribeToIfaces
+    ] = ultraState<string[]>([]);
 
+    const [
+        getRoutingRules, 
+        setRoutingRules, 
+        subscribeToRoutingRules
+    ] = ultraState<IRoutingRule[]>([]);
+
+    const [
+        getPage, 
+        setPage, 
+        subscribeToPage
+    ] = ultraState<TPages>("basic");
+
+    const [
+        getTitle, 
+        setTitle, 
+        subscribeToTitle
+    ] = ultraState<string>("");
+
+    const [
+        getEventCleanup, 
+        setEventCleanup
+    ] = ultraState<(() => void) | null>(null);
+
+    /**
+     * Dumps all the data from the router element API into the state variables
+     * @returns 
+     */
+    function onLoad() {
+        const routerAPI = rmCtx.get().routerElementAPI;
+        if (!routerAPI) return;
+        onLoadIfaces();
+        onLoadRoutingRules();
+        setTitle(routerAPI.properties().elementId);
+        setEventCleanup(onEvents());
+    }
+
+    /**
+     * Dumps the iface information from the router element API 
+     * into the state variables.
+     * @returns 
+     */
+    function onLoadIfaces(){
+        const routerAPI = rmCtx.get().routerElementAPI;
+        if (!routerAPI) return;
+        const ifaceIds = Object.keys(routerAPI.getIfaces());
+        setIfaces(ifaceIds);
+    }
+
+    /**
+     * Dumps the routing rule information from the router element API 
+     * into the state variables.
+     * @returns 
+     */
+    function onLoadRoutingRules(){
+        const routerAPI = rmCtx.get().routerElementAPI;
+        if (!routerAPI) return;
+        const currRules = routerAPI.routingRules();
+        setRoutingRules(currRules);
+    }
+
+    /**
+     * This function is called when the router menu context changes. It checks if the 
+     * context is visible and if it is, it loads the data from the router element
+     * API into the state variables.
+     * @returns
+     */
     function onContextChange() {
         if (rmCtx.get().isVisible) {
             onLoad();
@@ -29,17 +95,11 @@ export function RouterMenu() {
         }
     }
 
-    function onLoad() {
-        const routerAPI = rmCtx.get().routerElementAPI;
-        if (!routerAPI) return;
-        const ifaceIds = Object.keys(routerAPI.getIfaces());
-        const currRules = routerAPI.routingRules();
-        setIfaces(ifaceIds);
-        setRoutingRules(currRules);
-        setTitle(routerAPI.properties().elementId);
-        setEventCleanup(onEvents());
-    }
-
+    /**
+     * This function is called when the router menu is closed. It cleans up the
+     * event listeners and sets the state variables to their initial values.
+     * @returns
+     */
     function onCleanup() {
         setIfaces([]);
         setRoutingRules([]);
@@ -48,6 +108,10 @@ export function RouterMenu() {
         setEventCleanup(null);
     }
 
+    /**
+     * This function closes the router menu and cleans up the state variables.
+     * @returns
+     */
     function onClose() {
         onCleanup();
         rmCtx.set({
@@ -56,13 +120,10 @@ export function RouterMenu() {
         })
     }
 
-    function onRoutingRulesChange() {
-        const routerAPI = rmCtx.get().routerElementAPI;
-        if (!routerAPI) return;
-        const currRules = structuredClone(routerAPI.routingRules());
-        setRoutingRules(currRules);
-    }
-
+    /**
+     * This function manages the global event listeners for the router menu.
+     * @returns
+     */
     function onEvents() {
 
         function onKeyDown(event: KeyboardEvent) {
@@ -83,7 +144,13 @@ export function RouterMenu() {
 
         component: UltraComponent({
 
-            component: `<form class="${styles['router-form']} modal draggable-modal"></form>`,
+            component: `<form></form>`,
+
+            className: [
+                styles['router-form'],
+                'modal',
+                'draggable-modal'
+            ],
 
             children: [
 
@@ -96,29 +163,40 @@ export function RouterMenu() {
 
                 UltraComponent({
 
-                    component: (`<div class="${styles['nav-panel']}"></div>`),
+                    component: (`<div></div>`),
+
+                    className: [styles['nav-panel']],
 
                     children: [
 
                         UltraComponent({
-                            component: `<button class="btn-modern-blue selected">Basic</button>`,
+                            component: `<button>Basic</button>`,
+                            className: ['btn-modern-blue','selected'],
                             eventHandler: { 'click': () => setPage('basic') },
                             trigger: [
                                 {
                                     subscriber: subscribeToPage,
                                     triggerFunction: (self: UltraLightElement) => {
-                                        self.classList.toggle("selected", getPage() === "basic");
+                                        self.classList.toggle(
+                                            "selected", 
+                                            getPage() === "basic"
+                                        );
                                     }
                                 }
                             ]
                         }),
 
                         UltraComponent({
-                            component: `<button class="btn-modern-blue">Routing Rules</button>`,
+                            component: `<button>Routing Rules</button>`,
+                            className: ['btn-modern-blue'],
                             eventHandler: { 'click': () => setPage('routing') },
                             trigger: [{
-                                subscriber: subscribeToPage, triggerFunction: (self: UltraLightElement) => {
-                                    self.classList.toggle("selected", getPage() === "routing");
+                                subscriber: subscribeToPage, 
+                                triggerFunction: (self: UltraLightElement) => {
+                                    self.classList.toggle(
+                                        "selected", 
+                                        getPage() === "routing"
+                                    );
                                 }
                             }]
                         })
@@ -130,9 +208,10 @@ export function RouterMenu() {
                 UltraActivity({
 
                     component: BasicSection({
-                        onRoutingRulesChange,
+                        onRoutingRulesChange: onLoadRoutingRules,
                         getIfaces,
                         subscribeToIfaces,
+                        refreshIfaces: onLoadIfaces
                     }),
 
                     mode: {
@@ -145,7 +224,7 @@ export function RouterMenu() {
                 UltraActivity({
 
                     component: RoutingRulesSection({
-                        onRoutingRulesChange,
+                        onRoutingRulesChange: onLoadRoutingRules,
                         getRoutingRules,
                         subscribeToRoutingRules,
                     }),
@@ -171,7 +250,10 @@ export function RouterMenu() {
         },
 
         trigger: [
-            { subscriber: rmCtx.subscribe, triggerFunction: onContextChange }
+            { 
+                subscriber: rmCtx.subscribe, 
+                triggerFunction: onContextChange 
+            }
         ]
 
     })

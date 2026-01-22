@@ -5,28 +5,40 @@ import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
 import { ip_addr } from "@/services/ifaces_service";
 import { encodeCidr } from "@/utils/network_lib";
+import AddIcon from "@/components/icons/add-icon";
 
 export default function BasicSection({
     onRoutingRulesChange,
     getIfaces,
     subscribeToIfaces,
+    refreshIfaces
 }: {
     onRoutingRulesChange: () => void;
     getIfaces: () => string[];
     subscribeToIfaces: (fn: (value: string[]) => void) => () => void;
+    refreshIfaces: () => void;
 }) {
 
-    const [getSelectedIface, setSelectedIface] = ultraState<string>("");
-    const [getFields, setFields, subscribeToFields] = ultraState<IRouterMenuFields>({
+    const [
+        getSelectedIface, 
+        setSelectedIface
+    ] = ultraState<string>("");
+
+    const [
+        getFields, 
+        setFields, 
+        subscribeToFields
+    ] = ultraState<IRouterMenuFields>({
         ip: "",
         netmask: ""
     });
 
     function onLoadIfaces(self: UltraLightElement) {
-        self.innerHTML = "";
+        const $select = self as HTMLSelectElement;
+        $select.innerHTML = "";
         const ifacesId = getIfaces();
         ifacesId.forEach(ifaceId => {
-            self.innerHTML += `<option value="${ifaceId}">${ifaceId}</option>`;
+            $select.innerHTML += `<option value="${ifaceId}">${ifaceId}</option>`;
         });
         if (ifacesId.length > 0) {
             const firstIface = ifacesId[0];
@@ -38,7 +50,6 @@ export default function BasicSection({
     function loadIfaceData(ifaceId: string) {
         const routerAPI = rmCtx.get().routerElementAPI;
         if (!routerAPI) return;
-
         const ifaces = routerAPI.getIfaces();
         if (ifaces[ifaceId]) {
             setFields({
@@ -94,11 +105,36 @@ export default function BasicSection({
 
     }
 
-    function onClose() {
-        rmCtx.set({
-            ...rmCtx.get(),
-            "isVisible": false
-        });
+    function onAddIface() {
+
+        const elementAPI = rmCtx.get().routerElementAPI;
+        if (!elementAPI) return;
+        const newIfaceId = elementAPI.getNewIfaceId();
+
+        try {
+
+            elementAPI.addInterface(newIfaceId);
+
+            toCtx.get().createNotification(
+                `Interface ${newIfaceId} added successfully`,
+                "success"
+            );
+
+            refreshIfaces();
+
+        } catch (error: unknown) {
+
+            const message = error instanceof Error
+            ? error.message
+            : "Unknown error";
+
+            toCtx.get().createNotification(
+                message,
+                "error"
+            );
+
+        }
+
     }
 
     return UltraComponent({
@@ -110,13 +146,21 @@ export default function BasicSection({
             UltraComponent({
                 component: `<div class="${styles['interfaces-wrapper']}"></div>`,
                 children: [
+                    
                     UltraComponent({
                         component: `<select id="iface"></select>`,
                         eventHandler: { 'change': (event: Event) => onIfaceChange((event.target as HTMLSelectElement).value) },
                         trigger: [{ subscriber: subscribeToIfaces, triggerFunction: onLoadIfaces }]
-                    }),   
-                    '<button class="btn-modern-red">Eliminar</button>',
-                    '<button class="btn-modern-blue dark">Añadir</button>'
+                    }),
+
+                    UltraComponent({
+                        component: AddIcon({ 
+                            size: 26, 
+                            className: styles['icon'] 
+                        }),
+                        eventHandler: { 'click': onAddIface },
+                    })
+
                 ]
             }),
 
@@ -163,23 +207,14 @@ export default function BasicSection({
             }),
 
             UltraComponent({
-
                 component: (`<div class="${styles['form-item']}"></div>`),
-                
                 children: [
-
                     UltraComponent({
-                        component: `<button class="btn-modern-blue dark" style="padding: 10px;">Save</button>`,
+                        component: `<button class="btn-modern-blue dark">Save</button>`,
+                        styles: { 'padding': '10px' },
                         eventHandler: { 'click': onSave }
-                    }),
-
-                    UltraComponent({
-                        component: `<button class="btn-modern-red dark" style="padding: 10px;" id="close-btn">Close</button>`,
-                        eventHandler: { 'click': onClose }
                     })
-
                 ],
-            
             })
 
         ]
