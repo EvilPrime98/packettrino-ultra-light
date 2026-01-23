@@ -95,3 +95,35 @@ export class MaxInterfacesError extends Error {
         this.name = "MaxInterfacesError";
     }
 }
+
+export class DirectoryDoesNotExistError extends Error {
+    constructor(directory: string) {
+        const message = `The directory ${directory} does not exist.`;
+        super(message);
+        this.name = "DirectoryDoesNotExistError";
+    }
+}
+
+export class FileDoesNotExistError extends Error {
+    constructor(file: string) {
+        const message = `The file ${file} does not exist.`;
+        super(message);
+        this.name = "FileDoesNotExistError";
+    }
+}
+
+export class DirectoryIsNotADirectoryError extends Error {
+    constructor(directory: string) {
+        const message = `The directory ${directory} is not a directory.`;
+        super(message);
+        this.name = "DirectoryIsNotADirectoryError";
+    }
+}
+
+export class FileIsNotAFileError extends Error {
+    constructor(file: string) {
+        const message = `The file ${file} is not a file.`;
+        super(message);
+        this.name = "FileIsNotAFileError";
+    }
+}

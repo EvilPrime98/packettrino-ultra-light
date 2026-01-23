@@ -1,3 +1,4 @@
+import { IPTTFolder } from "@/utils/pttFileSystem";
 import { Packet } from "./packets";
 import { MacRecord } from "./types";
 
@@ -74,7 +75,7 @@ export interface TPcElementProperties {
     /**
      * Returns the filesystem of the network element as an object.
      */
-    "filesystem": Record<string, unknown>;
+    "filesystem": Record<string, IPTTFolder>;
     /**
      * Returns true or false based on whether the resolver is active for the network element.
      */
@@ -331,7 +332,7 @@ export interface IRouterElementProperties {
     /**
      * Returns the filesystem of the network element as an object.
      */
-    "filesystem": Record<string, unknown>;
+    "filesystem": Record<string, IPTTFolder>;
     /**
      * Returns true or false based on whether the resolver is active for the network element.
      */
