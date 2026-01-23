@@ -48,6 +48,11 @@ export interface UltraLightElement extends HTMLElement {
 export interface UltraTrigger<T = HTMLElement> {
     subscriber: (fn: (value: any) => void) => () => void;
     triggerFunction: (node: T) => void;
+    /**
+     * When true, the trigger callback is deferred to the next animation frame.
+     * Useful when the trigger depends on DOM updates completing first.
+     */
+    defer?: boolean;
 }
 
 // Type Guards & Utilities

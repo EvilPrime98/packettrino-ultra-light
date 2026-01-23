@@ -474,10 +474,13 @@ export function UltraComponent({
     //add cleanup functions for triggers
 
     trigger.forEach(t => {
-        const { subscriber, triggerFunction: subscriberFunction } = t;
+        const { subscriber, triggerFunction: subscriberFunction, defer } = t;
         if (subscriber && subscriberFunction) {
             try {
-                const unsubscribe = subscriber(() => subscriberFunction(node as HTMLElement));
+                const callback = defer
+                    ? () => requestAnimationFrame(() => subscriberFunction(node as HTMLElement))
+                    : () => subscriberFunction(node as HTMLElement);
+                const unsubscribe = subscriber(callback);
                 if (unsubscribe) {
                     cleanupFunctions.push(unsubscribe);
                 }
@@ -650,10 +653,13 @@ export function UltraActivity({
 
     // Add cleanup functions for triggers
     trigger.forEach(t => {
-        const { subscriber, triggerFunction } = t;
+        const { subscriber, triggerFunction, defer } = t;
         if (subscriber && triggerFunction) {
             try {
-                const unsub = subscriber(() => triggerFunction(element as HTMLElement));
+                const callback = defer
+                    ? () => requestAnimationFrame(() => triggerFunction(element as HTMLElement))
+                    : () => triggerFunction(element as HTMLElement);
+                const unsub = subscriber(callback);
                 if (unsub) {
                     cleanupFunctions.push(unsub);
                 }
