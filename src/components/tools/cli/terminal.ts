@@ -1,4 +1,4 @@
-import { UltraComponent, ultraState } from "@ultra-light";
+import { UltraActivity, UltraComponent, ultraEffect, ultraState } from "@ultra-light";
 import TerminalEditor from "./terminal-editor";
 import { TERMINAL_CONTEXT as tCtx } from "../../../context/terminal-context";
 import MenuFrame from "@/components/menus/menu-frame";
@@ -10,9 +10,8 @@ import styles from "./terminal.module.css";
 
 export default function Terminal() {
 
-    const [prevIsVisible, setPrevIsVisible,] = ultraState(
-        tCtx.get().isVisible
-    );
+    const [prevIsVisible, setPrevIsVisible,] = ultraState(tCtx.get().isVisible);
+    const [getEditorState, setEditorState, subscribeToEditorState] = ultraState(false);
 
     function onKeydown(event: Event) {
 
@@ -89,10 +88,10 @@ export default function Terminal() {
         if (keydownEvent.key === "Enter") {
 
             tCtx.get()
-            .clear();
+                .clear();
 
             unix();
-            
+
             const {
                 input,
                 currentCommandIndex: currIndex,
@@ -118,50 +117,30 @@ export default function Terminal() {
 
     function onContextChange(self: HTMLElement) {
 
-        const { isVisible, elementAPI: propertiesHandler } = tCtx.get();
-
+        const { isVisible, elementAPI } = tCtx.get();
         if (prevIsVisible() === isVisible) return;
-
         setPrevIsVisible(isVisible);
-
         self.classList.toggle(styles["hidden"], !isVisible);
 
         if (!isVisible) {
-
-            tCtx.set({
-                ...tCtx.get(),
+            tCtx.get().update({
                 isVisible: false,
                 pwd: [],
                 input: "",
                 output: ""
             });
-
             Object.assign(self.style, {
                 top: "40%",
                 left: "50%",
                 transform: "translate(-50%, -50%)"
             });
-
             return;
-
         }
 
-        //forzamos el focus y la selección del input
-        const terminalInput = self.querySelector("input") as HTMLInputElement;
-        terminalInput.focus();
-        terminalInput.setSelectionRange(
-            terminalInput.value.length,
-            terminalInput.value.length
-        );
-
-        //actualizamos las propiedades del terminal
-        if (propertiesHandler) {
-
-            tCtx.set({
-                ...tCtx.get(),
-                host: propertiesHandler.properties().elementId,
+        if (elementAPI) {
+            tCtx.get().update({
+                host: elementAPI.properties().elementId,
             });
-
         }
 
     }
@@ -173,12 +152,22 @@ export default function Terminal() {
         });
     }
 
+    const effectCleaner = ultraEffect(() => {
+
+        tCtx.set({
+            ...tCtx.get(),
+            openEditor: () => setEditorState(true),
+            closeEditor: () => setEditorState(false)
+        })
+
+    }, [])
+
     return UltraComponent({
 
         component: `<div></div>`,
 
         className: [
-            styles["terminal-component"], 
+            styles["terminal-component"],
             "draggable-modal",
             tCtx.get().isVisible ? "" : styles["hidden"]
         ],
@@ -190,13 +179,40 @@ export default function Terminal() {
                 initTitle: "Terminal",
             }),
 
-            UltraComponent({
-                component: '<p></p>',
-                children: [ TerminalPrompt(), TerminalInput() ]
+            UltraActivity({
+                
+                mode: {
+                    state: () => !getEditorState(),
+                    subscriber: subscribeToEditorState
+                },
+
+                component: UltraComponent({
+                    component: '<p></p>',
+                    children: [
+                        TerminalPrompt(),
+                        TerminalInput()
+                    ]
+                })
+
             }),
 
-            TerminalOutput(),
-            TerminalEditor()
+            UltraActivity({
+                
+                mode: {
+                    state: () => !getEditorState(),
+                    subscriber: subscribeToEditorState
+                },
+
+                component: TerminalOutput()
+
+            }),
+
+            TerminalEditor({
+                getEditorState,
+                setEditorState,
+                subscribeToEditorState,
+            })
+
         ],
 
         eventHandler: {
@@ -206,7 +222,9 @@ export default function Terminal() {
 
         trigger: [
             { subscriber: tCtx.subscribe, triggerFunction: onContextChange }
-        ]
+        ],
+
+        cleanup: [effectCleaner]
 
     });
 
