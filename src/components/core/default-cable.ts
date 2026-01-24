@@ -1,8 +1,20 @@
 import { IDefaultCableProps } from "@/types/Tcanvas";
-import { UltraFragment, UltraComponent, ultraState, UltraLightElement } from "@ultra-light";
+import { 
+    UltraFragment, 
+    UltraComponent, 
+    ultraState, 
+    UltraLightElement 
+} from "@ultra-light";
 
-
-export default function DefaultCable({ x1, y1, x2, y2, item1Api, item2Api }: IDefaultCableProps) {
+export default function DefaultCable({ 
+    x1, 
+    y1, 
+    x2, 
+    y2, 
+    item1Api, 
+    item2Api,
+    ifaceId
+}: IDefaultCableProps) {
 
     const [deleteSignal, setDeleteSignal, subscribeDeleteSignal] = ultraState(false);
     const parseCoord = (coord: string): number => parseInt(coord.replace("px", ""));
@@ -15,13 +27,13 @@ export default function DefaultCable({ x1, y1, x2, y2, item1Api, item2Api }: IDe
     const midX = Math.floor((x1Value + x2Value) / 2);
     const midY = Math.floor((y1Value + y2Value) / 2);
 
-    const cutConnection = () => {
+    function onCut() {
         item1Api.removeConnection(item2Api.properties().elementId);
         item2Api.removeConnection(item1Api.properties().elementId);
         setDeleteSignal(true);
     }
 
-    const deleteHandler = (self: UltraLightElement) => {
+    function onDelete(self: UltraLightElement) {
         if (!deleteSignal()) return;
         self._cleanup?.();
         self.remove();
@@ -30,7 +42,8 @@ export default function DefaultCable({ x1, y1, x2, y2, item1Api, item2Api }: IDe
     return UltraFragment(
 
         UltraComponent({
-            component: `
+            
+            component: (`
                 <line
                     x1="${x1Value}"
                     y1="${y1Value}"
@@ -38,38 +51,45 @@ export default function DefaultCable({ x1, y1, x2, y2, item1Api, item2Api }: IDe
                     y2="${y2Value}"
                     stroke-width="${STROKE_WIDTH}"
                     stroke="#000"
-                />`,
+                />
+            `),
+
             trigger: [{
-                subscriber: subscribeDeleteSignal, triggerFunction: deleteHandler
+                subscriber: subscribeDeleteSignal, triggerFunction: onDelete
             }]
+
         }),
 
         UltraComponent({
 
-            component: (
-                `<circle
+            component: (`
+                <circle
                     cx="${midX}"
                     cy="${midY}"
                     r="${CIRCLE_RADIUS}"
                     fill="#d80606ff"
-                    style="cursor: pointer;"
-                />`
-            ),
+                />
+            `),
+
+            styles: {
+                cursor: "pointer"
+            },
 
             children: [
                 UltraComponent({
-                    component: `<title>Delete connection</title>`
+                    component: `<title>${ifaceId}</title>`
                 })
             ],
 
             eventHandler: { 
-                'click': cutConnection 
+                'click': onCut 
             },
 
             trigger: [{
-                subscriber: subscribeDeleteSignal, triggerFunction: deleteHandler
+                subscriber: subscribeDeleteSignal, triggerFunction: onDelete
             }]
 
         })
+
     );
 }

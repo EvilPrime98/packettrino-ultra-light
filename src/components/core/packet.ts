@@ -1,6 +1,6 @@
-import { UltraLightElement, UltraComponent, ultraEffect } from "@ultra-light";
+import { UltraLightElement, UltraComponent } from "@ultra-light";
 import ultraPacketConfig from "@/hooks/ultraPacketConfig";
-import { CANVAS_CONTEXT } from "./svg-canvas";
+import { CANVAS_CONTEXT } from "@/context/canvas-context";
 import { TAnimatedPacket } from "@/types/Tcanvas";
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 
 export default function Packet({ x1, y1, x2, y2, type }: Props) {
 
-    const selfConfig = ultraPacketConfig({ x1, y1, x2, y2, type });
+    const api = ultraPacketConfig({ x1, y1, x2, y2, type });
     let animationPromise: Promise<void> | null = null;
 
     function deleteHandler(self: UltraLightElement) {
@@ -22,26 +22,23 @@ export default function Packet({ x1, y1, x2, y2, type }: Props) {
     }
 
     function updatePosition(self: UltraLightElement) {
-        self.setAttribute("x", selfConfig.getPositions().x);
-        self.setAttribute("y", selfConfig.getPositions().y);
+        self.setAttribute("x", api.getPositions().x);
+        self.setAttribute("y", api.getPositions().y);
     }
 
-    ultraEffect( () => {
 
-        animationPromise = new Promise<void>((resolve) => {
-            requestAnimationFrame(async () => {
-                await selfConfig.startAnimation();
-                resolve();
-            });
+    animationPromise = new Promise<void>((resolve) => {
+        requestAnimationFrame(async () => {
+            await api.startAnimation();
+            resolve();
         });
+    });
 
-        CANVAS_CONTEXT.set({
-            ...CANVAS_CONTEXT.get(),
-            elementApi: selfConfig,
-            animationPromise
-        })
-
-    }, []);
+    CANVAS_CONTEXT.set({
+        ...CANVAS_CONTEXT.get(),
+        elementApi: api,
+        animationPromise
+    })
 
     return UltraComponent({
 
@@ -50,14 +47,14 @@ export default function Packet({ x1, y1, x2, y2, type }: Props) {
                 href="/assets/packets/${type}.png"
                 width="50"
                 height="50"
-                x="${selfConfig.getPositions().x}"
-                y="${selfConfig.getPositions().y}"
+                x="${api.getPositions().x}"
+                y="${api.getPositions().y}"
             />`
         ),
 
         trigger: [
-            { subscriber: selfConfig.subscribeToDeleteSignal, triggerFunction: deleteHandler },
-            { subscriber: selfConfig.subscribeToPositions, triggerFunction: updatePosition }
+            { subscriber: api.subscribeToDeleteSignal, triggerFunction: deleteHandler },
+            { subscriber: api.subscribeToPositions, triggerFunction: updatePosition }
         ],
 
     });

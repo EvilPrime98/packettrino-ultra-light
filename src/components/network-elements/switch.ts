@@ -6,7 +6,7 @@ import ultraSwitchConfig from "@/hooks/ultraSwitchConfig";
 import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
 import { WORK_SPACE_CONTEXT as wCtx } from "@/context/workspace-context";
 import { IUltraSwitchConfig, TNewNetworkElementProperties } from "@/types/TConfig";
-import { CANVAS_CONTEXT as cCtx } from "../core/svg-canvas";
+import { CANVAS_CONTEXT as cCtx } from "@/context/canvas-context"
 
 export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties): HTMLElement {
 
@@ -46,15 +46,13 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
         event.preventDefault();
         event.stopPropagation();
 
-        if (wCtx.get().elementAPI
-            ?.itemType === "switch") return;
+        if (wCtx.get().elementAPI?.itemType === "switch") return;
 
         const self = event.currentTarget;
 
         if (!self || !(self instanceof HTMLElement)) return;
 
-        const elementApi = wCtx.get()
-            .elementAPI?.config;
+        const elementApi = wCtx.get().elementAPI?.config;
 
         if (!elementApi) return;
 
@@ -70,6 +68,8 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
                 api: selfApi
             });
 
+            if (!ifaceId) return;
+
             selfApi.addMacRecord(
                 elementApi.properties().elementId
             )
@@ -80,7 +80,8 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
                 x2: self.style.left || "0px",
                 y2: self.style.top || "0px",
                 item1Api: selfApi,
-                item2Api: elementApi
+                item2Api: elementApi,
+                ifaceId: ifaceId
             });
 
             toCtx.get().createNotification(

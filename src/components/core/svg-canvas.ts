@@ -1,31 +1,28 @@
-import { UltraComponent, UltraContext, ultraEffect, ultraState } from "@ultra-light";
+import { UltraComponent, ultraEffect, UltraLightElement, ultraState } from "@ultra-light";
 import DefaultCable from "./default-cable";
-import { CanvasContextInterface, IDefaultCableProps, TAnimatedPacket } from "@/types/Tcanvas";
+import { IDefaultCableProps, TAnimatedPacket } from "@/types/Tcanvas";
 import Packet from "./packet";
-
-const CANVAS_CONTEXT = UltraContext<CanvasContextInterface>({
-    elementApi: null,
-    animationPromise: null,
-    addCableElement: null,
-    createPacketAnimation: async () => {},
-});
-
-export { CANVAS_CONTEXT }
+import { CANVAS_CONTEXT as caCtx } from "@/context/canvas-context";
 
 export function SvgCanvas() {
 
-    const [elementToAdd, setElementToAdd, subscribeToElementToAdd] = ultraState<IDefaultCableProps| null>(null);
+    const [
+        elementToAdd, 
+        setElementToAdd, 
+        subscribeToElementToAdd
+    ] = ultraState<IDefaultCableProps| null>(null);
 
     const component = UltraComponent({
 
-        component: `
+        component: (`
             <svg  
                 id="svg-board" 
                 preserveAspectRatio="none" 
                 width="100%" 
                 height="100%"
             >
-            </svg>`,
+            </svg>
+        `),
 
         eventHandler: { 
             'dragover': (event: Event) => event.preventDefault() 
@@ -43,13 +40,18 @@ export function SvgCanvas() {
 
     })
 
-    function elementsHandler(self: HTMLElement) {
+    function elementsHandler(self: UltraLightElement) {
+        const $svg = self as HTMLElement;
         const element = elementToAdd();
         if (!element) return;
-        self.appendChild?.(DefaultCable(element));
+        $svg.appendChild?.(
+            DefaultCable(element)
+        );
     }
 
-    function addCableElement(element: IDefaultCableProps) {
+    function addCableElement(
+        element: IDefaultCableProps
+    ) {
         setElementToAdd(element);
     }
 
@@ -65,7 +67,7 @@ export function SvgCanvas() {
             Packet({ x1, y1, x2, y2, type: type || "unicast" })
         );
 
-        const promise = CANVAS_CONTEXT.get().animationPromise;
+        const promise = caCtx.get().animationPromise;
 
         if (promise) {
             await promise;
@@ -75,9 +77,9 @@ export function SvgCanvas() {
 
     ultraEffect(() => {
 
-        const currentContext = CANVAS_CONTEXT.get();
+        const currentContext = caCtx.get();
 
-        CANVAS_CONTEXT.set({
+        caCtx.set({
             ...currentContext,
             addCableElement,
             createPacketAnimation

@@ -463,10 +463,12 @@ export interface IUltraSwitchConfig {
 }
 
 //UNION TYPES
+
 /**
  * Devices that only work at layer 2.
  */
 export type TLayer2Config = IUltraSwitchConfig;
+
 /**
  * Devices that work at layer 2 and 3.
  */
