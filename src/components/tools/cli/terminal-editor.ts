@@ -1,15 +1,22 @@
 import { UltraActivity, UltraComponent } from "@ultra-light";
 import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
 import styles from './terminal.module.css';
+import { nano_write } from "@/commands/nano";
 
 export default function TerminalEditor({
     getEditorState,
     setEditorState,
-    subscribeToEditorState
+    subscribeToEditorState,
+    getEditorContent,
+    setEditorContent,
+    subscribeToEditorContent
 }: {
     getEditorState: () => boolean;
     setEditorState: (value: boolean) => void;
     subscribeToEditorState: (fn: (value: boolean) => void) => () => void;
+    getEditorContent: () => string;
+    setEditorContent: (value: string) => void;
+    subscribeToEditorContent: (fn: (value: string) => void) => () => void;
 }) {
 
     function onKeydown(event: Event){
@@ -21,6 +28,7 @@ export default function TerminalEditor({
 
         if (kEvent.ctrlKey && kEvent.key === 's') {
             kEvent.preventDefault();
+            onSave();
             setEditorState(false);
             return;
         }
@@ -100,6 +108,29 @@ export default function TerminalEditor({
         $textArea.setSelectionRange(0, 0);
     }
 
+    function updateEditorContent(self: HTMLElement) {
+        const $textArea = self as HTMLTextAreaElement;
+        $textArea.value = getEditorContent();
+    }
+
+    function onSave(){
+        
+        const elementAPI = tCtx.get().elementAPI;
+        if (!elementAPI) return;
+                
+        nano_write(
+            elementAPI, 
+            tCtx.get().editorPath, 
+            getEditorContent()
+        );
+
+    }
+
+    function onInput(event: Event){
+        const $textArea = event.target as HTMLTextAreaElement;
+        setEditorContent($textArea.value);
+    }
+
     return UltraActivity({
 
         mode: {
@@ -123,9 +154,13 @@ export default function TerminalEditor({
                     'mouseup': event => event.stopPropagation(),
                     'click': event => event.stopPropagation(),
                     'dragstart': event => event.stopPropagation(),
-                    'keydown': onKeydown
+                    'keydown': onKeydown,
+                    'input': onInput
                 },
-                trigger: [{ subscriber: tCtx.subscribe, triggerFunction: onContextChange }]
+                trigger: [
+                    { subscriber: tCtx.subscribe, triggerFunction: onContextChange },
+                    { subscriber: subscribeToEditorContent, triggerFunction: updateEditorContent }
+                ]
             }),
 
             UltraComponent({

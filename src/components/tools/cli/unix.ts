@@ -5,6 +5,7 @@ import { command_cd } from "@/commands/cd";
 import { command_ip }from "@/commands/ip";
 import { command_ping } from "@/commands/ping";
 import { command_history } from "@/commands/history";
+import { command_nano } from "@/commands/nano";
 
 /**
  * Compiles, interprets and executes a terminal command
@@ -22,7 +23,8 @@ export default function unix() {
         "cd": () => command_cd(),
         "ip": () => command_ip(),
         "ping": () => command_ping(),
-        "history": () => command_history()
+        "history": () => command_history(),
+        "nano": () => command_nano()
     }
 
     if (Object.hasOwn(unixMap, keyWord)) {

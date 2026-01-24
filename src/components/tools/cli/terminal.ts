@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, ultraEffect, ultraState } from "@ultra-light";
+import { UltraActivity, UltraComponent, ultraState } from "@ultra-light";
 import TerminalEditor from "./terminal-editor";
 import { TERMINAL_CONTEXT as tCtx } from "../../../context/terminal-context";
 import MenuFrame from "@/components/menus/menu-frame";
@@ -12,6 +12,7 @@ export default function Terminal() {
 
     const [prevIsVisible, setPrevIsVisible,] = ultraState(tCtx.get().isVisible);
     const [getEditorState, setEditorState, subscribeToEditorState] = ultraState(false);
+    const [getEditorContent, setEditorContent, subscribeToEditorContent] = ultraState('');
 
     function onKeydown(event: Event) {
 
@@ -26,6 +27,7 @@ export default function Terminal() {
             });
         }
 
+        //clear terminal and stop loops
         if (keydownEvent.ctrlKey && keydownEvent.key === "c") {
             keydownEvent.preventDefault();
             clearLoop();
@@ -36,6 +38,7 @@ export default function Terminal() {
             return;
         }
 
+        //exit
         if (keydownEvent.key === "Escape") {
             keydownEvent.preventDefault();
             clearLoop();
@@ -46,6 +49,7 @@ export default function Terminal() {
             return;
         }
 
+        //command history controls
         if (keydownEvent.key === "ArrowUp") {
 
             keydownEvent.preventDefault();
@@ -85,6 +89,7 @@ export default function Terminal() {
 
         }
 
+        //execute command
         if (keydownEvent.key === "Enter") {
 
             tCtx.get()
@@ -106,6 +111,7 @@ export default function Terminal() {
             });
 
         }
+
 
     }
 
@@ -152,15 +158,21 @@ export default function Terminal() {
         });
     }
 
-    const effectCleaner = ultraEffect(() => {
+    function openEditor(content: string){
+        setEditorState(true);
+        setEditorContent(content);
+    }
 
-        tCtx.set({
-            ...tCtx.get(),
-            openEditor: () => setEditorState(true),
-            closeEditor: () => setEditorState(false)
-        })
+    function closeEditor(){
+        setEditorState(false);
+        setEditorContent('');
+    }
 
-    }, [])
+    tCtx.set({
+        ...tCtx.get(),
+        openEditor,
+        closeEditor,
+    })
 
     return UltraComponent({
 
@@ -190,7 +202,10 @@ export default function Terminal() {
                     component: '<p></p>',
                     children: [
                         TerminalPrompt(),
-                        TerminalInput()
+                        TerminalInput(
+                            getEditorState,
+                            subscribeToEditorState
+                        )
                     ]
                 })
 
@@ -211,6 +226,9 @@ export default function Terminal() {
                 getEditorState,
                 setEditorState,
                 subscribeToEditorState,
+                getEditorContent,
+                setEditorContent,
+                subscribeToEditorContent,
             })
 
         ],
@@ -223,8 +241,6 @@ export default function Terminal() {
         trigger: [
             { subscriber: tCtx.subscribe, triggerFunction: onContextChange }
         ],
-
-        cleanup: [effectCleaner]
 
     });
 

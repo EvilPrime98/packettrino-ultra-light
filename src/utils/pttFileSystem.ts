@@ -99,11 +99,15 @@ export class pttFileSystem {
 
     }
 
-    write(
-        fileName: string,
-        directoryPath: string[],
-        content: string
-    ): void {
+    write({
+        fileName,
+        directoryPath,
+        content,
+    }: {
+        fileName: string;
+        directoryPath: string[];
+        content: IPTTFile;
+    }): void {
 
         let currentDirectory: IPTTFolder = this.structure;
 

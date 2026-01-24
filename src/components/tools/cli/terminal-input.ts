@@ -6,7 +6,10 @@ import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
  * It listens to the context changes and updates the input value accordingly.
  * @returns 
  */
-export default function TerminalInput() {
+export default function TerminalInput(
+    getEditorState: () => boolean,
+    subscribeToEditorState: (fn: (value: boolean) => void) => () => void
+) {
 
     const onInput = (event: Event) => {
         if (tCtx.get().isVisible === false) return;
@@ -18,6 +21,17 @@ export default function TerminalInput() {
 
     const onContextChange = (self: HTMLElement) => {
         if (tCtx.get().isVisible === false) return;
+        const $input = self as HTMLInputElement;
+        $input.value = tCtx.get().input;
+        $input.focus();
+        $input.setSelectionRange(
+            $input.value.length,
+            $input.value.length
+        );
+    }
+
+    function onEditorStateChange(self: HTMLElement) {
+        if (getEditorState() === true) return;
         const $input = self as HTMLInputElement;
         $input.value = tCtx.get().input;
         $input.focus();
@@ -42,7 +56,17 @@ export default function TerminalInput() {
         eventHandler: { 'input': onInput },
 
         trigger: [
-            { subscriber: tCtx.subscribe, triggerFunction: onContextChange },
+
+            { 
+                subscriber: tCtx.subscribe, 
+                triggerFunction: onContextChange 
+            },
+
+            {   
+                subscriber: subscribeToEditorState, 
+                triggerFunction: onEditorStateChange, 
+                defer: true 
+            }
         ]
 
     })
