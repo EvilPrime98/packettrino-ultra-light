@@ -8,6 +8,8 @@ import {
 
 type lsOptions = {
     recursive?: boolean;
+    long?: boolean;
+    dir?: string[];
 }
 
 export type IPTTFile = string;
@@ -24,18 +26,41 @@ export class pttFileSystem {
         this.structure = structure['/'];
     }
 
-    getPWD(): IPTTFolder {
-        let currentDirectory: IPTTFile | IPTTFolder = this.structure;
-        const $PWD = TERMINAL_CONTEXT.get().pwd;
-        for (let i = 0; i < $PWD.length; i++) {
-            currentDirectory = (currentDirectory as IPTTFolder)[$PWD[i]];
+    /**
+     * Takes an absolute path and returns the directory at that path.
+     * @param absPath An array of strings representing the absolute path to a certain directory.
+     * @returns 
+     */
+    private goTo(
+        absPath: string[]
+    ) {
+        let currentDirectory: IPTTFile | IPTTFolder = structuredClone(this.structure);
+        for (const dir of absPath) {
+            currentDirectory = (currentDirectory as IPTTFolder)[dir];
+            if (currentDirectory === undefined) throw new DirectoryDoesNotExistError(dir);
+            if (!(currentDirectory instanceof Object)) throw new DirectoryIsNotADirectoryError(dir);
         }
         return currentDirectory as IPTTFolder;
     }
 
-    ls({ recursive }: lsOptions ) {
+    /**
+     * Returns a list of files and directories in the current directory, or in a specified directory.
+     * @param {lsOptions} options
+     * @param {boolean} options.recursive Recursively lists subdirectories.
+     * @param {boolean} options.long Long format.
+     * @param {Array<string>} options.dir Optional directory in absolute path format to list.
+     * @returns 
+     */
+    ls({ 
+        recursive, 
+        long,
+        dir
+    }: lsOptions = {}): string {
 
-        const currentDirectory = this.getPWD();
+        const currentDirectory = (!dir || dir?.length === 0) 
+        ? this.goTo(TERMINAL_CONTEXT.get().pwd) 
+        : this.goTo(dir);
+
         const isRecursive = recursive;
         const output: string[] = [];
 
@@ -56,7 +81,7 @@ export class pttFileSystem {
             }
         }
 
-        return (isRecursive) ? output.join("\n") : output.join(" ");
+        return (long) ? output.join("\n") : output.join(" ");
 
     }
 
