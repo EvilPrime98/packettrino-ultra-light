@@ -1,24 +1,31 @@
 import { pttFileSystem } from "@/utils/pttFileSystem";
 import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
-import { IllegalArgumentError } from "@/errors";
+import { catchopts } from "@/utils/network_lib";
+import pathBuilder from "@/utils/pathBuilder";
+
 
 export function command_ls(): void {
+
+    const legalOptions = ["-l", "-R"];
 
     try {
 
         const elementProperties = tCtx.get().elementAPI?.properties();
         if (!elementProperties) return;
-        
-        const args = (tCtx.get().input).trim().split(" ").slice(1);
 
-        for (const arg of args) {
-            const validArgs = ["-l", "-R"];
-            if (!validArgs.includes(arg)) throw new IllegalArgumentError(`Illegal option: ${arg}`);
-        }
+        const tokens = tCtx.get().input.trim().replace(/\s+/, ' ').split(' ');
+        
+        const $OPTS = catchopts(
+            legalOptions,
+            tokens
+        );
 
         const fs = new pttFileSystem(elementProperties.filesystem);
+        
         const lsResult = fs.ls({
-            recursive: args.includes("-R")
+            recursive: Object.hasOwn($OPTS, "-R"),
+            long: Object.hasOwn($OPTS, "-l"),
+            dir: pathBuilder(tokens.slice($OPTS.IND+1)[0])
         });
 
         tCtx.get().write(
