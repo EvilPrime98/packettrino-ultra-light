@@ -27,7 +27,7 @@ export type {
 
 const SVG_EXCLUSIVE_TAGS = new Set([
     'svg', 'circle', 'ellipse', 'line', 'polygon', 'polyline', 'rect', 'path', 'g',
-    'defs', 'symbol', 'use', 'marker', 'clipPath', 'mask', 'pattern',
+    'defs', 'symbol', 'use', 'marker', 'clipPath', 'mask', 'pattern', 'title', 'text', 'tspan',
     'linearGradient', 'radialGradient', 'meshGradient', 'stop', 'hatch', 'hatchpath',
     'animate', 'animateMotion', 'animateTransform', 'set', 'animateColor', 'mpath',
     'filter', 'feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite',
