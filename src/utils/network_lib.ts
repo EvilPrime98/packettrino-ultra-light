@@ -230,7 +230,7 @@ export function getopts(
                 i++;
             }
         } else {
-            throw new Error(`Opción no reconocida: ${evSplit[i]}`);
+            throw new Error(`Invalid option: ${evSplit[i]}`);
         }
     }
 
@@ -241,9 +241,11 @@ export function getopts(
 /**
  * Parses command-line style arguments with options. Throws error if option is not recognized.
  * @param options Array of option strings (use ":" suffix for options that require values)
- * @param args Array of arguments to parse (typically process.argv or similar)
+ * @param args Array of arguments to parse, including the command itself.
  * @returns Object with parsed options and IND property indicating last processed index
  * @throws Error if option is not recognized
+ * @example
+ * const $OPTS = catchopts(["-l", "-R"], "ls -l /home/user/file.txt".split(" "));
  */
 export function catchopts(options: string[], args: string[]): {
     [key: string]: string | number;

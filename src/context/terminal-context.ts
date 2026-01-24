@@ -123,7 +123,7 @@ const TERMINAL_CONTEXT = UltraContext<TerminalContextInterface>({
   elementAPI: null,
   input: "",
   output: "",
-  user: "root@",
+  user: "root",
   host: "",
   delimiter: "#",
   loopId: null,
