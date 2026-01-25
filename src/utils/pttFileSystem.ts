@@ -5,6 +5,7 @@ import {
     FileDoesNotExistError, 
     FileIsNotAFileError 
 } from "@/errors";
+import { printcol } from "./prints";
 
 type lsOptions = {
     recursive?: boolean;
@@ -44,6 +45,37 @@ export class pttFileSystem {
     }
 
     /**
+     * Returns the size of a file or directory in bytes.
+     * @param ref 
+     * @returns 
+     */
+    private getFileSize(
+        ref: IPTTFile | IPTTFolder
+    ){
+        if (ref instanceof Object) return 0;
+        return ref.length * 2;
+    }
+
+    /**
+     * Returns the long information of a file or directory.
+     * @param ref 
+     * @param index 
+     * @returns 
+     */
+    private getLongInformation(
+        ref: IPTTFile | IPTTFolder,
+        index: string
+    ){
+        const isDirectory = ref instanceof Object;
+        const permissions = `${(isDirectory) ? 'd' : '-'}rw-r--r--`;
+        const user  = TERMINAL_CONTEXT.get().user;
+        const group = TERMINAL_CONTEXT.get().user;
+        const size = this.getFileSize(ref).toString();
+        //const lastModified = '2022-01-01'; // TODO: get last modified date
+        return printcol(5, permissions, user, group, size, index);
+    }
+
+    /**
      * Returns a list of files and directories in the current directory, or in a specified directory.
      * @param {lsOptions} options
      * @param {boolean} options.recursive Recursively lists subdirectories.
@@ -64,27 +96,42 @@ export class pttFileSystem {
         const isRecursive = recursive;
         const output: string[] = [];
 
-        recursiveSearch(currentDirectory, "");
-
-        function recursiveSearch(
-            objt: IPTTFolder,
+        const recursiveSearch = (
+            dir: IPTTFolder,
             currentPath: string
-        ) {
+        ) => {
 
-            for (const key in objt) {
-                if (objt[key] instanceof Object) {
-                    output.push(`${currentPath}/${key}`);
-                    if (isRecursive) recursiveSearch(objt[key], `${currentPath}/${key}`);
+            for (const index in dir) {   
+                if (dir[index] instanceof Object) {
+                    if (long) {
+                        output.push(this.getLongInformation(dir[index], index));
+                    }else {
+                        output.push(`${currentPath}/${index}`);
+                    }
+                    if (isRecursive) recursiveSearch(dir[index], `${currentPath}/${index}`);
                 } else {
-                    output.push(`${currentPath}/${key}`);
+                    if (long) {
+                        output.push(this.getLongInformation(dir[index], index));
+                    }else {
+                        output.push(`${currentPath}/${index}`);
+                    }
                 }
             }
-        }
+        };
 
-        return (long) ? output.join("\n") : output.join(" ");
+        recursiveSearch(currentDirectory, "");
+
+        return output.join("\n");
 
     }
 
+    /**
+     * Changes the current working directory.
+     * @param directoryPath An array of strings representing the absolute path to the directory to change to.
+     * @returns The new current working directory. 
+     * @throws DirectoryDoesNotExistError
+     * @throws DirectoryIsNotADirectoryError
+     */
     cd(directoryPath: string[]) {
 
         let currentDirectory: IPTTFile | IPTTFolder = this.structure;
@@ -104,6 +151,12 @@ export class pttFileSystem {
 
     }
 
+    /**
+     * Reads a file from the file system.
+     * @param fileName A string representing the name of the file to read.
+     * @param directoryPath An array of strings representing the absolute path to the directory containing the file.
+     * @returns 
+     */
     read(
         fileName: string,
         directoryPath: string[]
@@ -124,6 +177,13 @@ export class pttFileSystem {
 
     }
 
+    /**
+     * Writes a file to the file system.
+     * @param param0 
+     * @returns
+     * @throws FileDoesNotExistError
+     * @throws FileIsNotAFileError
+     */
     write({
         fileName,
         directoryPath,
