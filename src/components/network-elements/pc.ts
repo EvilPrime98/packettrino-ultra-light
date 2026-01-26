@@ -3,7 +3,7 @@ import { ARPTable } from "../tables/arp_tab";
 import { AdvancedOptions } from "@components/core/adv-options";
 import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
-import ultraPcConfig from "@/hooks/ultraPcConfig"; 
+import ultraPcConfig from "@/hooks/ultraPcConfig";
 import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
 import { IUltraPcConfig, TNewNetworkElementProperties } from "@/types/TConfig";
@@ -25,10 +25,10 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
         { message: "Delete", callback: () => setIsDeleting(true) }
     ]
 
-    function canConnect(){
+    function canConnect() {
         const ifaces = pcAPI.getIfaces();
         const numofInterfaces = Object.keys(ifaces).length;
-        const numofConnections = Object.keys(ifaces).filter(ifaceId => 
+        const numofConnections = Object.keys(ifaces).filter(ifaceId =>
             ifaces[ifaceId].connection.api !== null
         ).length;
         return numofConnections < numofInterfaces;
@@ -47,7 +47,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
     }
 
     function onClick() {
-        
+
         if (ENV.get().quickPingMode === true) {
             setPacketState(true);
             quick_ping(pcAPI, () => {
@@ -63,10 +63,10 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
             "isVisible": true,
             "pcElementAPI": pcAPI
         })
-        
+
     }
 
-    function onRightClick(event: Event){
+    function onRightClick(event: Event) {
         event.preventDefault();
         setContextClickEvent(event);
         setAdvOptionsState(!advOptionsState());
@@ -105,28 +105,26 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
         icon.classList.toggle(styles['clickable'], canConnect());
     }
 
-    return (
+    return UltraComponent({
 
-        UltraComponent({
+        component: (
+            `<article
+                id="${id}"
+                class="item-dropped pc ${styles["pc-animated"]}"
+            >
+            </article>`
+        ),
 
-            component:(
-                `<article
-                    id="${id}"
-                    class="item-dropped pc ${styles["pc-animated"]}"
-                >
-                </article>`
-            ),
+        styles: {
+            left: `${x}px`,
+            top: `${y}px`
+        },
 
-            styles: {
-                left: `${x}px`,
-                top: `${y}px`
-            },
+        children: [
 
-            children: [
+            UltraComponent({
 
-                UltraComponent({
-
-                    component: (`
+                component: (`
                         <img 
                             src="./assets/board/pc.svg"
                             alt="pc"
@@ -135,79 +133,77 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
                         />
                     `),
 
-                    trigger: [
-                        { 
-                            subscriber: pcAPI.subscribeToIfaces, 
-                            triggerFunction: onIfaceChanges 
-                        }
-                    ]
-
-                }),
-                
-                UltraActivity({
-                    
-                    component: ARPTable({ 
-                        onClose: () => setArpTableState(false),
-                        arpCache: pcAPI.getARPCache,
-                        arpSubscriber: pcAPI.subscribeToArpCache,
-                    }),
-
-                    mode: {
-                        state: arpTableState,
-                        subscriber: subscribeArpTableState
+                trigger: [
+                    {
+                        subscriber: pcAPI.subscribeToIfaces,
+                        triggerFunction: onIfaceChanges
                     }
+                ]
 
+            }),
+
+            UltraActivity({
+
+                component: ARPTable({
+                    onClose: () => setArpTableState(false),
+                    arpCache: pcAPI.getARPCache,
+                    arpSubscriber: pcAPI.subscribeToArpCache,
                 }),
 
-                UltraActivity({
-                    
-                    component: AdvancedOptions({
-                        onClose: () => setAdvOptionsState(false),
-                        contextClickEvent,
-                        options: [...options],
-                        subscribeAdvOptionsState
-                    }),
+                mode: {
+                    state: arpTableState,
+                    subscriber: subscribeArpTableState
+                }
 
-                    mode: {
-                        state: advOptionsState,
-                        subscriber: subscribeAdvOptionsState
-                    }
+            }),
 
+            UltraActivity({
+
+                component: AdvancedOptions({
+                    onClose: () => setAdvOptionsState(false),
+                    contextClickEvent,
+                    options: [...options],
+                    subscribeAdvOptionsState
                 }),
 
-                UltraActivity({
+                mode: {
+                    state: advOptionsState,
+                    subscriber: subscribeAdvOptionsState
+                }
 
-                    component: (`
+            }),
+
+            UltraActivity({
+
+                component: (`
                         <img 
                             src="/assets/packets/unicast.png"
                             class=${styles['packet-animation']}
                         />
                     `),
 
-                    mode: {
-                        state: packetState,
-                        subscriber: subscribePacketState
-                    }
-
-                })
-
-            ],
-
-            eventHandler: {
-                'contextmenu': onRightClick,
-                'click': onClick,
-                'dragstart': onDragStart
-            },
-
-            trigger: [
-                { 
-                    subscriber: subscribeIsDeleting, 
-                    triggerFunction: onDelete 
+                mode: {
+                    state: packetState,
+                    subscriber: subscribePacketState
                 }
-            ]
 
-        })
+            })
 
-    )
+        ],
+
+        eventHandler: {
+            'contextmenu': onRightClick,
+            'click': onClick,
+            'dragstart': onDragStart
+        },
+
+        trigger: [
+            {
+                subscriber: subscribeIsDeleting,
+                triggerFunction: onDelete
+            }
+        ]
+
+    })
 
 }

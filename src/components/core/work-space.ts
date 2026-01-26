@@ -4,7 +4,7 @@ import { TElementCoordinates, TCreatableElement } from "@/types/TWorkSpace";
 import { createElementMap, getNextElementId } from "@/utils/component";
 import { SvgCanvas } from "./svg-canvas";
 import { WORK_SPACE_CONTEXT as wCtx, WORK_SPACE_CONTEXT } from "@/context/workspace-context";
-import { TOASTER_CONTEXT as toCtx } from "./toaster";
+import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import styles from './work-space.module.css';
 import { isLayer3, TLayer2Config, TLayer3Config } from "@/types/TConfig";
 

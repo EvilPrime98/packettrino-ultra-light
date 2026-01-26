@@ -1,13 +1,10 @@
-import { UltraComponent, ultraState, UltraContext, ultraEffect } from "@ultra-light";
+import { UltraComponent, ultraState } from "@ultra-light";
 import styles from "./toaster.module.css";
 import '@assets/error.svg';
 import CheckMarkIcon from "../icons/check-mark-icon";
 import CrossIcon from "../icons/cross-icon";
-import { IToasterContext, ToasterProperties, TToasterNotification } from "@/types/types";
-
-export const TOASTER_CONTEXT = UltraContext<IToasterContext>({
-    createNotification: () => {}
-});
+import { ToasterProperties, TToasterNotification } from "@/types/types";
+import { TOASTER_CONTEXT } from "@/context/toaster-context";
 
 const TOAST_ICONS = {
     success: CheckMarkIcon({}),
@@ -29,7 +26,7 @@ export function Toaster() {
     const icon = TOAST_ICONS[properties().type] || TOAST_ICONS.info;
     const initialClass = `${styles['toaster-container']} ${(properties().isVisible) ? '' : styles['hidden']}`;
 
-    const toasterTrigger = (self: HTMLElement) => {
+    function toasterTrigger(self: HTMLElement) {
 
         if (!properties().isVisible || isLoading()) return;
 
@@ -51,7 +48,10 @@ export function Toaster() {
 
     }
 
-    const createNotification = (message: string, type: TToasterNotification ) => {
+    function createNotification(
+        message: string | number, 
+        type: TToasterNotification 
+    ) {
 
         const newState: ToasterProperties = {
             ...properties(),
@@ -64,13 +64,11 @@ export function Toaster() {
 
     }
 
-    ultraEffect(() => {
 
-        TOASTER_CONTEXT.set({
-            createNotification
-        })
+    TOASTER_CONTEXT.set({
+        createNotification
+    })
 
-    }, [])
 
     return UltraComponent({
 
@@ -97,7 +95,7 @@ export function Toaster() {
                         component: `<div class="${styles['toast-message']}">${properties().message}</div>`,
                         trigger: [{
                             subscriber: subscribeToProperties, triggerFunction: (self: HTMLElement) => {
-                                self.innerHTML = properties().message;
+                                self.innerHTML = properties().message.toString();
                             }
                         }]
                     })

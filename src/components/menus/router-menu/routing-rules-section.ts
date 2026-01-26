@@ -2,7 +2,7 @@ import { IRoutingRule } from "@/types/TConfig";
 import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
 import styles from './router-menu.module.css';
 import { ip_route } from "@/services/routing_service";
-import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
+import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
 import { encodeCidr } from "@/utils/network_lib";
 import CrossIcon from "@/components/icons/cross-icon";

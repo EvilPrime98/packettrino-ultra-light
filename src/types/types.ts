@@ -1,22 +1,15 @@
-import { iface, IUltraPcConfig, IUltraRouterConfig } from "./TConfig";
+import type { iface } from "./TConfig";
 
+/**
+ * Type that returns the keys of a type that are writable.
+ */
 export type WritableKeys<T> = {
   [K in keyof T]-?: (<F>() => F extends { [Q in K]: T[K] } ? 1 : 2) extends
     (<F>() => F extends { -readonly [Q in K]: T[K] } ? 1 : 2) ? K : never
 }[keyof T];
 
-export interface IToasterContext {
-  /**
-   * Creates a toaster notification. It can be used to display messages to the user.
-   * @param message Message to be displayed.
-   * @param type It can be 'success', 'error', 'info', or 'warning'.
-   * @returns 
-   */
-  createNotification: (message: string | number, type: TToasterNotification) => void
-}
-
 export type ToasterProperties = {
-  message: string;
+  message: string | number;
   isVisible: boolean;
   type: TToasterNotification;
   timeout: number;
@@ -41,16 +34,6 @@ export type PcMenuInfo = {
   elementId: string;
   ifaces: iface[];
   gateway: string;
-}
-
-export type PcMenuCtx = {
-  isVisible: boolean;
-  pcElementAPI: IUltraPcConfig | null;
-}
-
-export type RouterMenuCtx = {
-  isVisible: boolean;
-  routerElementAPI: IUltraRouterConfig | null;
 }
 
 export type AdvancedOption = {

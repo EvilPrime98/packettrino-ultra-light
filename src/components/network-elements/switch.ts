@@ -3,7 +3,7 @@ import { AdvancedOption, MacRecord } from "@/types/types";
 import { UltraActivity, UltraLightElement, UltraComponent, ultraState } from "@ultra-light";
 import { AdvancedOptions } from "../core/adv-options";
 import ultraSwitchConfig from "@/hooks/ultraSwitchConfig";
-import { TOASTER_CONTEXT as toCtx } from "@/components/core/toaster";
+import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { WORK_SPACE_CONTEXT as wCtx } from "@/context/workspace-context";
 import { IUltraSwitchConfig, TNewNetworkElementProperties } from "@/types/TConfig";
 import { CANVAS_CONTEXT as cCtx } from "@/context/canvas-context"
