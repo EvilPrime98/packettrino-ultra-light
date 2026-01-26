@@ -387,7 +387,8 @@ export function UltraComponent({
     className = [],
     children = [],
     trigger = [],
-    cleanup = []
+    onMount = [],
+    cleanup = [],
 }: {
     /**
      * The parent component to be rendered. It accepts children in plain HTML.
@@ -413,6 +414,10 @@ export function UltraComponent({
      * Array of trigger objects.
      */
     trigger?: UltraTrigger[];
+    /** 
+     * Array of functions that are called inmediately after the component is mounted.
+     */
+    onMount?: ((node: UltraLightElement) => void)[];
     /**
      * Array of cleanup functions.
      */
@@ -469,6 +474,18 @@ export function UltraComponent({
                 cleanupFunctions.push(childElement._cleanup!);
             }
         }
+    });
+
+    //add onMount functions
+
+    onMount.forEach(fn => {
+        requestAnimationFrame(() => {
+            try {
+                fn(node);
+            } catch (error) {
+                console.error('Error while executing onMount function(s):', error);
+            }
+        });
     });
 
     //add cleanup functions for triggers
@@ -530,6 +547,7 @@ export function UltraActivity({
     mode,
     trigger = [],
     type = 'display',
+    onMount = [],
     cleanup = []
 }: {
     /**
@@ -567,6 +585,10 @@ export function UltraActivity({
      * Type of activity (display or visibility). Default is 'display'.
      */
     type?: 'display' | 'visibility';
+    /** 
+     * Array of functions that are called inmediately after the component is mounted.
+     */
+    onMount?: ((node: UltraLightElement) => void)[];
     /**
      * Array of cleanup functions.
      */
@@ -651,6 +673,17 @@ export function UltraActivity({
 
     update();
 
+    // Add onMount functions
+    onMount.forEach(fn => {
+        requestAnimationFrame(() => {
+            try {
+                fn(element);
+            } catch (error) {
+                console.error('Error while executing onMount function(s):', error);
+            }
+        });
+    });
+    
     // Add cleanup functions for triggers
     trigger.forEach(t => {
         const { subscriber, triggerFunction, defer } = t;
