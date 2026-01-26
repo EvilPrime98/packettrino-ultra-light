@@ -1,9 +1,10 @@
 import Pc from "@/components/network-elements/pc";
 import Router from "@/components/network-elements/router";
 import SwitchElement from "@/components/network-elements/switch";
+import DhcpServer from "@/components/network-elements/dhcp-server";
 import TextObject from "@/components/tools/notes/note";
 import { ENV } from "@/context/env-context";
-import { TElementFactory, TElementType } from "@/types/TWorkSpace";
+import { TElementFactory, TCreatableElement } from "@/types/TWorkSpace";
 
 /**
  * Function that creates a filesystem object for any network element.
@@ -55,13 +56,17 @@ export function getNextElementId(itemType: string): string {
  * @param y 
  * @returns 
  */
-export function createElementMap(x: number, y: number): Record<TElementType, TElementFactory> {
+export function createElementMap(
+    x: number, 
+    y: number
+): Record<TCreatableElement, TElementFactory> {
     return (
         {
             "pc": (id) => Pc({ x, y, id }),
             "router": (id) => Router({ x, y, id }),
             "switch": (id) => SwitchElement({ x, y, id }),
-            "note": (id) => TextObject({ id, x, y })
+            "note": (id) => TextObject({ id, x, y }),
+            "dhcp-server": (id) => DhcpServer({ x, y, id })
         }
     );
 }

@@ -8,7 +8,7 @@ export type TElementCoordinates = {
 
 export type TElementFactory = (id: string) => UltraLightElement;
 
-export type TElementType = "pc" | "router" | "switch" | "note" | "dhcp-server";
+export type TCreatableElement = "pc" | "router" | "switch" | "note" | "dhcp-server";
 
 export interface TElementApi {
     config: TLayer2Config | TLayer3Config | null;

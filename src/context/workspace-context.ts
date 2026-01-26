@@ -33,7 +33,8 @@ export type WorkSpaceContextInterface = {
     getCoordinatesByElementId: (elementId: string) => TElementCoordinates | null;
     
     /**
-     * Allows updating the context with a new value.
+     * Updates the context with a new value. Short-hand
+     * for using the setter but allows for partial updates.
      * @param updates
      */
     update(updates: Partial<WorkSpaceContextInterface>): void;

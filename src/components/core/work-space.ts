@@ -1,6 +1,6 @@
 import { UltraComponent, ultraEffect, UltraLightElement, ultraState } from "@ultra-light";
 import { checkObjectClip } from "@utils/checkObjectClip";
-import { TElementCoordinates, TElementType } from "@/types/TWorkSpace";
+import { TElementCoordinates, TCreatableElement } from "@/types/TWorkSpace";
 import { createElementMap, getNextElementId } from "@/utils/component";
 import { SvgCanvas } from "./svg-canvas";
 import { WORK_SPACE_CONTEXT as wCtx, WORK_SPACE_CONTEXT } from "@/context/workspace-context";
@@ -38,7 +38,7 @@ export function WorkSpace() {
     }
 
     const onCreateItem = (
-        itemType: TElementType,
+        itemType: TCreatableElement,
         x: number,
         y: number,
         container: HTMLElement
@@ -100,7 +100,7 @@ export function WorkSpace() {
         }
 
         if (itemData?.state === 'undropped') {
-            const itemType = itemData?.itemType as TElementType;
+            const itemType = itemData?.itemType as TCreatableElement;
             onCreateItem(itemType, x, y, container);
         }
 
