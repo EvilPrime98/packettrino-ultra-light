@@ -132,7 +132,6 @@ const TERMINAL_CONTEXT = UltraContext<TerminalContextInterface>({
   //methods
   update: (updates: Partial<TerminalContextInterface>) => {
     const tCtx = TERMINAL_CONTEXT;
-    if (!tCtx.get().isVisible) return;
     tCtx.set({
       ...tCtx.get(),
       ...updates
