@@ -80,7 +80,7 @@ export function Dhcp_Server_Menu() {
                 children: [
 
                     UltraComponent({
-                        component: `<button type="button">main</button>`,
+                        component: `<button type="button">Main</button>`,
                         className: ['btn-modern-blue', 'selected'],
                         eventHandler: { 'click': () => setPage(pages.main) },
                         trigger: [
