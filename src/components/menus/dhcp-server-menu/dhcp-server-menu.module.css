@@ -42,8 +42,12 @@
 
 .nav-panel {
     padding: 0 0 0 30px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
 }
-
 
 .main-section {
 
