@@ -11,6 +11,7 @@ import PcMenu from "@/components/menus/pc-menu/pc-menu.ts";
 import { RouterMenu } from "@/components/menus/router-menu/router-menu.ts";
 import PacketTracer from "@/components/menus/packet-tracer/packet-tracer.ts";
 import SettingsMenu from "@/components/menus/settings/settings-menu.ts";
+import { Dhcp_Server_Menu } from "./components/menus/dhcp-server-menu/dhcp-server-menu.ts";
 
 export default function App() {
 
@@ -28,6 +29,7 @@ export default function App() {
         WorkSpace(),
         PcMenu(),
         RouterMenu(),
+        Dhcp_Server_Menu(),
         PacketTracer(),
         SettingsMenu(),
         Panel({ isLoaded, subscribeIsLoaded })
