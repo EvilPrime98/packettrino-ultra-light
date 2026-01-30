@@ -6,8 +6,10 @@ import { BasicSection } from "./basic-section";
 import { DhcpOptionsSection } from "./dhcp-options-section";
 import styles from "./dhcp-server-menu.module.css";
 import { ReservationsSection } from "./reservations-section";
+import { MenuTab } from "./tab";
 
 const pages = {
+    network: "network",
     main: "main",
     reservations: "reservations"
 } as const;
@@ -28,21 +30,24 @@ export function Dhcp_Server_Menu() {
         subscribeToPage
     ] = ultraState<TPages>(pages.main);
 
-    function onLoad(){
-        if (!dsCtx.get().isVisible) return;
+    function onLoad($form: UltraLightElement) {
+        if (!dsCtx.get().isVisible) {
+            cleanup($form);
+            return;
+        }
         const serverAPI = dsCtx.get().serverAPI;
         if (!serverAPI) return;
         setTitle(serverAPI.properties().elementId);
     }
 
     function onClose() {
-        cleanup();
         dsCtx.get().update({
             isVisible: false
         })
     }
 
-    function cleanup() {
+    function cleanup($form: UltraLightElement) {
+        ($form as HTMLFormElement).reset();
         setPage(pages.main);
         setTitle('');
     }
@@ -79,36 +84,28 @@ export function Dhcp_Server_Menu() {
 
                 children: [
 
-                    UltraComponent({
-                        component: `<button type="button">Main</button>`,
-                        className: ['btn-modern-blue', 'selected'],
-                        eventHandler: { 'click': () => setPage(pages.main) },
-                        trigger: [
-                            {
-                                subscriber: subscribeToPage,
-                                triggerFunction: (self: UltraLightElement) => {
-                                    self.classList.toggle(
-                                        "selected",
-                                        getPage() === pages.main
-                                    );
-                                }
-                            }
-                        ]
+                    MenuTab({
+                        pageId: pages.main,
+                        selectedClass: 'selected',
+                        onClick: () => setPage(pages.main),
+                        pageSubscriber: subscribeToPage,
+                        getCurrentPage: getPage
                     }),
 
-                    UltraComponent({
-                        component: `<button type="button">Reservations</button>`,
-                        className: ['btn-modern-blue'],
-                        eventHandler: { 'click': () => setPage(pages.reservations) },
-                        trigger: [{
-                            subscriber: subscribeToPage,
-                            triggerFunction: (self: UltraLightElement) => {
-                                self.classList.toggle(
-                                    "selected",
-                                    getPage() === pages.reservations
-                                );
-                            }
-                        }]
+                    MenuTab({
+                        pageId: pages.network,
+                        selectedClass: 'selected',
+                        onClick: () => setPage(pages.network),
+                        pageSubscriber: subscribeToPage,
+                        getCurrentPage: getPage
+                    }),
+
+                    MenuTab({
+                        pageId: pages.reservations,
+                        selectedClass: 'selected',
+                        onClick: () => setPage(pages.reservations),
+                        pageSubscriber: subscribeToPage,
+                        getCurrentPage: getPage
                     })
 
                 ]
@@ -125,7 +122,6 @@ export function Dhcp_Server_Menu() {
                 component: '<section></section>',
                 className: [styles['main-section']],
                 children: [
-                    BasicSection(),
                     DhcpOptionsSection()
                 ]
 
