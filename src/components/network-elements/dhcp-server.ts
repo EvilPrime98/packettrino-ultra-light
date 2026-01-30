@@ -3,32 +3,38 @@ import { ARPTable } from "../tables/arp_tab";
 import { AdvancedOptions } from "@components/core/adv-options";
 import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
-import ultraPcConfig from "@/hooks/ultraPcConfig"; 
+import ultraPcConfig from "@/hooks/ultraPcConfig";
 import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
-import { IUltraPcConfig, TNewNetworkElementProperties } from "@/types/TConfig";
+import { TNewNetworkElementProperties } from "@/types/TConfig";
 import { ENV } from "@/context/env-context";
 import styles from "./pc.module.css";
 import { quick_ping } from "@/utils/quick_ping";
+import ultraDhcpServerConfig from "@/hooks/ultraDHCPServerConfig";
 
 export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
-    const serverAPI: IUltraPcConfig = ultraPcConfig({ id });
+    const serverAPI = { 
+        ...ultraPcConfig({ id }), 
+        ...ultraDhcpServerConfig()
+    };
+    
     const [arpTableState, setArpTableState, subscribeArpTableState] = ultraState(false);
     const [advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
     const [packetState, setPacketState, subscribePacketState] = ultraState(false);
     const [contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
     const [, setIsDeleting, subscribeIsDeleting] = ultraState(false);
+
     const options: AdvancedOption[] = [
         { message: "Show ARP Table", callback: () => setArpTableState(true) },
         { message: "Terminal", callback: showTerminal },
         { message: "Delete", callback: () => setIsDeleting(true) }
     ]
 
-    function canConnect(){
+    function canConnect() {
         const ifaces = serverAPI.getIfaces();
         const numofInterfaces = Object.keys(ifaces).length;
-        const numofConnections = Object.keys(ifaces).filter(ifaceId => 
+        const numofConnections = Object.keys(ifaces).filter(ifaceId =>
             ifaces[ifaceId].connection.api !== null
         ).length;
         return numofConnections < numofInterfaces;
@@ -57,7 +63,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
         })
     }
 
-    function onRightClick(event: Event){
+    function onRightClick(event: Event) {
         event.preventDefault();
         setContextClickEvent(event);
         setAdvOptionsState(!advOptionsState());
@@ -91,28 +97,26 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
         icon.classList.toggle(styles['clickable'], canConnect());
     }
 
-    return (
+    return UltraComponent({
 
-        UltraComponent({
+        component: `<article id="${id}"></article>`,
 
-            component: `<article id="${id}"></article>`,
+        className: [
+            'item-dropped',
+            'dhcp-server',
+            styles['dhcp-server-animated']
+        ],
 
-            className: [
-                'item-dropped',
-                'dhcp-server',
-                styles['dhcp-server-animated']
-            ],
+        styles: {
+            left: `${x}px`,
+            top: `${y}px`
+        },
 
-            styles: {
-                left: `${x}px`,
-                top: `${y}px`
-            },
+        children: [
 
-            children: [
+            UltraComponent({
 
-                UltraComponent({
-
-                    component: (`
+                component: (`
                         <img 
                             src="./assets/board/dhcp.svg"
                             alt="pc"
@@ -121,79 +125,77 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
                         />
                     `),
 
-                    trigger: [
-                        { 
-                            subscriber: serverAPI.subscribeToIfaces, 
-                            triggerFunction: onIfaceChanges 
-                        }
-                    ]
-
-                }),
-                
-                UltraActivity({
-                    
-                    component: ARPTable({ 
-                        onClose: () => setArpTableState(false),
-                        arpCache: serverAPI.getARPCache,
-                        arpSubscriber: serverAPI.subscribeToArpCache,
-                    }),
-
-                    mode: {
-                        state: arpTableState,
-                        subscriber: subscribeArpTableState
+                trigger: [
+                    {
+                        subscriber: serverAPI.subscribeToIfaces,
+                        triggerFunction: onIfaceChanges
                     }
+                ]
 
+            }),
+
+            UltraActivity({
+
+                component: ARPTable({
+                    onClose: () => setArpTableState(false),
+                    arpCache: serverAPI.getARPCache,
+                    arpSubscriber: serverAPI.subscribeToArpCache,
                 }),
 
-                UltraActivity({
-                    
-                    component: AdvancedOptions({
-                        onClose: () => setAdvOptionsState(false),
-                        contextClickEvent,
-                        options: [...options],
-                        subscribeAdvOptionsState
-                    }),
-
-                    mode: {
-                        state: advOptionsState,
-                        subscriber: subscribeAdvOptionsState
-                    }
-
-                }),
-
-                UltraActivity({
-
-                    component: (`
-                        <img 
-                            src="/assets/packets/unicast.png"
-                            class=${styles['packet-animation']}
-                        />
-                    `),
-
-                    mode: {
-                        state: packetState,
-                        subscriber: subscribePacketState
-                    }
-
-                })
-
-            ],
-
-            eventHandler: {
-                'contextmenu': onRightClick,
-                'click': onClick,
-                'dragstart': onDragStart
-            },
-
-            trigger: [
-                { 
-                    subscriber: subscribeIsDeleting, 
-                    triggerFunction: onDelete 
+                mode: {
+                    state: arpTableState,
+                    subscriber: subscribeArpTableState
                 }
-            ]
 
-        })
+            }),
 
-    )
+            UltraActivity({
+
+                component: AdvancedOptions({
+                    onClose: () => setAdvOptionsState(false),
+                    contextClickEvent,
+                    options: [...options],
+                    subscribeAdvOptionsState
+                }),
+
+                mode: {
+                    state: advOptionsState,
+                    subscriber: subscribeAdvOptionsState
+                }
+
+            }),
+
+            UltraActivity({
+
+                component: (`
+                    <img 
+                        src="/assets/packets/unicast.png"
+                        class=${styles['packet-animation']}
+                    />
+                `),
+
+                mode: {
+                    state: packetState,
+                    subscriber: subscribePacketState
+                }
+
+            })
+
+        ],
+
+        eventHandler: {
+            'contextmenu': onRightClick,
+            'click': onClick,
+            'dragstart': onDragStart
+        },
+
+        trigger: [
+            {
+                subscriber: subscribeIsDeleting,
+                triggerFunction: onDelete
+            }
+        ]
+
+    })
 
 }

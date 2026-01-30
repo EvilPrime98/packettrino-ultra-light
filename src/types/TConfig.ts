@@ -272,6 +272,78 @@ export interface IUltraIfaceConfig {
     getAvailableIps: () => string[];
 }
 
+//DHCP SERVER CONFIG
+export type TDhcpServerReservations = {
+    [ip: string]: {
+        mac: string;
+        hostname: string;
+    }
+}
+
+export type TDhcpServerProperties = {
+    /**
+     * The interfaces that the DHCP server will listen on.
+     */
+    listenOnIfaces: string[];
+    /**
+     * The first IP address that the DHCP server will offer.
+     */
+    offerRangeStart: string;
+    /**
+     * The last IP address that the DHCP server will offer.
+     */
+    offerRangeEnd: string;
+    /**
+     * The netmask that the DHCP server will offer.
+     */
+    offerNetmask: string;
+    /**
+     * The gateway that the DHCP server will offer.
+     */
+    offerGateway: string;
+    /**
+     * The DNS server that the DHCP server will offer.
+     */
+    offerDns: string;
+    /**
+     * The lease time that the DHCP server will offer.
+     */
+    offerLeaseTime: number;
+}
+
+export interface IUltraDHCPServerConfig {
+    /**
+     * Returns the properties of the DHCP server.
+     * @returns
+     */
+    getDHCPServerProperties: () => TDhcpServerProperties;
+    /**
+     * Subscriber function for the properties of the DHCP server.
+     * @param fn
+     * @returns
+     */
+    subscribeToDHCPServerProperties: (fn: (value: TDhcpServerProperties) => void) => () => void;
+    /**
+     * Returns the reservations of the DHCP server.
+     * @returns
+     */
+    getDHCPReservations: () => TDhcpServerReservations;
+    /**
+     * Adds a reservation to the DHCP server.
+     * @param ip Ipv4 address of the reservation.
+     * @param mac 48-bit MAC address of the reservation.
+     * @param hostname Hostname of the reservation.
+     * @returns
+     */
+    addDHCPReservation: (ip: string, mac: string, hostname: string) => void;
+    /**
+     * Removes a reservation from the DHCP server.
+     * @param ip Ipv4 address of the reservation.
+     * @returns
+     */
+    removeDHCPReservation: (ip: string) => void;
+}
+
 //PC CONFIG
 export interface IUltraPcConfig extends 
 IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
