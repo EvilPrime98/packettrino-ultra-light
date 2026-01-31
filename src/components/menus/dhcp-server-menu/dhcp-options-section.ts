@@ -5,7 +5,6 @@ import { hasDHCPServer } from "@/types/TConfig";
 import { FormInput } from "@/components/core/form-input";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { iscDhcpServerValidator } from "@/services/isc-dhcp-service";
-import { FormCheckBox } from "@/components/core/form-checkbox";
 
 export function DhcpOptionsSection() {
 
@@ -92,11 +91,12 @@ export function DhcpOptionsSection() {
 
             '<p>DHCP Options</p>',
 
-            FormCheckBox({
+            FormInput({
                 id: "dhcp-state"
+                , type: "checkbox"
                 , name: "dhcp-state"
                 , label: "State:"
-                , subscriber: subscribeToState
+                , changeSubscriber: subscribeToState
                 , getValue: getState
                 , onChange: (event: Event) => {
                     setState((event.target as HTMLInputElement).checked);

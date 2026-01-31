@@ -1,4 +1,4 @@
-import { UltraComponent, UltraLightElement } from "@/ultra-light/ultra-light";
+import { UltraComponent } from "@/ultra-light/ultra-light";
 
 /**
  * Renders a form input element. The default structure is a
@@ -12,9 +12,11 @@ export function FormInput({
     getValue,
     changeSubscriber,
     onInput,
+    onChange,
+    className,
     type,
     label
-}:{
+}: {
     /**
      * Unique identifier of the input.
      */
@@ -26,7 +28,7 @@ export function FormInput({
     /**
      * Stateful function that returns the current value of the input.
      */
-    getValue: () => string | number;
+    getValue: () => string | number | boolean;
     /**
      * Stateful subscriber function that is triggered when the input value changes.
      */
@@ -35,6 +37,14 @@ export function FormInput({
      * Optional event handler for the input element.
      */
     onInput?: (event: Event) => void;
+    /**
+     * Optional event handler for the input element.
+     */
+    onChange?: (event: Event) => void;
+    /**
+     * Optional class names for the input element. These will be applied to the wrapper div.
+     */
+    className?: string[];
     /**
      * Type of the input. Defaults to "text".
      */
@@ -45,36 +55,75 @@ export function FormInput({
     label?: string;
 }) {
 
-    function onChangeTrigger($input: UltraLightElement) {
-        ($input as HTMLInputElement).value = getValue().toString();
-    }
+    if (type === 'checkbox') {
 
-    const eventHandlers = (onInput) ? { 'input': onInput } : {};
-    
-    return UltraComponent({
-        
-        component: '<div></div>',
+        return UltraComponent({
 
-        children: [
-            
-            (label) ? `<label for="${name}">${label}</label>` : null,
+            component: `<div></div>`,
 
-            UltraComponent({
-                
-                component: (`
+            className: (!className) ? [] : className,
+
+            children: [
+
+                (label) ? `<label for="${name}">${label}</label>` : null,
+
+                UltraComponent({
+
+                    component: (`
                     <input 
-                        type="${type || 'text'}"
                         id="${id}" 
                         name="${name}"
+                        type="checkbox" 
+                        class="btn-toggle"
                     />
                 `),
 
-                trigger: [ { subscriber: changeSubscriber, triggerFunction: onChangeTrigger } ]
+                    eventHandler: (onChange) ? { 'change': onChange } : {},
+
+                    trigger: [{ 
+                        subscriber: changeSubscriber, 
+                        triggerFunction: ($input: HTMLElement) => {
+                            ($input as HTMLInputElement).checked = Boolean(getValue());
+                        }
+                    }],
+
+                })
+
+            ]
+
+        })
+
+    }
+
+    return UltraComponent({
+
+        component: '<div></div>',
+
+        children: [
+
+            (label) ? `<label for="${name}">${label}</label>` : null,
+
+            UltraComponent({
+
+                component: (`
+                <input 
+                    type="${type || 'text'}"
+                    id="${id}" 
+                    name="${name}"
+                />
+            `),
+
+                trigger: [{ 
+                    subscriber: changeSubscriber, 
+                    triggerFunction: ($input: HTMLElement) => {
+                        ($input as HTMLInputElement).value = getValue().toString();
+                    }
+                }]
             })
 
         ],
 
-        eventHandler: eventHandlers
+        eventHandler: (onInput) ? { 'input': onInput } : {}
 
     })
 
