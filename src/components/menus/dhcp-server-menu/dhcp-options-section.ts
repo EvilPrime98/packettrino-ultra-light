@@ -1,7 +1,82 @@
-import { UltraComponent } from "@/ultra-light/ultra-light";
+import { UltraComponent, ultraState } from "@/ultra-light/ultra-light";
 import styles from "./dhcp-server-menu.module.css";
+import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
+import { hasDHCPServer } from "@/types/TConfig";
+import { FormInput } from "@/components/core/form-input";
+import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
+import { iscDhcpServerValidator } from "@/services/isc-dhcp-service";
 
 export function DhcpOptionsSection() {
+
+    const [getListenOnInterfaces, setListenOnInterfaces, subscribeToListenOnInterfaces] = ultraState("");
+    const [getRangeStart, setRangeStart, subscribeToRangeStart] = ultraState("");
+    const [getRangeEnd, setRangeEnd, subscribeToRangeEnd] = ultraState("");
+    const [getOfferNetmask, setOfferNetmask, subscribeToOfferNetmask] = ultraState("");
+    const [getOfferGateway, setOfferGateway, subscribeToOfferGateway] = ultraState("");
+    const [getOfferDns, setOfferDns, subscribeToOfferDns] = ultraState("");
+    const [getOfferLeaseTime, setOfferLeaseTime, subscribeToOfferLeaseTime] = ultraState(0);
+
+    function onLoad() {
+        if (!dsCtx.get().isVisible) {
+            onCleanup();
+            return;
+        }
+        const serverAPI = dsCtx.get().serverAPI;
+        if (serverAPI && hasDHCPServer(serverAPI)) {
+            const serverProperties = serverAPI.getDHCPServerProperties();
+            setListenOnInterfaces(serverProperties.listenOnIfaces.join(", "));
+            setRangeStart(serverProperties.offerRangeStart);
+            setRangeEnd(serverProperties.offerRangeEnd);
+            setOfferNetmask(serverProperties.offerNetmask);
+            setOfferGateway(serverProperties.offerGateway);
+            setOfferDns(serverProperties.offerDns);
+            setOfferLeaseTime(serverProperties.offerLeaseTime);
+        }
+    }
+
+    function onCleanup() {
+        setListenOnInterfaces("");
+        setRangeStart("");
+        setRangeEnd("");
+        setOfferNetmask("");
+        setOfferGateway("");
+        setOfferDns("");
+        setOfferLeaseTime(0);
+    }
+
+    function onSave() {
+        const serverAPI = dsCtx.get().serverAPI;
+        if (!serverAPI || !hasDHCPServer(serverAPI)) return;
+        const newProperties = {
+            state: serverAPI.getDHCPServerProperties().state,
+            listenOnIfaces: getListenOnInterfaces().split(",").map(x => x.trim()),
+            offerRangeStart: getRangeStart(),
+            offerRangeEnd: getRangeEnd(),
+            offerNetmask: getOfferNetmask(),
+            offerGateway: getOfferGateway(),
+            offerDns: getOfferDns(),
+            offerLeaseTime: getOfferLeaseTime()
+        }
+        try {
+            iscDhcpServerValidator(
+                serverAPI,
+                newProperties
+            );
+            serverAPI.updateDHCPServerProperties(newProperties);
+            toCtx.get().createNotification(
+                'DHCP Server Options Saved',
+                'success'
+            )
+        } catch (e) {
+            const errorMessage = e instanceof Error
+            ? e.message
+            : 'Error Saving DHCP Server Options';
+            toCtx.get().createNotification(
+                errorMessage,
+                'error'
+            )
+        }
+    }
 
     return UltraComponent({
 
@@ -10,79 +85,96 @@ export function DhcpOptionsSection() {
         className: [styles['dhcp-options-section']],
 
         children: [
-            
+
             '<p>DHCP Options</p>',
 
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="dhcp-listen-on-interfaces">Listen on Interfaces:</label>',
-                    UltraComponent({
-                        component: '<input type="text" id="dhcp-listen-on-interfaces" name="dhcp-listen-on-interfaces">',
-                    })
-                ]
+            FormInput({
+                id: "dhcp-listen-on-interfaces"
+                , name: "dhcp-listen-on-interfaces"
+                , getValue: getListenOnInterfaces
+                , changeSubscriber: subscribeToListenOnInterfaces
+                , onInput: (event: Event) => {
+                    setListenOnInterfaces((event.target as HTMLInputElement).value);
+                }
+                , label: "Listen on Interfaces:"
+            }),
+
+            FormInput({
+                id: "range-start"
+                , name: "range-start"
+                , getValue: getRangeStart
+                , changeSubscriber: subscribeToRangeStart
+                , onInput: (event: Event) => {
+                    setRangeStart((event.target as HTMLInputElement).value);
+                }
+                , label: "Range Start:"
+            }),
+
+            FormInput({
+                id: "range-end"
+                , name: "range-end"
+                , getValue: getRangeEnd
+                , changeSubscriber: subscribeToRangeEnd
+                , onInput: (event: Event) => {
+                    setRangeEnd((event.target as HTMLInputElement).value);
+                }
+                , label: "Range End:"
+            }),
+
+            FormInput({
+                id: "dhcp-offer-netmask"
+                , name: "dhcp-offer-netmask"
+                , getValue: getOfferNetmask
+                , changeSubscriber: subscribeToOfferNetmask
+                , onInput: (event: Event) => {
+                    setOfferNetmask((event.target as HTMLInputElement).value);
+                }
+                , label: "Offer Netmask:"
+            }),
+
+            FormInput({
+                id: "dhcp-offer-gateway"
+                , name: "dhcp-offer-gateway"
+                , getValue: getOfferGateway
+                , changeSubscriber: subscribeToOfferGateway
+                , onInput: (event: Event) => {
+                    setOfferGateway((event.target as HTMLInputElement).value);
+                }
+                , label: "Offer Gateway:"
+            }),
+
+            FormInput({
+                id: "dhcp-offer-dns"
+                , name: "dhcp-offer-dns"
+                , getValue: getOfferDns
+                , changeSubscriber: subscribeToOfferDns
+                , onInput: (event: Event) => {
+                    setOfferDns((event.target as HTMLInputElement).value);
+                }
+                , label: "Offer DNS:"
+            }),
+
+            FormInput({
+                id: "dhcp-offer-lease-time"
+                , name: "dhcp-offer-lease-time"
+                , getValue: getOfferLeaseTime
+                , changeSubscriber: subscribeToOfferLeaseTime
+                , onInput: (event: Event) => {
+                    setOfferLeaseTime(parseInt((event.target as HTMLInputElement).value));
+                }
+                , label: "Offer Lease Time:"
             }),
 
             UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="range-start">Range Start:</label>',
-                    UltraComponent({
-                        component: '<input type="text" id="range-start" name="range-start">',
-                    })
-                ]
-            }),
+                component: '<button type="button">Save</button>',
+                className: ['btn-modern-blue', 'dark'],
+                eventHandler: { click: onSave }
+            })
 
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="range-end">Range End:</label>',
-                    UltraComponent({
-                        component: '<input type="text" id="range-end" name="range-end">',
-                    })
-                ]
-            }),
+        ],
 
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="dhcp-offer-netmask">Offer Netmask:</label>',
-                    UltraComponent({
-                        component: '<input type="text" id="dhcp-offer-netmask" name="dhcp-offer-netmask">',
-                    })
-                ]
-            }),
-
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="dhcp-offer-gateway">Offer Gateway:</label>',
-                    UltraComponent({
-                        component: '<input type="text" id="dhcp-offer-gateway" name="dhcp-offer-gateway">',
-                    })
-                ]
-            }),
-
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="dhcp-offer-dns">Offer DNS:</label>',
-                    UltraComponent({
-                        component: '<input type="text" id="dhcp-offer-dns" name="dhcp-offer-dns">',
-                    })
-                ]
-            }),
-
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="dhcp-offer-lease-time">Offer Lease Time:</label>',
-                    UltraComponent({
-                        component: '<input type="text" id="dhcp-offer-lease-time" name="dhcp-offer-lease-time">',
-                    })
-                ]
-            }),
-            
+        trigger: [
+            { subscriber: dsCtx.subscribe, triggerFunction: onLoad }
         ]
 
     })

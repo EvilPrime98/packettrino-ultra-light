@@ -51,7 +51,7 @@ export function getBroadcast(ip: string, netmask: string) {
  * @param ip 
  * @returns 
  */
-function ipToBinary(ip: string) {
+export function ipToBinary(ip: string) {
     const blocks = ip.split(".");
     const blocksBinary = [];
     for (let i = 0; i < blocks.length; i++) {

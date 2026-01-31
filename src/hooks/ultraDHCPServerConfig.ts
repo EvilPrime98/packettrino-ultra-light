@@ -4,6 +4,7 @@ import type { IUltraDHCPServerConfig, TDhcpServerProperties, TDhcpServerReservat
 export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
 
     const initialProperties: TDhcpServerProperties = {
+        "state": true,
         "listenOnIfaces": ["enp0s3"],
         "offerRangeStart": "192.168.1.100",
         "offerRangeEnd": "192.168.1.150",
@@ -15,7 +16,7 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
     
     const [
         getProperties
-        , 
+        ,setProperties
         ,subscribeToProperties
     ] = ultraState<TDhcpServerProperties>(initialProperties);
 
@@ -43,8 +44,16 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
         setReservations(newReservations);
     }
 
+    function updateProperties(
+        newProperties: Partial<TDhcpServerProperties>
+    ) {
+        const newState = {...getProperties(), ...newProperties };
+        setProperties(newState);
+    }
+
     return {
         getDHCPServerProperties: getProperties,
+        updateDHCPServerProperties: updateProperties,
         subscribeToDHCPServerProperties: subscribeToProperties,
         getDHCPReservations: getReservations,
         addDHCPReservation: addReservation,

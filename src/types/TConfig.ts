@@ -281,6 +281,8 @@ export type TDhcpServerReservations = {
 }
 
 export type TDhcpServerProperties = {
+    /** Whether the DHCP server is enabled or not. */
+    state: boolean;
     /**
      * The interfaces that the DHCP server will listen on.
      */
@@ -317,6 +319,8 @@ export interface IUltraDHCPServerConfig {
      * @returns
      */
     getDHCPServerProperties: () => TDhcpServerProperties;
+    /** Updates the properties of the DHCP server. */
+    updateDHCPServerProperties: (newProperties: Partial<TDhcpServerProperties>) => void;
     /**
      * Subscriber function for the properties of the DHCP server.
      * @param fn
@@ -544,6 +548,7 @@ export type TLayer2Config = IUltraSwitchConfig;
 /**
  * Devices that work at layer 2 and 3.
  */
+
 export type TLayer3Config = IUltraPcConfig | IUltraRouterConfig;
 
 //TYPE GUARDS
@@ -568,4 +573,13 @@ export function isLayer3(
     config: TLayer2Config | TLayer3Config
 ): config is TLayer3Config {
     return 'getIfaces' in config;
+}
+
+/**
+ * Returns true if an element IP has a DHCP server, false otherwise.
+ * @param config 
+ * @returns 
+ */
+export function hasDHCPServer(config: TLayer3Config): config is TLayer3Config & IUltraDHCPServerConfig {
+    return 'getDHCPServerProperties' in config;
 }

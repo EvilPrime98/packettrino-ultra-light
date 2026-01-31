@@ -9,9 +9,10 @@ import { UltraComponent, UltraLightElement } from "@/ultra-light/ultra-light";
 export function FormInput({
     id,
     name,
-    type,
     getValue,
     changeSubscriber,
+    onInput,
+    type,
     label
 }:{
     /**
@@ -25,11 +26,15 @@ export function FormInput({
     /**
      * Stateful function that returns the current value of the input.
      */
-    getValue: () => string;
+    getValue: () => string | number;
     /**
      * Stateful subscriber function that is triggered when the input value changes.
      */
     changeSubscriber: (fn: (value: any) => void) => () => void;
+    /** 
+     * Optional event handler for the input element.
+     */
+    onInput?: (event: Event) => void;
     /**
      * Type of the input. Defaults to "text".
      */
@@ -41,8 +46,10 @@ export function FormInput({
 }) {
 
     function onChangeTrigger($input: UltraLightElement) {
-        ($input as HTMLInputElement).value = getValue();
+        ($input as HTMLInputElement).value = getValue().toString();
     }
+
+    const eventHandlers = (onInput) ? { 'input': onInput } : {};
     
     return UltraComponent({
         
@@ -65,7 +72,9 @@ export function FormInput({
                 trigger: [ { subscriber: changeSubscriber, triggerFunction: onChangeTrigger } ]
             })
 
-        ]
+        ],
+
+        eventHandler: eventHandlers
 
     })
 
