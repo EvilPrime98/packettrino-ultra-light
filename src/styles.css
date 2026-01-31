@@ -290,7 +290,7 @@ img {
     height: 30px;
     background: linear-gradient(135deg, #ff0000, #bd0505);
     position: relative;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     margin: 0px;
     scale: 0.7;

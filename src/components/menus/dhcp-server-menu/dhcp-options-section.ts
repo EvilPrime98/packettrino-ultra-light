@@ -5,9 +5,11 @@ import { hasDHCPServer } from "@/types/TConfig";
 import { FormInput } from "@/components/core/form-input";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { iscDhcpServerValidator } from "@/services/isc-dhcp-service";
+import { FormCheckBox } from "@/components/core/form-checkbox";
 
 export function DhcpOptionsSection() {
 
+    const [getState, setState, subscribeToState] = ultraState(false);
     const [getListenOnInterfaces, setListenOnInterfaces, subscribeToListenOnInterfaces] = ultraState("");
     const [getRangeStart, setRangeStart, subscribeToRangeStart] = ultraState("");
     const [getRangeEnd, setRangeEnd, subscribeToRangeEnd] = ultraState("");
@@ -24,6 +26,7 @@ export function DhcpOptionsSection() {
         const serverAPI = dsCtx.get().serverAPI;
         if (serverAPI && hasDHCPServer(serverAPI)) {
             const serverProperties = serverAPI.getDHCPServerProperties();
+            setState(serverProperties.state);
             setListenOnInterfaces(serverProperties.listenOnIfaces.join(", "));
             setRangeStart(serverProperties.offerRangeStart);
             setRangeEnd(serverProperties.offerRangeEnd);
@@ -35,6 +38,7 @@ export function DhcpOptionsSection() {
     }
 
     function onCleanup() {
+        setState(false);
         setListenOnInterfaces("");
         setRangeStart("");
         setRangeEnd("");
@@ -48,7 +52,7 @@ export function DhcpOptionsSection() {
         const serverAPI = dsCtx.get().serverAPI;
         if (!serverAPI || !hasDHCPServer(serverAPI)) return;
         const newProperties = {
-            state: serverAPI.getDHCPServerProperties().state,
+            state: getState(),
             listenOnIfaces: getListenOnInterfaces().split(",").map(x => x.trim()),
             offerRangeStart: getRangeStart(),
             offerRangeEnd: getRangeEnd(),
@@ -87,6 +91,17 @@ export function DhcpOptionsSection() {
         children: [
 
             '<p>DHCP Options</p>',
+
+            FormCheckBox({
+                id: "dhcp-state"
+                , name: "dhcp-state"
+                , label: "State:"
+                , subscriber: subscribeToState
+                , getValue: getState
+                , onChange: (event: Event) => {
+                    setState((event.target as HTMLInputElement).checked);
+                }
+            }),
 
             FormInput({
                 id: "dhcp-listen-on-interfaces"
