@@ -3,6 +3,7 @@ import { ARPTable } from "../tables/arp_tab";
 import { AdvancedOptions } from "@components/core/adv-options";
 import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
+import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import ultraPcConfig from "@/hooks/ultraPcConfig";
 import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
@@ -26,6 +27,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
     const [, setIsDeleting, subscribeIsDeleting] = ultraState(false);
 
     const options: AdvancedOption[] = [
+        { message: "Network Configuration", callback: onNetworkConfig },
         { message: "Show ARP Table", callback: () => setArpTableState(true) },
         { message: "Terminal", callback: showTerminal },
         { message: "Delete", callback: () => setIsDeleting(true) }
@@ -95,6 +97,14 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
         if (!icon) return;
         icon.draggable = canConnect();
         icon.classList.toggle(styles['clickable'], canConnect());
+    }
+
+    function onNetworkConfig() {
+        if (pmCtx.get()?.isVisible) return;
+        pmCtx.get().update({
+            "isVisible": true,
+            "pcElementAPI": serverAPI
+        })
     }
 
     return UltraComponent({

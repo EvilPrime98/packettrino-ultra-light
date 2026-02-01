@@ -8,7 +8,6 @@ import { ReservationsSection } from "./reservations-section";
 import { MenuTab } from "./tab";
 
 const pages = {
-    network: "network",
     main: "main",
     reservations: "reservations"
 } as const;
@@ -87,14 +86,6 @@ export function Dhcp_Server_Menu() {
                         pageId: pages.main,
                         selectedClass: 'selected',
                         onClick: () => setPage(pages.main),
-                        pageSubscriber: subscribeToPage,
-                        getCurrentPage: getPage
-                    }),
-
-                    MenuTab({
-                        pageId: pages.network,
-                        selectedClass: 'selected',
-                        onClick: () => setPage(pages.network),
                         pageSubscriber: subscribeToPage,
                         getCurrentPage: getPage
                     }),
