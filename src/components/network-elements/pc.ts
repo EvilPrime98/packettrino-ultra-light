@@ -58,8 +58,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
         if (pmCtx.get()?.isVisible) return;
 
-        pmCtx.set({
-            ...pmCtx.get(),
+        pmCtx.get().update({
             "isVisible": true,
             "pcElementAPI": pcAPI
         })

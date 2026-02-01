@@ -56,14 +56,11 @@ export default function PcMenu() {
     }
 
     function onClose() {
-
         onCleanup();
-
-        pmCtx.set({
+        pmCtx.get().update({
             isVisible: false,
             pcElementAPI: null,
         });
-
     }
 
     function onSave() {
