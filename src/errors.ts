@@ -127,3 +127,19 @@ export class FileIsNotAFileError extends Error {
         this.name = "FileIsNotAFileError";
     }
 }
+
+export class InvalidIpv4AddressError extends Error {
+    constructor(ip: string) {
+        const message = `The IP address ${ip} is not a valid IPv4 address.`;
+        super(message);
+        this.name = "InvalidIpv4AddressError";
+    }
+}
+
+export class Invalid48BitMacAddressError extends Error {
+    constructor(mac: string) {
+        const message = `The MAC address ${mac} is not a valid MAC address.`;
+        super(message);
+        this.name = "InvalidMacAddressError";
+    }
+}
