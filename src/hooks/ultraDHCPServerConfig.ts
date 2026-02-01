@@ -1,5 +1,7 @@
 import { ultraState } from "@ultra-light";
 import type { IUltraDHCPServerConfig, TDhcpServerProperties, TDhcpServerReservations } from "@/types/TConfig";
+import { isValidIp, isValidMac } from "@/utils/network_lib";
+import { InvalidIpv4AddressError, Invalid48BitMacAddressError } from '@/errors'
 
 export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
 
@@ -24,15 +26,16 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
         getReservations
         ,setReservations
         ,
-    ] = ultraState<TDhcpServerReservations>({})
+    ] = ultraState<TDhcpServerReservations>({});
 
     function addReservation(
         ip: string,
         mac: string,
-        hostname: string
     ){
+        if (!isValidIp(ip)) throw new InvalidIpv4AddressError(ip);
+        if (!isValidMac(mac)) throw new Invalid48BitMacAddressError(mac);
         const newReservations = {...getReservations() };
-        newReservations[ip] = { mac, hostname };
+        newReservations[ip] = { mac };
         setReservations(newReservations);
     }
 

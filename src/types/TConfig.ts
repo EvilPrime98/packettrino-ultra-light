@@ -276,7 +276,6 @@ export interface IUltraIfaceConfig {
 export type TDhcpServerReservations = {
     [ip: string]: {
         mac: string;
-        hostname: string;
     }
 }
 
@@ -336,10 +335,11 @@ export interface IUltraDHCPServerConfig {
      * Adds a reservation to the DHCP server.
      * @param ip Ipv4 address of the reservation.
      * @param mac 48-bit MAC address of the reservation.
-     * @param hostname Hostname of the reservation.
      * @returns
+     * @throws InvalidIpv4AddressError if the ip is not a valid IPv4 address.
+     * @throws Invalid48BitMacAddressError if the mac is not a valid 48-bit MAC address.
      */
-    addDHCPReservation: (ip: string, mac: string, hostname: string) => void;
+    addDHCPReservation: (ip: string, mac: string) => void;
     /**
      * Removes a reservation from the DHCP server.
      * @param ip Ipv4 address of the reservation.

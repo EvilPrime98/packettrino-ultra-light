@@ -1,10 +1,70 @@
-import { UltraComponent } from "@/ultra-light/ultra-light";
+import { UltraComponent, ultraState } from "@/ultra-light/ultra-light";
 import styles from "./dhcp-server-menu.module.css";
+import { ReservationsTable } from "./reservations-table";
+import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
+import { TDhcpServerReservations } from "@/types/TConfig";
+import { FormInput } from "@/components/core/form-input";
+import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 
 export function ReservationsSection() {
 
+    const [
+        getReservations
+        ,setReservations
+        ,subscribeToReservations
+    ] = ultraState<TDhcpServerReservations>({});
+
+    const [
+        getFields
+        , setFields
+        , subscribeToFields
+    ] = ultraState({
+        mac: "",
+        ip: ""
+    });
+
+    function onLoad() {
+        if (!dsCtx.get().isVisible) {
+            onCleanup();
+            return;
+        }
+        const serverAPI = dsCtx.get().serverAPI;
+        if (!serverAPI) return;
+        const reservations = serverAPI.getDHCPReservations();
+        setReservations(reservations);
+    }
+
     function addReservation() {
-        console.log("add reservation");
+        const { ip, mac } = getFields();
+        if (!ip || !mac) return;
+        const serverAPI = dsCtx.get().serverAPI;
+        if (!serverAPI) return;
+        try {
+            serverAPI.addDHCPReservation(ip, mac);
+            setFields({
+                ip: "",
+                mac: ""
+            });
+            toCtx.get().createNotification(
+                'Reservation added successfully!'
+                , 'success'
+            )
+            setReservations({
+                ...getReservations(),
+                [ip]: { mac }
+            });
+        }catch(e) {
+            toCtx.get().createNotification(
+               (e instanceof Error) 
+               ? e.message
+               : 'Error adding reservation!'
+                , 'error'
+            )
+        }
+    }
+
+    function onCleanup() {
+        setReservations({});
     }
 
     return UltraComponent({
@@ -15,38 +75,34 @@ export function ReservationsSection() {
 
         children: [
 
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="mac-for-reserve">MAC Address:</label>',
-                    UltraComponent({
-                        component: (`
-                            <input 
-                                type="text" 
-                                id="mac-for-reserve" 
-                                name="mac-for-reserve"
-                                pattern="^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})$"
-                            />
-                        `),
+            FormInput({
+                id: "mac-for-reserve"
+                , label: "MAC Address:"
+                , name: "mac-for-reserve"
+                , getValue: () => getFields().mac
+                , changeSubscriber: subscribeToFields
+                , onInput: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    setFields({
+                        ...getFields(),
+                        mac: target.value
                     })
-                ]
+                }
             }),
 
-            UltraComponent({
-                component: '<div></div>',
-                children: [
-                    '<label for="ip-to-reserve">IP Address (IPv4):</label>',
-                    UltraComponent({
-                        component: (`
-                            <input 
-                                type="text" 
-                                id="ip-to-reserve" 
-                                name="ip-to-reserve"
-                                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-                            />
-                        `),
+            FormInput({
+                id: "ip-to-reserve"
+                , label: "IP Address (IPv4):"
+                , name: "ip-to-reserve"
+                , getValue: () => getFields().ip
+                , changeSubscriber: subscribeToFields
+                , onInput: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    setFields({
+                        ...getFields(),
+                        ip: target.value
                     })
-                ]
+                }
             }),
 
             UltraComponent({
@@ -57,23 +113,15 @@ export function ReservationsSection() {
                 }
             }),
 
-            UltraComponent({
-                component: '<div></div>',
-                className: [styles['reservations-table-wrapper']],
-                children: [
-                    UltraComponent({
-                        component: '<table id="reservations-table"></table>',
-                        className: [styles['inner-table']],
-                        children: [
-                            '<thead><tr><th>MAC</th><th>IP</th></tr></thead>',
-                            UltraComponent({
-                                component: '<tbody></tbody>'
-                            })
-                        ]
-                    })
-                ]
+            ReservationsTable({
+                getReservations: getReservations,
+                subscribeToReservations: subscribeToReservations
             })
 
+        ],
+
+        trigger: [
+            { subscriber: dsCtx.subscribe, triggerFunction: onLoad }
         ]
 
     })

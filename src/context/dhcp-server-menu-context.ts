@@ -1,4 +1,4 @@
-import { TLayer3Config } from "@/types/TConfig";
+import { IUltraDHCPServerConfig, TLayer3Config } from "@/types/TConfig";
 import { UltraContext } from "@ultra-light";
 
 export type TDchpServerMenuContext = {
@@ -9,7 +9,7 @@ export type TDchpServerMenuContext = {
   /**
    * Returns the pc element API for the current PC element.
    */
-  serverAPI: TLayer3Config| null;
+  serverAPI: (TLayer3Config & IUltraDHCPServerConfig) | null;
   /**
    * Updates the pc menu context with the provided updates. 
    * It will trigger all subscribers to update their state.
