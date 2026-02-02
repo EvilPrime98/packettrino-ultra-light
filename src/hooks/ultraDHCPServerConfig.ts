@@ -1,11 +1,15 @@
 import { ultraState } from "@ultra-light";
-import type { IUltraDHCPServerConfig, TDhcpServerProperties, TDhcpServerReservations } from "@/types/TConfig";
+import type { IUltraDhcpLease, IUltraDHCPServerConfig, TDhcpServerProperties, TDhcpServerReservations } from "@/types/TConfig";
 import { isValidIp, isValidMac } from "@/utils/network_lib";
 import { InvalidIpv4AddressError, Invalid48BitMacAddressError } from '@/errors'
 
 export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
 
-    const initialProperties: TDhcpServerProperties = {
+    const [
+        getProperties
+        , setProperties
+        , subscribeToProperties
+    ] = ultraState<TDhcpServerProperties>({
         "state": true,
         "listenOnIfaces": ["enp0s3"],
         "offerRangeStart": "192.168.1.100",
@@ -14,27 +18,49 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
         "offerGateway": "192.168.1.1",
         "offerDns": "8.8.8.8",
         "offerLeaseTime": 86400
-    }
-    
+    });
+
     const [
-        getProperties
-        ,setProperties
-        ,subscribeToProperties
-    ] = ultraState<TDhcpServerProperties>(initialProperties);
+        getLeases,
+        setLeases,
+        
+    ] = ultraState<Record<string, IUltraDhcpLease>>({});
 
     const [
         getReservations
-        ,setReservations
+        , setReservations
         ,
     ] = ultraState<TDhcpServerReservations>({});
 
+    let intervalId: NodeJS.Timeout | null = null;
+
+    //private methods
+    function updateLeasesTime(){
+        intervalId = setInterval(() => {
+            const currLeases = {...getLeases()};
+            for (const lease in currLeases) {
+                currLeases[lease].leaseTime -= 1;
+                if (currLeases[lease].leaseTime <= 0) {
+                    delete currLeases[lease];
+                }
+            }
+            setLeases(currLeases);
+            if (Object.keys(currLeases).length === 0 
+            && intervalId !== null) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        }, 1000);
+    }
+
+    //public methods
     function addReservation(
         ip: string,
         mac: string,
-    ){
+    ) {
         if (!isValidIp(ip)) throw new InvalidIpv4AddressError(ip);
         if (!isValidMac(mac)) throw new Invalid48BitMacAddressError(mac);
-        const newReservations = {...getReservations() };
+        const newReservations = { ...getReservations() };
         newReservations[ip] = { mac };
         setReservations(newReservations);
     }
@@ -42,7 +68,7 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
     function removeReservation(
         ip: string
     ) {
-        const newReservations = {...getReservations() };
+        const newReservations = { ...getReservations() };
         delete newReservations[ip];
         setReservations(newReservations);
     }
@@ -50,17 +76,32 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
     function updateProperties(
         newProperties: Partial<TDhcpServerProperties>
     ) {
-        const newState = {...getProperties(), ...newProperties };
+        const newState = { ...getProperties(), ...newProperties };
         setProperties(newState);
     }
 
+    function assignIp(
+        mac: string,
+    ): string | null {
+        const newLeases = {...getLeases()};
+        const ip = '192.168.1.100';
+        newLeases[ip] = {
+            mac,
+            leaseTime: getProperties().offerLeaseTime
+        }
+        setLeases(newLeases);
+        if (intervalId === null) updateLeasesTime();
+        return ip;
+    }
+    
     return {
         getDHCPServerProperties: getProperties,
         updateDHCPServerProperties: updateProperties,
         subscribeToDHCPServerProperties: subscribeToProperties,
         getDHCPReservations: getReservations,
         addDHCPReservation: addReservation,
-        removeDHCPReservation: removeReservation
+        removeDHCPReservation: removeReservation,
+        assignIp
     }
 
 }

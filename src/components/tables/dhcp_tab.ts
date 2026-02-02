@@ -1,23 +1,58 @@
-export function dhcpTable() {
+import { UltraComponent } from "@/ultra-light/ultra-light";
 
-    const $dhcpTable = document.createElement("article");
+export function DhcpLeasesTable({
+    onClose
+}: {
+    onClose: () => void;
+}) {
 
-    $dhcpTable.classList.add("modal-table","dhcp-table");
+    return UltraComponent({
+        
+        component: '<article></article>',
+        
+        className: [
+            'modal-table',
+            'dhcp-table'
+        ],
+        
+        children: [
+            
+            UltraComponent({
+                
+                component: '<table></table>',
+                
+                children: [
+                    
+                    `<thead>
+                        <tr>
+                            <th>IP</th>
+                            <th>MAC</th>
+                            <th>Lease Time</th>
+                        </tr>
+                    </thead>`,
 
-    $dhcpTable.innerHTML = `
-        <table>
-            <tr>
-                <th>IP</th>
-                <th>MAC</th>
-                <th>Host</th>
-                <th>Tiempo de Alquiler</th>
-            </tr>
-        </table>
-        <button onclick="closeObjectModalTable(event, '.dhcp-table')">Cerrar</button>
-    `;
+                    UltraComponent({
+                        component: '<tbody></tbody>',
+                    })
+                ]
 
-    $dhcpTable.setAttribute("onclick", "event.stopPropagation();");
+            }),
 
-    return $dhcpTable;
+            UltraComponent({
+                component: '<button>Close</button>',
+                className: ['close-button'],
+                eventHandler: {
+                    'click': onClose
+                }
+            })
+        ],
+
+        eventHandler: {
+            'click': (event: Event) => {
+                event.stopPropagation();
+            }
+        }
+
+    })
     
 }

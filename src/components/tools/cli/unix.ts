@@ -6,6 +6,7 @@ import { command_ip }from "@/commands/ip";
 import { command_ping } from "@/commands/ping";
 import { command_history } from "@/commands/history";
 import { command_nano } from "@/commands/nano";
+import { command_dhcp } from "@/commands/dhcp";
 
 /**
  * Compiles, interprets and executes a terminal command
@@ -24,7 +25,8 @@ export default function unix() {
         "ip": () => command_ip(),
         "ping": () => command_ping(),
         "history": () => command_history(),
-        "nano": () => command_nano()
+        "nano": () => command_nano(),
+        "dhcp": () => command_dhcp()
     }
 
     if (Object.hasOwn(unixMap, keyWord)) {

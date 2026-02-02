@@ -1,6 +1,6 @@
 import { ultraState } from "@ultra-light";
 import { createFilesystem } from "@/utils/component";
-import { TPcElementProperties, IUltraPcConfig } from "@/types/TConfig";
+import { IUltraPcConfig, TPcElementProperties } from "@/types/TConfig";
 import { Packet } from "@/types/packets";
 import { ENV } from "@/context/env-context";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
@@ -9,9 +9,23 @@ import ultraRoutingConfig from "./ultraRoutingConfig";
 import ultraAnimations from "./ultraAnimations";
 import ultraARPConfig from "./ultraARPConfig";
 import ultraIfaceConfig from "./ultraIfaceConfig";
+import ultraDhcpServerConfig from "./ultraDHCPServerConfig";
 import { routing } from "@/kernel/routing";
 
-export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
+export default function ultraPcConfig({
+    id,
+    dhcpServer
+}: {
+    /**
+     * The unique identifier for the network element.
+     */
+    id: string,
+    /**
+     * Optional parameter to indicate if the network element
+     * should have DHCP server functionality.
+     */
+    dhcpServer?: boolean
+}): IUltraPcConfig {
 
     const initialProperties: TPcElementProperties = {
         "elementId": `${id}`,
@@ -24,10 +38,7 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
     const [buffer, setBuffer, subscribeToBuffer] = ultraState<Packet[]>([]);
     const { visualize } = ultraAnimations();
 
-    const self: IUltraPcConfig = {
-        ...ultraIfaceConfig({ initialIfaces: 1}),
-        ...ultraRoutingConfig(),
-        ...ultraARPConfig(),
+    const self = {
         properties,
         subscribeToProperties,
         replaceProperties,
@@ -36,6 +47,10 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
         currentBuffer: buffer,
         subscribeToBuffer,
         getDefaultGateway,
+        ...ultraIfaceConfig({ initialIfaces: 1 }),
+        ...ultraRoutingConfig(),
+        ...ultraARPConfig(),
+        ...(dhcpServer === true && ultraDhcpServerConfig())
     }
 
     function replaceProperties(newProperties: TPcElementProperties) {
@@ -43,7 +58,7 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
     }
 
     function editProperty(
-        property: keyof TPcElementProperties, 
+        property: keyof TPcElementProperties,
         value: TPcElementProperties[keyof TPcElementProperties]
     ) {
         setProperties({
@@ -61,17 +76,19 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
         return macs;
     }
 
-    function findReceiverInterface(originId: string) {
+    function findReceiverInterface(
+        originId: string
+    ): string | null {
         const ifaces = self.getIfaces();
         for (const ifaceId of Object.keys(ifaces)) {
             const iface = ifaces[ifaceId];
-            if (iface.connection.itemId === originId) return iface;
+            if (iface.connection.itemId === originId) return ifaceId;
         }
         return null;
     }
 
     async function sendPacket(
-        packet: Packet, 
+        packet: Packet,
         originId: string
     ) {
 
@@ -79,36 +96,49 @@ export default function ultraPcConfig({ id }: { id: string }): IUltraPcConfig {
             await visualize(originId, properties().elementId, packet);
         }
 
-        if (ENV.get().trackTraffic === true){
+        if (ENV.get().trackTraffic === true) {
             tmCtx.get().addPacket(packet, originId);
         }
-        
-        const iface = findReceiverInterface(originId);
-        if (!iface) return;
 
-        if (!iface.promiscuousMode) {
+        const receiverIfaceId = findReceiverInterface(originId);
+        if (!receiverIfaceId) return;
+
+        if (!self.getIfaces()[receiverIfaceId].promiscuousMode) {
             const validMacs = [...getAvailableMACAddresses(), 'ff:ff:ff:ff:ff:ff'];
             if (!validMacs.includes(packet.destinationMac)) {
                 return;
             }
         }
 
-        const [replyPacket, wasProcessed] = await packetProcessor(packet, self);
+        const [replyPacket, wasProcessed] = await packetProcessor(
+            packet, 
+            self,
+            receiverIfaceId
+        );
 
         if (wasProcessed) {
             if (wasProcessed) setBuffer([...buffer(), packet]);
-            if (replyPacket) await routing(self, replyPacket);
+            if (replyPacket) {
+                if (replyPacket.destinationIp === '255.255.255.255') {
+                    await self.getIfaces()[receiverIfaceId].connection.api?.sendPacket(
+                        replyPacket, 
+                        self.properties().elementId
+                    );
+                }else {
+                    await routing(self, replyPacket);
+                }
+            }
             return;
         }
 
-        if ( !wasProcessed
-            && !self.getAvailableIps().includes(packet.destinationIp) 
+        if (!wasProcessed
+            && !self.getAvailableIps().includes(packet.destinationIp)
             && self.properties()['ipv4-forwarding'] === true
-        ){
+        ) {
             if (packet.destinationMac === 'ff:ff:ff:ff:ff:ff' || packet.destinationIp === '255.255.255.255') return;
             await routing(self, packet);
         }
-        
+
     }
 
     function getDefaultGateway() {

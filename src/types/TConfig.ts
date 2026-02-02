@@ -346,6 +346,17 @@ export interface IUltraDHCPServerConfig {
      * @returns
      */
     removeDHCPReservation: (ip: string) => void;
+    /**
+     * Assigns an IP address to a MAC address.
+     * @param mac 48-bit MAC address.
+     * @returns
+     */
+    assignIp: (mac: string) => string | null;
+}
+
+export interface IUltraDhcpLease {
+    mac: string;
+    leaseTime: number;
 }
 
 //PC CONFIG

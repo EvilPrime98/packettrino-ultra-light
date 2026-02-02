@@ -175,15 +175,23 @@ export class DhcpOffer extends Packet {
   public readonly dns: IpAddress;
   public readonly leasetime: number;
 
-  constructor(
-    originIp: IpAddress,
-    originMac: MacAddress,
-    serverIp: IpAddress,
-    offerIp: IpAddress,
-    destinationMac: MacAddress,
-    chaddr: MacAddress,
-    options: Required<Omit<DhcpOptions, "hostname">>
-  ) {
+  constructor({
+    originIp,
+    originMac,
+    serverIp,
+    offerIp,
+    destinationMac,
+    chaddr,
+    options,
+  }: {
+    originIp: IpAddress;
+    originMac: MacAddress;
+    serverIp: IpAddress;
+    offerIp: IpAddress;
+    destinationMac: MacAddress;
+    chaddr: MacAddress;
+    options: Required<Omit<DhcpOptions, "hostname">>;
+  }) {
     super({
       originIp,
       destinationIp: "255.255.255.255",
@@ -198,6 +206,7 @@ export class DhcpOffer extends Packet {
     this.dns = options.dns;
     this.leasetime = options.leasetime;
   }
+  
 }
 
 export class DhcpRequest extends Packet {
@@ -218,12 +227,17 @@ export class DhcpRequest extends Packet {
   public readonly netmask: IpAddress = "";
   public readonly dns: IpAddress = "";
 
-  constructor(
-    originMac: MacAddress,
-    requestedIp: IpAddress,
-    serverIp: IpAddress,
-    hostname?: string
-  ) {
+  constructor({
+    originMac,
+    requestedIp,
+    serverIp,
+    hostname
+  }: {
+    originMac: MacAddress;
+    requestedIp: IpAddress;
+    serverIp: IpAddress;
+    hostname?: string;
+  }) {
     super({
       originIp: "0.0.0.0",
       destinationIp: "255.255.255.255",
@@ -235,45 +249,56 @@ export class DhcpRequest extends Packet {
     this.requestedIp = requestedIp;
     this.hostname = hostname;
   }
+
 }
 
 export class DhcpAck extends Packet {
+
   public readonly protocol = "dhcp" as const;
   public readonly transportProtocol = "udp" as const;
   public readonly type: DhcpType = "ack";
   public readonly ttl: number = 64;
   public readonly sport: Port = 67;
   public readonly dport: Port = 68;
-  public readonly ciaddr: IpAddress = "0.0.0.0";
-  public readonly yiaddr: IpAddress;
-  public readonly siaddr: IpAddress;
-  public readonly chaddr: MacAddress = "";
+  public readonly ciaddr: IpAddress = "0.0.0.0"; 
+  public readonly yiaddr: IpAddress;              
+  public readonly siaddr: IpAddress;              
+  public readonly chaddr: MacAddress;             
   public readonly gateway: IpAddress;
   public readonly netmask: IpAddress;
   public readonly dns: IpAddress;
   public readonly hostname?: string;
   public readonly leasetime: number;
-
-  constructor(
-    originMac: MacAddress,
-    assignedIp: IpAddress,
-    serverIp: IpAddress,
-    options: Required<DhcpOptions>
-  ) {
+    
+  constructor({
+    clientMac,
+    assignedIp,
+    serverIp,
+    options
+  }: {
+    clientMac: MacAddress;
+    assignedIp: IpAddress;
+    serverIp: IpAddress;
+    options: Required<DhcpOptions>;
+  }) {
     super({
       originIp: serverIp,
-      destinationIp: "255.255.255.255",
-      originMac,
-      destinationMac: "ff:ff:ff:ff:ff:ff",
+      destinationIp: "255.255.255.255",  
+      originMac: serverIp,                
+      destinationMac: "ff:ff:ff:ff:ff:ff", 
     });
+    
     this.yiaddr = assignedIp;
     this.siaddr = serverIp;
+    this.chaddr = clientMac;
     this.gateway = options.gateway;
     this.netmask = options.netmask;
     this.dns = options.dns;
     this.hostname = options.hostname;
     this.leasetime = options.leasetime;
+
   }
+
 }
 
 export class DhcpRelease extends Packet {
@@ -533,6 +558,42 @@ export function isTcpPacket(packet: Packet): packet is TcpSyn | TcpSynAck | TcpA
 
 export function isHttpPacket(packet: Packet): packet is HttpRequest | HttpReply {
   return packet.protocol === "http";
+}
+
+/**
+ * Returns true if the packet is a DHCP discover, false otherwise.
+ * @param packet 
+ * @returns 
+ */
+export function isDhcpDiscover(packet: Packet): packet is DhcpDiscover {
+  return packet.protocol === 'dhcp' && packet.type === 'discover';
+}
+
+/**
+ * Returns true if the packet is a DHCP offer, false otherwise.
+ * @param packet Packet to be checked.
+ * @returns 
+ */
+export function isDhcpOffer(packet: Packet): packet is DhcpOffer {
+  return packet.protocol === 'dhcp' && packet.type === 'offer';
+}
+
+/**
+ * Returns true if the packet is a DHCP request, false otherwise.
+ * @param packet Packet to be checked.
+ * @returns 
+ */
+export function isDhcpRequest(packet: Packet): packet is DhcpRequest {
+  return packet.protocol === 'dhcp' && packet.type === 'request';
+}
+
+/**
+ * Returns true if the packet is a DHCP request, false otherwise.
+ * @param packet Packet to be checked.
+ * @returns 
+ */
+export function isDhcpAck(packet: Packet): packet is DhcpAck {
+  return packet.protocol === 'dhcp' && packet.type === 'ack';
 }
 
 // ==================== Union Types ====================

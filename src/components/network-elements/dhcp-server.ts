@@ -7,28 +7,58 @@ import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import ultraPcConfig from "@/hooks/ultraPcConfig";
 import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
-import { TNewNetworkElementProperties } from "@/types/TConfig";
+import { hasDHCPServer, TNewNetworkElementProperties } from "@/types/TConfig";
 import { ENV } from "@/context/env-context";
 import styles from "./pc.module.css";
 import { quick_ping } from "@/utils/quick_ping";
-import ultraDhcpServerConfig from "@/hooks/ultraDHCPServerConfig";
+import { DhcpLeasesTable } from "../tables/dhcp_tab";
 
 export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
-    const serverAPI = { 
-        ...ultraPcConfig({ id }), 
-        ...ultraDhcpServerConfig()
-    };
+    const serverAPI = ultraPcConfig({ 
+        id, 
+        dhcpServer: true
+    }); 
     
-    const [arpTableState, setArpTableState, subscribeArpTableState] = ultraState(false);
-    const [advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
-    const [packetState, setPacketState, subscribePacketState] = ultraState(false);
-    const [contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
-    const [, setIsDeleting, subscribeIsDeleting] = ultraState(false);
+    const [
+        arpTableState, 
+        setArpTableState, 
+        subscribeArpTableState
+    ] = ultraState(false);
+    
+    const [
+        advOptionsState, 
+        setAdvOptionsState, 
+        subscribeAdvOptionsState
+    ] = ultraState(false);
+    
+    const [
+        leasesTableState, 
+        setLeasesTableState, 
+        subscribeLeasesTableState
+    ] = ultraState(false);
+    
+    const [
+        packetState, 
+        setPacketState, 
+        subscribePacketState
+    ] = ultraState(false);
+    
+    const [
+        contextClickEvent, 
+        setContextClickEvent,
+    ] = ultraState<null | Event>(null);
+
+    const [
+        , 
+        setIsDeleting, 
+        subscribeIsDeleting
+    ] = ultraState(false);
 
     const options: AdvancedOption[] = [
         { message: "Network Configuration", callback: onNetworkConfig },
-        { message: "Show ARP Table", callback: () => setArpTableState(true) },
+        { message: "Leases Table", callback: () => setLeasesTableState(true) },
+        { message: "ARP Table", callback: () => setArpTableState(true) },
         { message: "Terminal", callback: showTerminal },
         { message: "Delete", callback: () => setIsDeleting(true) }
     ]
@@ -59,6 +89,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
             return;
         }
         if (dsCtx.get()?.isVisible) return;
+        if (!hasDHCPServer(serverAPI)) return;
         dsCtx.get().update({
             "isVisible": true,
             "serverAPI": serverAPI
@@ -172,6 +203,19 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
                     state: advOptionsState,
                     subscriber: subscribeAdvOptionsState
                 }
+
+            }),
+
+            UltraActivity({
+
+                mode: {
+                    state: leasesTableState,
+                    subscriber: subscribeLeasesTableState
+                },
+
+                component: DhcpLeasesTable({
+                    onClose: () => setLeasesTableState(false)
+                })
 
             }),
 

@@ -1,6 +1,7 @@
 import { ArpReply, IcmpEchoReply, Packet } from "@/types/packets";
 import { IUltraPcConfig, IUltraRouterConfig, TLayer3Config } from "@/types/TConfig";
 import { getAvailableIps } from "@/utils/network_lib";
+import { dhcpProcessor } from "@/kernel/dhcp-processor";
 
 /**
  * General processor for packets. It routes the packet to the appropriate processor based on the protocol.
@@ -11,12 +12,14 @@ import { getAvailableIps } from "@/utils/network_lib";
  */
 export async function packetProcessor(
     packet: Packet,
-    elementApi: IUltraPcConfig | IUltraRouterConfig
+    elementApi: IUltraPcConfig | IUltraRouterConfig,
+    receiverIfaceId: string
 ): Promise<[Packet | null, boolean]> { 
 
     const protocolMap: Record<string, () => Promise<[Packet | null, boolean]>> = {
         'arp': async () => arpProcessor(packet, elementApi),
-        'icmp': async () => icmpProcessor(packet, elementApi)
+        'icmp': async () => icmpProcessor(packet, elementApi),
+        'dhcp': async () => dhcpProcessor(packet, elementApi, receiverIfaceId)
     }
 
     if (Object.hasOwn(protocolMap, packet.protocol)) {

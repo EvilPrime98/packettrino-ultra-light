@@ -1,5 +1,7 @@
 import { IUltraDHCPServerConfig, TDhcpServerProperties, TLayer3Config } from "@/types/TConfig";
 import { isValidIp, ipToBinary, getNetwork } from "@/utils/network_lib";
+import { DhcpDiscover, isDhcpAck } from "@/types/packets";
+import { InterfaceDoesNotExistError } from "@/errors";
 
 /**
  * Validator for the configuration of an ISC DHCP server.
@@ -68,5 +70,45 @@ export function iscDhcpServerValidator(
     }
 
     return true;
+
+}
+
+/**
+ * Sends a DHCP discover packet to the netowork.
+ * @param dhcpClientAPI Network element API
+ * @param ifaceId Interface ID
+ * @returns 
+ */
+export async function sendDHCPDiscover(
+    dhcpClientAPI: TLayer3Config,
+    ifaceId: string
+){
+    
+    const ifaces = dhcpClientAPI.getIfaces();
+    const iface = ifaces[ifaceId];
+
+    if (!iface) {
+        throw new InterfaceDoesNotExistError(ifaceId);
+    }
+
+    const packet = new DhcpDiscover(
+        iface.mac,
+    );
+
+    const connectionAPI = iface.connection.api;
+    if (!connectionAPI) return;
+
+    const unsubscribe = dhcpClientAPI.subscribeToBuffer( async () => {
+        const buffer = dhcpClientAPI.currentBuffer();
+        if (buffer.length === 0) return;
+        const lastPacket = buffer[buffer.length - 1];
+        if (!isDhcpAck(lastPacket)) return;
+        unsubscribe();
+    });
+
+    await connectionAPI.sendPacket(
+        packet, 
+        dhcpClientAPI.properties().elementId
+    );
 
 }

@@ -1,5 +1,5 @@
 import { Packet } from "@/types/packets";
-import { IUltraPcConfig, IUltraRouterConfig } from "@/types/TConfig";
+import { TLayer3Config } from "@/types/TConfig";
 import { getNetwork } from "@/utils/network_lib";
 import type { WritableKeys } from "@/types/types";
 import arp from "@services/arp_service";
@@ -11,7 +11,7 @@ import arp from "@services/arp_service";
  * @returns if the packet was routed or discarded
  */
 export async function routing(
-    elementApi: IUltraPcConfig | IUltraRouterConfig,
+    elementApi: TLayer3Config,
     packet: Packet
 ): Promise<boolean> {
 
