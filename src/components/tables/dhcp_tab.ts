@@ -1,6 +1,6 @@
 import { TLayer3Config } from "@/types/TConfig";
 import { hasDHCPServer } from "@/types/typeguards";
-import { UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
+import { UltraComponent, UltraFragment, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
 
 export function DhcpLeasesTable({
     onClose,
@@ -19,42 +19,34 @@ export function DhcpLeasesTable({
     const [,setLeaseIps,] = ultraState<string[]>([]);
     const trackedIps = new Set<string>();
     
-    function onMount($table: UltraLightElement){
-        
+    function onMount(
+        $table: UltraLightElement
+    ){
         if (!hasDHCPServer(serverAPI)) return;
-        
         serverAPI.dhcpserver.subscribeToLeases(() => {
             updateLeases($table);
         });
-
         updateLeases($table);
-
     }
 
-    function updateLeases($tbody: HTMLElement) {
-
+    function updateLeases(
+        $tbody: HTMLElement
+    ) {
         if (!hasDHCPServer(serverAPI)) return;
         const currentLeases = serverAPI.dhcpserver.getLeases();
         const newIps: string[] = [];
-
         for (const ip in currentLeases) {
             if (!trackedIps.has(ip)) {
                 trackedIps.add(ip);
                 newIps.push(ip);
             }
         }
-
         if (newIps.length > 0) {
-            const fragment = document.createDocumentFragment();
-            newIps.forEach(ip => {
-                fragment.appendChild(
-                    DhcpLeasesTableRow({ ip, serverAPI })
-                );
-            });
-            $tbody.appendChild(fragment);
+            $tbody.appendChild(UltraFragment(...newIps.map(ip => 
+                DhcpLeasesTableRow({ ip, serverAPI })))
+            );
             setLeaseIps([...trackedIps]);
         }
-
     };
 
     return UltraComponent({
@@ -124,15 +116,26 @@ function DhcpLeasesTableRow({
         leaseTime: initLeaseTime
     } = serverAPI.dhcpserver.getLeases()[ip];
 
-    const onLeaseTimeChange = ($td: UltraLightElement) => {
+    function updateLeaseTime(
+        $td: UltraLightElement
+    ){
+        if (!hasDHCPServer(serverAPI)) return;
+        const leases = serverAPI.dhcpserver.getLeases();
+        const lease = leases[ip];
+        if (lease) $td.innerText = lease.leaseTime.toString();
+    }
+
+    function checkRow(
+        $tr: UltraLightElement
+    ) {
+        if (!hasDHCPServer(serverAPI)) return;
         const leases = serverAPI.dhcpserver.getLeases();
         const lease = leases[ip];
         if (!lease) {
-            $td._cleanup?.();
-            $td.remove();
+            $tr._cleanup?.();
+            $tr.remove();
             return;
         }
-        $td.innerText = lease.leaseTime.toString();
     }
 
     return UltraComponent({
@@ -153,11 +156,17 @@ function DhcpLeasesTableRow({
                 component: `<td>${initLeaseTime}</td>`,
                 trigger: [{
                     subscriber: serverAPI.dhcpserver.subscribeToLeases,
-                    triggerFunction: onLeaseTimeChange
+                    triggerFunction: updateLeaseTime
                 }]
             })
 
-        ]
+        ],
+
+        trigger: [{
+            subscriber: serverAPI.dhcpserver.subscribeToLeases,
+            triggerFunction: checkRow,
+            defer: true
+        }]
 
     })
 
