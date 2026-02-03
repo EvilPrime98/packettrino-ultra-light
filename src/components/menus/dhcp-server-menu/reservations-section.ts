@@ -2,7 +2,8 @@ import { UltraComponent, ultraState } from "@/ultra-light/ultra-light";
 import styles from "./dhcp-server-menu.module.css";
 import { ReservationsTable } from "./reservations-table";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
-import { hasDHCPServer, TDhcpServerReservations } from "@/types/TConfig";
+import { TDhcpServerReservations } from "@/types/TConfig";
+import { hasDHCPServer } from "@/types/typeguards";
 import { FormInput } from "@/components/core/form-input";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 

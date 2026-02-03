@@ -97,14 +97,12 @@ export type TNewNetworkElementProperties = {
     y: number;
 }
 
-//CABLE CONFIG
 export interface IUltraCableConfig {
     properties: () => ICableElementProperties;
     propertiesSubscriber: (fn: (value: ICableElementProperties) => void) => () => void;
     updatePosition: (newPositions: ICableElementPosition) => void;
 }
 
-//ANIMATIONS
 export interface IUltraAnimations {
     /**
      * Generates an animation for a packet between two elements.
@@ -272,7 +270,6 @@ export interface IUltraIfaceConfig {
     getAvailableIps: () => string[];
 }
 
-//DHCP SERVER CONFIG
 export type TDhcpServerReservations = {
     [ip: string]: {
         mac: string;
@@ -367,7 +364,6 @@ export interface IUltraDhcpLease {
     leaseTime: number;
 }
 
-//DHCP CLIENT CONFIG
 export interface Lease {
     ifaceId: string;
     leasetime: number;
@@ -395,7 +391,6 @@ export interface IUltraDhcpClientConfig {
     subscribeToLeases: (fn: (value: Lease[]) => void) => () => void;
 }
 
-//PC CONFIG
 export interface IUltraPcConfig extends 
 IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
     /**
@@ -446,7 +441,6 @@ IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
     getDefaultGateway: () => string;
 }
 
-//ROUTER CONFIG
 export interface IRouterElementProperties {
     /**
      * The unique identifier of the network element.
@@ -516,7 +510,6 @@ IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
     getDefaultGateway: () => string;
 }
 
-//SWITCH CONFIG
 export interface ISwitchElementProperties {
     elementId: string;
     "connections": TConnection[];
@@ -585,8 +578,6 @@ export interface IUltraSwitchConfig {
     broadcast: (packet: Packet, originId: string) => void;
 }
 
-//UNION TYPES
-
 /**
  * Devices that only work at layer 2.
  */
@@ -595,42 +586,4 @@ export type TLayer2Config = IUltraSwitchConfig;
 /**
  * Devices that work at layer 2 and 3.
  */
-
 export type TLayer3Config = IUltraPcConfig | IUltraRouterConfig;
-
-//TYPE GUARDS
-
-/**
- * Returns true if the config is a layer 2 config, false otherwise.
- * @param config 
- * @returns 
- */
-export function isLayer2(
-    config: TLayer2Config | TLayer3Config
-): config is TLayer2Config {
-    return 'connections' in config.properties();
-}
-
-/**
- * Returns true if the config is a layer 3 config, false otherwise.
- * @param config 
- * @returns 
- */
-export function isLayer3(
-    config: TLayer2Config | TLayer3Config
-): config is TLayer3Config {
-    return 'getIfaces' in config;
-}
-
-/**
- * Returns true if an element IP has a DHCP server, false otherwise.
- * @param config 
- * @returns 
- */
-export function hasDHCPServer(config: TLayer3Config): config is TLayer3Config & Record<"dhcpserver", IUltraDHCPServerConfig> {
-    return 'dhcpserver' in config;
-}
-
-export function hasDHCPClient(config: TLayer3Config): config is TLayer3Config & Record<"dhcpClient", IUltraDhcpClientConfig> {
-    return 'dhcpClient' in config;
-}

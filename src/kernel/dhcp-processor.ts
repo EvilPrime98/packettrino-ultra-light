@@ -1,6 +1,7 @@
 import { DhcpAck, DhcpRequest, isDhcpAck, isDhcpDiscover, isDhcpOffer, isDhcpRequest, type Packet } from "@/types/packets";
 import { DhcpOffer } from "@/types/packets";
-import { hasDHCPClient, hasDHCPServer, type TLayer3Config } from "@/types/TConfig";
+import { type TLayer3Config } from "@/types/TConfig";
+import { hasDHCPServer, hasDHCPClient } from "@/types/typeguards";
 
 export function dhcpProcessor(
     packet: Packet,
