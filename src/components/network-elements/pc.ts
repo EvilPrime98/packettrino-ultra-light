@@ -6,19 +6,47 @@ import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import ultraPcConfig from "@/hooks/ultraPcConfig";
 import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
-import { IUltraPcConfig, TNewNetworkElementProperties } from "@/types/TConfig";
+import { TNewNetworkElementProperties } from "@/types/TConfig";
 import { ENV } from "@/context/env-context";
 import styles from "./pc.module.css";
 import { quick_ping } from "@/utils/quick_ping";
 
 export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
-    const pcAPI: IUltraPcConfig = ultraPcConfig({ id });
-    const [arpTableState, setArpTableState, subscribeArpTableState] = ultraState(false);
-    const [advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
-    const [packetState, setPacketState, subscribePacketState] = ultraState(false);
-    const [contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
-    const [, setIsDeleting, subscribeIsDeleting] = ultraState(false);
+    const pcAPI  = ultraPcConfig({ 
+        id,
+        dhcpClient: true
+    });
+
+    const [
+        arpTableState, 
+        setArpTableState, 
+        subscribeArpTableState
+    ] = ultraState(false);
+    
+    const [
+        advOptionsState, 
+        setAdvOptionsState, 
+        subscribeAdvOptionsState
+    ] = ultraState(false);
+
+    const [
+        packetState, 
+        setPacketState, 
+        subscribePacketState
+    ] = ultraState(false);
+
+    const [
+        contextClickEvent, 
+        setContextClickEvent,
+    ] = ultraState<null | Event>(null);
+    
+    const [
+        , 
+        setIsDeleting, 
+        subscribeIsDeleting
+    ] = ultraState(false);
+    
     const options: AdvancedOption[] = [
         { message: "Show ARP Table", callback: () => setArpTableState(true) },
         { message: "Terminal", callback: showTerminal },

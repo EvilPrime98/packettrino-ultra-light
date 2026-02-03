@@ -214,6 +214,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
                 },
 
                 component: DhcpLeasesTable({
+                    serverAPI,
                     onClose: () => setLeasesTableState(false)
                 })
 

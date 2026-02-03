@@ -3,7 +3,7 @@ import type { IUltraDhcpLease, IUltraDHCPServerConfig, TDhcpServerProperties, TD
 import { isValidIp, isValidMac } from "@/utils/network_lib";
 import { InvalidIpv4AddressError, Invalid48BitMacAddressError } from '@/errors'
 
-export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
+export default function ultraDhcpServerConfig(): Record<"dhcpserver", IUltraDHCPServerConfig> {
 
     const [
         getProperties
@@ -21,9 +21,9 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
     });
 
     const [
-        getLeases,
-        setLeases,
-        
+        getLeases
+        , setLeases
+        , subscribeToLeases
     ] = ultraState<Record<string, IUltraDhcpLease>>({});
 
     const [
@@ -35,9 +35,9 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
     let intervalId: NodeJS.Timeout | null = null;
 
     //private methods
-    function updateLeasesTime(){
+    function updateLeasesTime() {
         intervalId = setInterval(() => {
-            const currLeases = {...getLeases()};
+            const currLeases = { ...getLeases() };
             for (const lease in currLeases) {
                 currLeases[lease].leaseTime -= 1;
                 if (currLeases[lease].leaseTime <= 0) {
@@ -45,8 +45,8 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
                 }
             }
             setLeases(currLeases);
-            if (Object.keys(currLeases).length === 0 
-            && intervalId !== null) {
+            if (Object.keys(currLeases).length === 0
+                && intervalId !== null) {
                 clearInterval(intervalId);
                 intervalId = null;
             }
@@ -83,7 +83,7 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
     function assignIp(
         mac: string,
     ): string | null {
-        const newLeases = {...getLeases()};
+        const newLeases = { ...getLeases() };
         const ip = '192.168.1.100';
         newLeases[ip] = {
             mac,
@@ -93,15 +93,19 @@ export default function ultraDhcpServerConfig(): IUltraDHCPServerConfig {
         if (intervalId === null) updateLeasesTime();
         return ip;
     }
-    
+
     return {
-        getDHCPServerProperties: getProperties,
-        updateDHCPServerProperties: updateProperties,
-        subscribeToDHCPServerProperties: subscribeToProperties,
-        getDHCPReservations: getReservations,
-        addDHCPReservation: addReservation,
-        removeDHCPReservation: removeReservation,
-        assignIp
+        dhcpserver: {
+            getProperties: getProperties,
+            updateProperties: updateProperties,
+            subscribeToProperties: subscribeToProperties,
+            getReservations,
+            addReservation: addReservation,
+            removeReservation: removeReservation,
+            assignIp,
+            getLeases,
+            subscribeToLeases
+        }
     }
 
 }

@@ -5,16 +5,18 @@ import { Packet } from "@/types/packets";
 import { ENV } from "@/context/env-context";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { packetProcessor } from "@/kernel/processors";
+import { routing } from "@/kernel/routing";
+import { ultraDhcpClientConfig } from "./ultraDhcpClientConfig";
 import ultraRoutingConfig from "./ultraRoutingConfig";
 import ultraAnimations from "./ultraAnimations";
 import ultraARPConfig from "./ultraARPConfig";
 import ultraIfaceConfig from "./ultraIfaceConfig";
 import ultraDhcpServerConfig from "./ultraDHCPServerConfig";
-import { routing } from "@/kernel/routing";
 
 export default function ultraPcConfig({
     id,
-    dhcpServer
+    dhcpServer,
+    dhcpClient
 }: {
     /**
      * The unique identifier for the network element.
@@ -25,6 +27,11 @@ export default function ultraPcConfig({
      * should have DHCP server functionality.
      */
     dhcpServer?: boolean
+    /**
+     * Optional parameter to indicate if the network element
+     * should have DHCP client functionality.
+     */
+    dhcpClient?: boolean
 }): IUltraPcConfig {
 
     const initialProperties: TPcElementProperties = {
@@ -37,6 +44,12 @@ export default function ultraPcConfig({
     const [properties, setProperties, subscribeToProperties] = ultraState<TPcElementProperties>(initialProperties);
     const [buffer, setBuffer, subscribeToBuffer] = ultraState<Packet[]>([]);
     const { visualize } = ultraAnimations();
+    
+    const ifaceConfig = ultraIfaceConfig({ initialIfaces: 1 });
+    const routingConfig = ultraRoutingConfig();
+    const arpConfig = ultraARPConfig();
+    const dhcpServerConfig = dhcpServer === true && ultraDhcpServerConfig();
+    const dhcpClientConfig = dhcpClient === true && ultraDhcpClientConfig(ifaceConfig);
 
     const self = {
         properties,
@@ -47,11 +60,12 @@ export default function ultraPcConfig({
         currentBuffer: buffer,
         subscribeToBuffer,
         getDefaultGateway,
-        ...ultraIfaceConfig({ initialIfaces: 1 }),
-        ...ultraRoutingConfig(),
-        ...ultraARPConfig(),
-        ...(dhcpServer === true && ultraDhcpServerConfig())
-    }
+        ...ifaceConfig,
+        ...routingConfig,
+        ...arpConfig,
+        ...(dhcpServerConfig ?? {}),
+        ...(dhcpClientConfig ?? {})
+    };
 
     function replaceProperties(newProperties: TPcElementProperties) {
         setProperties(newProperties);

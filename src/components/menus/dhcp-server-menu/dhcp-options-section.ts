@@ -24,7 +24,7 @@ export function DhcpOptionsSection() {
         }
         const serverAPI = dsCtx.get().serverAPI;
         if (serverAPI && hasDHCPServer(serverAPI)) {
-            const serverProperties = serverAPI.getDHCPServerProperties();
+            const serverProperties = serverAPI.dhcpserver.getProperties();
             setState(serverProperties.state);
             setListenOnInterfaces(serverProperties.listenOnIfaces.join(", "));
             setRangeStart(serverProperties.offerRangeStart);
@@ -65,7 +65,7 @@ export function DhcpOptionsSection() {
                 serverAPI,
                 newProperties
             );
-            serverAPI.updateDHCPServerProperties(newProperties);
+            serverAPI.dhcpserver.updateProperties(newProperties);
             toCtx.get().createNotification(
                 'DHCP Server Options Saved',
                 'success'

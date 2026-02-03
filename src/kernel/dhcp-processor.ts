@@ -1,8 +1,6 @@
 import { DhcpAck, DhcpRequest, isDhcpAck, isDhcpDiscover, isDhcpOffer, isDhcpRequest, type Packet } from "@/types/packets";
 import { DhcpOffer } from "@/types/packets";
-import { hasDHCPServer, type TLayer3Config } from "@/types/TConfig";
-import { ip_addr } from "@/services/ifaces_service";
-import { encodeCidr } from "@/utils/network_lib";
+import { hasDHCPClient, hasDHCPServer, type TLayer3Config } from "@/types/TConfig";
 
 export function dhcpProcessor(
     packet: Packet,
@@ -16,14 +14,14 @@ export function dhcpProcessor(
             return [null, false];
         }
 
-        const serverProperties = elementAPI.getDHCPServerProperties();
+        const serverProperties = elementAPI.dhcpserver.getProperties();
 
         if (!serverProperties.listenOnIfaces.includes(receiverIfaceId)) {
             return [null, false];
         }
 
         const iface = elementAPI.getIfaces()[receiverIfaceId];
-        const offerIp = elementAPI.assignIp(packet.originMac);
+        const offerIp = elementAPI.dhcpserver.assignIp(packet.originMac);
         
         if (offerIp === null) return [null, true];
 
@@ -47,6 +45,8 @@ export function dhcpProcessor(
     }
 
     if (isDhcpOffer(packet)) {
+
+        if (!hasDHCPClient(elementAPI)) return [null, false];
         
         const iface = elementAPI.getIfaces()[receiverIfaceId];
         if (packet.chaddr !== iface.mac) return [null, false];
@@ -65,7 +65,7 @@ export function dhcpProcessor(
 
         if (!hasDHCPServer(elementAPI)) return [null, false];
         if (packet.siaddr !== elementAPI.getIfaces()[receiverIfaceId].ip) return [null, false];
-        const serverProperties = elementAPI.getDHCPServerProperties();
+        const serverProperties = elementAPI.dhcpserver.getProperties();
         
         const replyPacket = new DhcpAck({
             clientMac: packet.chaddr,
@@ -85,13 +85,15 @@ export function dhcpProcessor(
     }
 
     if (isDhcpAck(packet)) {
+
+        if (!hasDHCPClient(elementAPI)) return [null, false];
         
         if (packet.chaddr !== elementAPI.getIfaces()[receiverIfaceId].mac) return [null, false];
         
-        ip_addr(elementAPI,{
-            'add': encodeCidr(packet.yiaddr, packet.netmask),
-            'dev': receiverIfaceId
-        })
+        elementAPI.dhcpClient.assignIp(
+            receiverIfaceId,
+            packet
+        );
 
         return [null, true];
 

@@ -1,5 +1,5 @@
 import { IPTTFolder } from "@/utils/pttFileSystem";
-import { Packet } from "./packets";
+import { DhcpAck, Packet } from "./packets";
 import { MacRecord } from "./types";
 
 export type TConnection = {
@@ -317,20 +317,20 @@ export interface IUltraDHCPServerConfig {
      * Returns the properties of the DHCP server.
      * @returns
      */
-    getDHCPServerProperties: () => TDhcpServerProperties;
+    getProperties: () => TDhcpServerProperties;
     /** Updates the properties of the DHCP server. */
-    updateDHCPServerProperties: (newProperties: Partial<TDhcpServerProperties>) => void;
+    updateProperties: (newProperties: Partial<TDhcpServerProperties>) => void;
     /**
      * Subscriber function for the properties of the DHCP server.
      * @param fn
      * @returns
      */
-    subscribeToDHCPServerProperties: (fn: (value: TDhcpServerProperties) => void) => () => void;
+    subscribeToProperties: (fn: (value: TDhcpServerProperties) => void) => () => void;
     /**
      * Returns the reservations of the DHCP server.
      * @returns
      */
-    getDHCPReservations: () => TDhcpServerReservations;
+    getReservations: () => TDhcpServerReservations;
     /**
      * Adds a reservation to the DHCP server.
      * @param ip Ipv4 address of the reservation.
@@ -339,24 +339,60 @@ export interface IUltraDHCPServerConfig {
      * @throws InvalidIpv4AddressError if the ip is not a valid IPv4 address.
      * @throws Invalid48BitMacAddressError if the mac is not a valid 48-bit MAC address.
      */
-    addDHCPReservation: (ip: string, mac: string) => void;
+    addReservation: (ip: string, mac: string) => void;
     /**
      * Removes a reservation from the DHCP server.
      * @param ip Ipv4 address of the reservation.
      * @returns
      */
-    removeDHCPReservation: (ip: string) => void;
+    removeReservation: (ip: string) => void;
     /**
      * Assigns an IP address to a MAC address.
      * @param mac 48-bit MAC address.
      * @returns
      */
     assignIp: (mac: string) => string | null;
+    /**
+     * Gets the leases table.
+     */
+    getLeases: () => Record<string, IUltraDhcpLease>;
+    /**
+     * Subscribes to the leases table.
+     */
+    subscribeToLeases: (fn: (value: Record<string, IUltraDhcpLease>) => void) => () => void;
 }
 
 export interface IUltraDhcpLease {
     mac: string;
     leaseTime: number;
+}
+
+//DHCP CLIENT CONFIG
+export interface Lease {
+    ifaceId: string;
+    leasetime: number;
+    serverIp: string;
+}
+
+export interface IUltraDhcpClientConfig {
+    /**
+     * Assigns a lease to an interface.
+     * @param ifaceId 
+     * @param ackPacket 
+     * @returns 
+     */
+    assignIp: (ifaceId: string, ackPacket: DhcpAck) => void;
+    /**
+     * Returns the leases of the DHCP client.
+     * @returns 
+     */
+    getLeases: () => Lease[];
+    /**
+     * Subscriber function for the leases of the DHCP client.
+     * @param fn 
+     * @returns 
+     */
+    subscribeToLeases: (fn: (value: Lease[]) => void) => () => void;
 }
 
 //PC CONFIG
@@ -591,6 +627,10 @@ export function isLayer3(
  * @param config 
  * @returns 
  */
-export function hasDHCPServer(config: TLayer3Config): config is TLayer3Config & IUltraDHCPServerConfig {
-    return 'getDHCPServerProperties' in config;
+export function hasDHCPServer(config: TLayer3Config): config is TLayer3Config & Record<"dhcpserver", IUltraDHCPServerConfig> {
+    return 'dhcpserver' in config;
+}
+
+export function hasDHCPClient(config: TLayer3Config): config is TLayer3Config & Record<"dhcpClient", IUltraDhcpClientConfig> {
+    return 'dhcpClient' in config;
 }

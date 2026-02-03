@@ -2,7 +2,7 @@ import { UltraComponent, ultraState } from "@/ultra-light/ultra-light";
 import styles from "./dhcp-server-menu.module.css";
 import { ReservationsTable } from "./reservations-table";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
-import { TDhcpServerReservations } from "@/types/TConfig";
+import { hasDHCPServer, TDhcpServerReservations } from "@/types/TConfig";
 import { FormInput } from "@/components/core/form-input";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 
@@ -29,8 +29,8 @@ export function ReservationsSection() {
             return;
         }
         const serverAPI = dsCtx.get().serverAPI;
-        if (!serverAPI) return;
-        const reservations = serverAPI.getDHCPReservations();
+        if (!serverAPI || !hasDHCPServer(serverAPI)) return;
+        const reservations = serverAPI.dhcpserver.getReservations();
         setReservations(reservations);
     }
 
@@ -38,9 +38,9 @@ export function ReservationsSection() {
         const { ip, mac } = getFields();
         if (!ip || !mac) return;
         const serverAPI = dsCtx.get().serverAPI;
-        if (!serverAPI) return;
+        if (!serverAPI || !hasDHCPServer(serverAPI)) return;
         try {
-            serverAPI.addDHCPReservation(ip, mac);
+            serverAPI.dhcpserver.addReservation(ip, mac);
             setFields({
                 ip: "",
                 mac: ""
