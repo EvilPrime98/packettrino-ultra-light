@@ -58,6 +58,14 @@ interface IEnv {
      * Returns the current Quick Ping object.
      */
     quickPingObject: Array<TLayer3Config>;
+    /**
+     * Returns the minimum DHCP lease time in seconds.
+     */
+    dhcpMinLeaseTime: number;
+    /**
+     * Returns the maximum DHCP lease time in seconds.
+     */
+    dhcpMaxLeaseTime: number;
 }
 
 const ENV = UltraContext<IEnv>({
@@ -74,7 +82,9 @@ const ENV = UltraContext<IEnv>({
     $MAXARPENTRYTTL: 600,
     $MACENTRYTTL: 120,
     quickPingMode: false,
-    quickPingObject: []
+    quickPingObject: [],
+    dhcpMinLeaseTime: 10,
+    dhcpMaxLeaseTime: 86400
 });
 
 export { ENV as ENV };

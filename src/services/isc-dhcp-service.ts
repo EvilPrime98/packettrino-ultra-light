@@ -2,6 +2,7 @@ import { IUltraDHCPServerConfig, TDhcpServerProperties, TLayer3Config } from "@/
 import { isValidIp, ipToBinary, getNetwork } from "@/utils/network_lib";
 import { DhcpDiscover, isDhcpAck } from "@/types/packets";
 import { InterfaceDoesNotExistError } from "@/errors";
+import { ENV } from "@/context/env-context";
 
 /**
  * Validator for the configuration of an ISC DHCP server.
@@ -65,7 +66,8 @@ export function iscDhcpServerValidator(
         throw new Error(`Error: "${newServerProperties.offerLeaseTime}" is not an integer.`);
     }
 
-    if (Number(newServerProperties.offerLeaseTime) < 120 || Number(newServerProperties.offerLeaseTime) > 86400) {
+    if (Number(newServerProperties.offerLeaseTime) < ENV.get().dhcpMinLeaseTime 
+    || Number(newServerProperties.offerLeaseTime) > ENV.get().dhcpMaxLeaseTime) {
         throw new Error(`Error: "${newServerProperties.offerLeaseTime}" is not a valid lease time. It must be between 120 and 86400 seconds.`);
     }
 
