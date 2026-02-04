@@ -1,8 +1,10 @@
 import { UltraComponent } from "@ultra-light";
 import styles from "./pc-menu.module.css";  
 
-export default function BasicButtons({ saveHandler } : {
-    saveHandler: () => void;
+export default function BasicButtons({ 
+    onSave 
+} : {
+    onSave: () => void;
 }) {
 
     return (
@@ -15,7 +17,7 @@ export default function BasicButtons({ saveHandler } : {
 
                 UltraComponent({
                     component: `<button class="btn-modern-blue" type="button" id="save-btn">Save</button>`,
-                    eventHandler: { 'click': saveHandler }
+                    eventHandler: { 'click': onSave }
                 })
 
             ]

@@ -1,24 +1,20 @@
 import { UltraComponent } from "@ultra-light";
-import { Props } from "./pc-menu-types";
 import styles from "./pc-menu.module.css";
+import { IUltraPcFields } from "./pc-menu";
 
-export default function IpField({ getFields, setFields, subscribeFields }: Props) {
+export default function IpField({ fields }: { fields: IUltraPcFields }) {
 
-    const updateFields = (event: Event) => {
-        //type guard
+    function updateFields(event: Event){
         event.stopPropagation();
-        const inputElement = event.target;
-        if (!inputElement || !(inputElement instanceof HTMLInputElement)) return;
-        //update state
-        setFields({
-            ...getFields(),
-            ipField: inputElement.value
-        })
+        const $input = event.target as HTMLInputElement;
+        fields.set('ip', $input.value);
     }
 
-    const sync = (self: HTMLElement) => {
-        if (!self || !(self instanceof HTMLInputElement)) return;
-        if (self.value !== getFields().ipField) self.value = getFields().ipField;     
+    function sync(self: HTMLElement){
+        const $input = self as HTMLInputElement;
+        if ($input.value !== fields.get('ip')) {
+            $input.value = fields.get('ip');
+        }
     }
     
     return (
@@ -35,7 +31,10 @@ export default function IpField({ getFields, setFields, subscribeFields }: Props
                     component: `<input type="text" id="ip" name="ip">`,
                     eventHandler: { 'input': updateFields },
                     trigger: [
-                        { subscriber: subscribeFields, triggerFunction: sync }
+                        { 
+                            subscriber: fields.subscribe('ip'),
+                            triggerFunction: sync 
+                        }
                     ]                    
                 })
 

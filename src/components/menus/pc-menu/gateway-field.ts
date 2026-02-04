@@ -1,12 +1,9 @@
 import { UltraComponent } from "@ultra-light";
-import { Props } from "./pc-menu-types";
 import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import styles from "./pc-menu.module.css";
+import { IUltraPcFields } from "./pc-menu";
 
-export default function GatewayField({ 
-    getFields, 
-    setFields 
-}: Props) {
+export default function GatewayField({ fields }: { fields: IUltraPcFields}) {
 
     const { subscribe: subscribePcInfo } = pmCtx;
 
@@ -23,10 +20,7 @@ export default function GatewayField({
         event.stopPropagation();
         const inputElement = event.target as HTMLInputElement;
         const gateway = inputElement.value;
-        setFields({
-            ...getFields(),
-            gatewayField: gateway
-        })
+        fields.set('gateway', gateway);
     }
     
     return (

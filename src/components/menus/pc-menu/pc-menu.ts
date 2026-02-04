@@ -1,10 +1,5 @@
-import {
-    UltraComponent,
-    ultraState,
-    UltraActivity,
-} from "@ultra-light";
+import { UltraComponent, ultraState, UltraActivity } from "@ultra-light";
 import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
-import type { PcMenuFields } from "@/types/types";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { PcFormValidator } from "@/schemas/pc-menu-schema";
 import InterfaceField from "./interface-field";
@@ -18,36 +13,80 @@ import { ip_route } from "@/services/routing_service";
 import { encodeCidr } from "@/utils/network_lib";
 import PcMenuFrame from "./pc-menu-frame";
 import Ipv4Forwarding from "./ipv4-forwarding";
+import { DhcpClientField } from "./dhcp-client-field";
+
+export interface IUltraPcFields {
+    get: (key: 'iface' | 'ip' | 'netmask' | 'gateway') => string;
+    set: (key: 'iface' | 'ip' | 'netmask' | 'gateway', value: string) => void;
+    subscribe: (key: 'iface' | 'ip' | 'netmask' | 'gateway') => (fn: (value: string) => void) => () => void;
+}
 
 export default function PcMenu() {
 
-    const [getFields, setFields, subscribeFields] = ultraState<PcMenuFields>({
-        interfaceField: "",
-        ipField: "",
-        netmaskField: "",
-        gatewayField: "",
-        dhcpField: false
-    })
+    const fields: IUltraPcFields = (function () {
 
-    const [eventCleaner, setEventCleaner] = ultraState<(() => void) | null>(null);
+        const [getInterfaceField, setInterfaceField, subscribeToInterfaceField] = ultraState<string>('');
+        const [getIpField, setIpField, subscribeToIpField] = ultraState<string>('');
+        const [getNetmaskField, setNetmaskField, subscribeToNetmaskField] = ultraState<string>('');
+        const [getGatewayField, setGatewayField, subscribeToGatewayField] = ultraState<string>('');
+
+        const fieldOperations = {
+            iface: {
+                get: getInterfaceField,
+                set: setInterfaceField,
+                subscribe: subscribeToInterfaceField
+            },
+            ip: {
+                get: getIpField,
+                set: setIpField,
+                subscribe: subscribeToIpField
+            },
+            netmask: {
+                get: getNetmaskField,
+                set: setNetmaskField,
+                subscribe: subscribeToNetmaskField
+            },
+            gateway: {
+                get: getGatewayField,
+                set: setGatewayField,
+                subscribe: subscribeToGatewayField
+            }
+        } as const;
+
+        type FieldKey = keyof typeof fieldOperations;
+
+        function get(key: FieldKey) {
+            return fieldOperations[key].get();
+        }
+
+        function set(key: FieldKey, value: string) {
+            fieldOperations[key].set(value);
+        }
+
+        function subscribe(key: FieldKey) {
+            return fieldOperations[key].subscribe;
+        }
+
+        return {
+            get,
+            set,
+            subscribe
+        };
+
+    })();
+
+    const [eventCleaner, setEventCleaner,] = ultraState<(() => void) | null>(null);
 
     function onStart() {
-
         setEventCleaner(onGlobalEvents());
-
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
         const ifaces = elementAPI.getIfaces();
         const initialIfaceId = Object.keys(ifaces)[0];
-
-        setFields({
-            interfaceField: initialIfaceId,
-            ipField: ifaces[initialIfaceId].ip,
-            netmaskField: ifaces[initialIfaceId].netmask,
-            gatewayField: elementAPI.getDefaultGateway(),
-            dhcpField: ifaces[initialIfaceId].dhcp
-        })
-
+        fields.set('iface', initialIfaceId);
+        fields.set('ip', ifaces[initialIfaceId].ip);
+        fields.set('netmask', ifaces[initialIfaceId].netmask);
+        fields.set('gateway', elementAPI.getDefaultGateway());
     }
 
     function onKeydown(event: KeyboardEvent) {
@@ -66,17 +105,13 @@ export default function PcMenu() {
     function onSave() {
 
         if (!pmCtx.get()?.isVisible) return;
-
         const { pcElementAPI } = pmCtx.get();
-
         if (!pcElementAPI) return;
 
-        const {
-            ipField: ip,
-            netmaskField: netmask,
-            gatewayField: gateway,
-            interfaceField: ifaceId
-        } = getFields();
+        const ip = fields.get('ip');
+        const netmask = fields.get('netmask');
+        const gateway = fields.get('gateway');
+        const ifaceId = fields.get('iface');
 
         try {
 
@@ -100,11 +135,10 @@ export default function PcMenu() {
                 });
             }
 
-            toCtx.get()
-                .createNotification(
-                    `Interface ${getFields().interfaceField.toUpperCase()} updated successfully!`,
-                    'success'
-                )
+            toCtx.get().createNotification(
+                `Interface ${fields.get('iface').toUpperCase()} updated successfully!`,
+                'success'
+            )
 
         } catch (error: unknown) {
 
@@ -112,38 +146,28 @@ export default function PcMenu() {
                 ? error.message
                 : 'Unknown error';
 
-            toCtx.get()
-                .createNotification(
-                    errorMessage,
-                    'error'
-                )
+            toCtx.get().createNotification(
+                errorMessage,
+                'error'
+            )
 
         }
 
     }
 
     function onGlobalEvents() {
-
         window.addEventListener("keydown", onKeydown);
-
         return () => {
             window.removeEventListener("keydown", onKeydown);
         }
-
     }
 
     function onCleanup() {
-
         eventCleaner()?.();
-
-        setFields({
-            interfaceField: "",
-            ipField: "",
-            netmaskField: "",
-            gatewayField: "",
-            dhcpField: false
-        })
-
+        fields.set('iface', "");
+        fields.set('ip', "");
+        fields.set('netmask', "");
+        fields.set('gateway', "");
     }
 
     return UltraActivity({
@@ -153,37 +177,27 @@ export default function PcMenu() {
             subscriber: pmCtx.subscribe
         },
 
-        component: `<form class="modal draggable-modal ${styles['pc-form']} "></form>`,
+        component: '<form></form>',
+
+        className: ['modal', 'draggable-modal', styles['pc-form']],
 
         children: [
 
             PcMenuFrame({ onClose }),
 
             UltraComponent({
-
                 component: `<section class="basic-section"></section>`,
-
                 children: [
-
-                    InterfaceField({
-                        getFields,
-                        setFields,
-                        subscribeFields
-                    }),
-
-                    IpField({ getFields, setFields, subscribeFields }),
-
-                    NetmaskField({ getFields, setFields, subscribeFields }),
-
-                    GatewayField({ getFields, setFields, subscribeFields }),
-
-                    Ipv4Forwarding()
-
+                    InterfaceField({ fields }),
+                    IpField({ fields }),
+                    NetmaskField({ fields }),
+                    GatewayField({ fields }),
+                    Ipv4Forwarding(),
+                    DhcpClientField({ fields })
                 ],
-
             }),
 
-            BasicButtons({ saveHandler: onSave }),
+            BasicButtons({ onSave }),
 
         ],
 

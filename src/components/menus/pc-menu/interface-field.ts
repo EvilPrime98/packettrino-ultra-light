@@ -1,23 +1,14 @@
-import { 
-    UltraComponent, 
-    ultraState 
+import {
+    UltraComponent,
+    ultraState
 } from "@ultra-light";
 import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
-import type { PcMenuFields } from "@/types/types";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import AddIcon from "@/components/icons/add-icon";
 import styles from "./pc-menu.module.css";
+import { IUltraPcFields } from "./pc-menu";
 
-type InterfaceFieldProps = {
-    getFields: () => PcMenuFields;
-    setFields: (newValue: PcMenuFields) => void;
-    subscribeFields: (fn: (value: PcMenuFields) => void) => () => void;
-}
-
-export default function InterfaceField({
-    setFields,
-    getFields
-}: InterfaceFieldProps) {
+export default function InterfaceField({ fields }: { fields: IUltraPcFields }) {
 
     const [
         ifacesList,
@@ -38,22 +29,15 @@ export default function InterfaceField({
     };
 
     function onIfaceChanges(event: Event) {
-
         const element = event.target;
         if (!element || !(element instanceof HTMLSelectElement)) return;
         const elementProperties = pmCtx.get().pcElementAPI;
         if (!elementProperties) return;
         const iface = elementProperties.getIfaces()[element.value];
         if (!iface) return;
-
-        setFields({
-            ...getFields(),
-            interfaceField: element.value,
-            ipField: iface.ip || "",
-            netmaskField: iface.netmask || "",
-            dhcpField: iface.dhcp || false
-        })
-
+        fields.set('iface', element.value);
+        fields.set('ip', iface.ip || "");
+        fields.set('netmask', iface.netmask || "");
     }
 
     function onAddIface() {
@@ -76,8 +60,8 @@ export default function InterfaceField({
         } catch (error: unknown) {
 
             const message = error instanceof Error
-            ? error.message
-            : 'Unknown error';
+                ? error.message
+                : 'Unknown error';
 
             toCtx.get().createNotification(
                 message,
@@ -91,8 +75,8 @@ export default function InterfaceField({
     function onSync(self: HTMLElement) {
         if (!self || !(self instanceof HTMLSelectElement)) return;
         self.innerHTML = ifacesList()
-        .map(iface => `<option value="${iface}">${iface}</option>`)
-        .join('');
+            .map(iface => `<option value="${iface}">${iface}</option>`)
+            .join('');
     }
 
     return UltraComponent({
@@ -121,6 +105,6 @@ export default function InterfaceField({
 
     })
 
-    
+
 
 }
