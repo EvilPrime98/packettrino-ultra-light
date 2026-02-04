@@ -10,15 +10,15 @@ import { command_dhcp } from "@/commands/dhcp";
 
 /**
  * Compiles, interprets and executes a terminal command
- * @returns 
+ * @returns
  */
-export default function unix() {
-    
+export default async function unix() {
+
     const tCtx = TERMINAL_CONTEXT;
     const input = (TERMINAL_CONTEXT.get().input).trim(); //TODO: sanitize input
     const keyWord = input.split(" ")[0];
 
-    const unixMap: Record<string, () => void> =  {
+    const unixMap: Record<string, () => void | Promise<void>> =  {
         "pwd": () => command_pwd(),
         "ls": () => command_ls(),
         "cd": () => command_cd(),
@@ -29,14 +29,20 @@ export default function unix() {
         "dhcp": () => command_dhcp()
     }
 
-    if (Object.hasOwn(unixMap, keyWord)) {
+    try {
 
-        unixMap[keyWord]()
-        
-    } else {
+        if (!Object.hasOwn(unixMap, keyWord)) {
+            throw new Error(`Unknown command: ${keyWord}`);
+        }
+
+        await unixMap[keyWord]();
+
+    }catch(error){
 
         tCtx.get().write(
-            `Unknown command: ${keyWord}`
+            (error instanceof Error)
+            ? error.message
+            : `Error while executing command: ${keyWord}`
         );
 
     }
