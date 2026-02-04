@@ -5,13 +5,19 @@ export async function command_dhcp(){
 
     const elementApi = tCtx.get().elementAPI;
 
-    if (!elementApi) {
-        throw new Error('No element properties detected. Was the component recently deleted?');
-    }
+    if (!elementApi) return;
+    
+    const [ifaceId] = tCtx.get().input
+    .trim()
+    .replace(/\s+/g, " ")
+    .split(" ")
+    .slice(1);
+
+    console.log(elementApi);
 
     await sendDHCPDiscover(
         elementApi,
-        "enp0s3"
+        ifaceId
     );
     
 }
