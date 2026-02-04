@@ -1,4 +1,4 @@
-import { UltraComponent } from "@/ultra-light/ultra-light";
+import { UltraComponent, UltraTrigger } from "@/ultra-light/ultra-light";
 
 /**
  * Renders a form input element. The default structure is a
@@ -15,7 +15,8 @@ export function FormInput({
     onChange,
     className,
     type,
-    label
+    label,
+    adTriggers
 }: {
     /**
      * Unique identifier of the input.
@@ -53,6 +54,11 @@ export function FormInput({
      * Optional label for the input.
      */
     label?: string;
+    /**
+     * Optional aditional triggers for the input. These will be applied to the input element.
+     */
+    adTriggers?: UltraTrigger[];
+
 }) {
 
     if (type === 'checkbox') {
@@ -70,22 +76,28 @@ export function FormInput({
                 UltraComponent({
 
                     component: (`
-                    <input 
-                        id="${id}" 
-                        name="${name}"
-                        type="checkbox" 
-                        class="btn-toggle"
-                    />
-                `),
+                        <input 
+                            id="${id}" 
+                            name="${name}"
+                            type="checkbox" 
+                            class="btn-toggle"
+                        />
+                    `),
 
                     eventHandler: (onChange) ? { 'change': onChange } : {},
 
-                    trigger: [{ 
-                        subscriber: changeSubscriber, 
-                        triggerFunction: ($input: HTMLElement) => {
-                            ($input as HTMLInputElement).checked = Boolean(getValue());
-                        }
-                    }],
+                    trigger: [
+                        
+                        {  
+                            subscriber: changeSubscriber, 
+                            triggerFunction: ($input: HTMLElement) => {
+                                ($input as HTMLInputElement).checked = Boolean(getValue());
+                            }
+                        },
+
+                        ...adTriggers || []
+
+                    ],
 
                 })
 
