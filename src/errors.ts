@@ -69,7 +69,8 @@ export class InterfaceNotConnectedError extends Error {
 }
 
 export class InterfaceDoesNotExistError extends Error {
-    constructor(message: string) {
+    constructor(ifaceId: string) {
+        const message = `The interface "${ifaceId}" does not exist.`;
         super(message);
         this.name = "InterfaceDoesNotExistError";
     }
