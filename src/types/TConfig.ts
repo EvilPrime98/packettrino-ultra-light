@@ -371,6 +371,8 @@ export interface Lease {
 }
 
 export interface IUltraDhcpClientConfig {
+    /** Returns an array of the interfaces that the DHCP client is listening on. */
+    getDhcpIfaces: () => string[];
     /**
      * Assigns a lease to an interface.
      * @param ifaceId 
@@ -389,6 +391,12 @@ export interface IUltraDhcpClientConfig {
      * @returns 
      */
     subscribeToLeases: (fn: (value: Lease[]) => void) => () => void;
+    /**
+     * Enables the DHCP client on a specific interface.
+     * @param ifaceId 
+     * @returns 
+     */
+    addDhcpIface: (ifaceId: string) => void;
 }
 
 export interface IUltraPcConfig extends 

@@ -46,7 +46,6 @@ export type PcMenuFields = {
   ipField: string;
   netmaskField: string;
   gatewayField: string;
-  dhcpField: boolean;
 }
 
 export type PcFormValidatorData = {

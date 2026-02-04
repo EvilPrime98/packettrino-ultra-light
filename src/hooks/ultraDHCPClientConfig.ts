@@ -1,10 +1,17 @@
 import { DhcpAck } from "@/types/packets";
 import type { IUltraDhcpClientConfig, IUltraIfaceConfig, Lease } from "@/types/TConfig";
 import { ultraState } from "@/ultra-light/ultra-light";
+import { InterfaceDoesNotExistError } from "@/errors";
 
 export function ultraDhcpClientConfig(
     ifaceApi: IUltraIfaceConfig
 ): Record<"dhcpClient", IUltraDhcpClientConfig> {
+
+    const [
+        getDhcpIfaces
+        , setDhcpIfaces
+        ,
+    ] = ultraState<string[]>([]);
 
     const [
         getLeases
@@ -58,11 +65,23 @@ export function ultraDhcpClientConfig(
 
     }
 
+    function addDhcpIface(
+        ifaceId: string
+    ){
+        const ifaceIds = Object.keys({ ...ifaceApi.getIfaces()});
+        if (!ifaceIds.includes(ifaceId)) {
+            throw new InterfaceDoesNotExistError(ifaceId);
+        }
+        setDhcpIfaces([...getDhcpIfaces(), ifaceId]);
+    }
+
     return {
         "dhcpClient": {
+            getDhcpIfaces,
             assignIp: assignLeaseToIface,
             subscribeToLeases,
-            getLeases
+            getLeases,
+            addDhcpIface
         }
     }
 
