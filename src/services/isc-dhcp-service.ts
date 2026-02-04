@@ -3,6 +3,7 @@ import { isValidIp, ipToBinary, getNetwork } from "@/utils/network_lib";
 import { DhcpDiscover, isDhcpAck } from "@/types/packets";
 import { InterfaceDoesNotExistError } from "@/errors";
 import { ENV } from "@/context/env-context";
+import { hasDHCPClient } from "@/types/typeguards";
 
 /**
  * Validator for the configuration of an ISC DHCP server.
@@ -77,16 +78,28 @@ export function iscDhcpServerValidator(
 
 /**
  * Sends a DHCP discover packet to the netowork.
- * @param dhcpClientAPI Network element API
+ * @param elementAPI Network element API
  * @param ifaceId Interface ID
  * @returns 
  */
 export async function sendDHCPDiscover(
-    dhcpClientAPI: TLayer3Config,
+    elementAPI: TLayer3Config,
     ifaceId: string
 ){
+
+    if (!hasDHCPClient(elementAPI)){
+        throw new Error('Error: DHCP client is not available.');
+    }
+
+    if (!Object.keys(elementAPI.getIfaces()).includes(ifaceId)) {
+        throw new InterfaceDoesNotExistError(ifaceId);
+    }
     
-    const ifaces = dhcpClientAPI.getIfaces();
+    if (!elementAPI.dhcpClient.getDhcpIfaces().includes(ifaceId)) {
+        throw new Error(`Error: The interface "${ifaceId}" is not configured as a DHCP client.`);
+    }
+
+    const ifaces = elementAPI.getIfaces();
     const iface = ifaces[ifaceId];
 
     if (!iface) {
@@ -100,8 +113,8 @@ export async function sendDHCPDiscover(
     const connectionAPI = iface.connection.api;
     if (!connectionAPI) return;
 
-    const unsubscribe = dhcpClientAPI.subscribeToBuffer( async () => {
-        const buffer = dhcpClientAPI.currentBuffer();
+    const unsubscribe = elementAPI.subscribeToBuffer( async () => {
+        const buffer = elementAPI.currentBuffer();
         if (buffer.length === 0) return;
         const lastPacket = buffer[buffer.length - 1];
         if (!isDhcpAck(lastPacket)) return;
@@ -110,7 +123,7 @@ export async function sendDHCPDiscover(
 
     await connectionAPI.sendPacket(
         packet, 
-        dhcpClientAPI.properties().elementId
+        elementAPI.properties().elementId
     );
 
 }
