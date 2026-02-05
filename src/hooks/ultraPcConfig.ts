@@ -156,7 +156,7 @@ export default function ultraPcConfig({
         Object.assign(self, packageConfig);
     }
 
-    if (packageOptions) dpkg(self, packageOptions);
+    if (packageOptions) dpkg(self).install(packageOptions);
 
     return self;
 

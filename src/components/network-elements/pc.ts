@@ -20,8 +20,6 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
         }
     });
 
-    console.log(pcAPI);
-
     const [
         arpTableState, 
         setArpTableState, 

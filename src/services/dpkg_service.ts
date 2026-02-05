@@ -5,27 +5,32 @@ import { PACKAGES } from "@/types/TConfig";
 import { extractIfaceConfig } from "@/types/TExtractor";
 
 export function dpkg(
-    elementAPI: TLayer3Config,
-    packageOptions: TPackageOptions
-){
+    elementAPI: TLayer3Config
+) {
+
+    const dpkgService = {
+        install
+    };
 
     const PACKAGE_CONFIG_MAP: Record<TAvailablePackages, any> = {
         'isc-dhcp-client': () => { return ultraDhcpClientConfig(extractIfaceConfig(elementAPI)) },
         'isc-dhcp-server': () => { return ultraDhcpServerConfig() }
     }
-    
-    PACKAGES.forEach(packageName => {
 
-        if (Object.hasOwn(packageOptions, packageName) && packageOptions[packageName] === true) {
-            
-            elementAPI.editProperty('packageList', 
-                [...elementAPI.properties().packageList, packageName]
-            );
+    function install(
+        packageOptions: TPackageOptions
+    ) {
+        PACKAGES.forEach(packageName => {
+            if (Object.hasOwn(packageOptions, packageName) 
+                && packageOptions[packageName] === true) {
+                elementAPI.editProperty('packageList',
+                    [...elementAPI.properties().packageList, packageName]
+                );
+                elementAPI.install(PACKAGE_CONFIG_MAP[packageName]());
+            }
+        });
+    }
 
-            elementAPI.install(PACKAGE_CONFIG_MAP[packageName]());
-            
-        }
-
-    });
+    return dpkgService;
 
 }
