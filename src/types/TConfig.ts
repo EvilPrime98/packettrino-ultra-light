@@ -77,10 +77,6 @@ export interface TPcElementProperties {
      */
     "filesystem": Record<string, IPTTFolder>;
     /**
-     * Returns true or false based on whether the resolver is active for the network element.
-     */
-    "resolved": boolean;
-    /**
      * Returns true or false based on whether IPv4 forwarding is enabled for the network element.
      */
     "ipv4-forwarding": boolean;
@@ -595,3 +591,15 @@ export type TLayer2Config = IUltraSwitchConfig;
  * Devices that work at layer 2 and 3.
  */
 export type TLayer3Config = IUltraPcConfig | IUltraRouterConfig;
+
+
+export const PACKAGES = [
+    'dhcpServer'
+    , 'dhcpClient'
+] as const;
+
+export type TAvailablePackages = typeof PACKAGES[number];
+
+export type TPackageOptions = {
+    [key in TAvailablePackages]?: boolean;
+}
