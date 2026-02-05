@@ -1,12 +1,12 @@
 import { ultraState } from "@ultra-light";
 import { createFilesystem } from "@/utils/component";
-import { IUltraPcConfig, TPcElementProperties } from "@/types/TConfig";
+import { IUltraPcConfig, TPackageOptions, TPcElementProperties } from "@/types/TConfig";
 import { Packet } from "@/types/packets";
 import { ENV } from "@/context/env-context";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { packetProcessor } from "@/kernel/processors";
 import { routing } from "@/kernel/routing";
-import { ultraDhcpClientConfig } from "./ultraDhcpClientConfig";
+import { ultraDhcpClientConfig } from "./ultraDHCPClientConfig";
 import ultraRoutingConfig from "./ultraRoutingConfig";
 import ultraAnimations from "./ultraAnimations";
 import ultraARPConfig from "./ultraARPConfig";
@@ -15,41 +15,34 @@ import ultraDhcpServerConfig from "./ultraDHCPServerConfig";
 
 export default function ultraPcConfig({
     id,
-    dhcpServer,
-    dhcpClient
+    packageOptions
 }: {
     /**
      * The unique identifier for the network element.
      */
     id: string,
-    /**
-     * Optional parameter to indicate if the network element
-     * should have DHCP server functionality.
-     */
-    dhcpServer?: boolean
-    /**
-     * Optional parameter to indicate if the network element
-     * should have DHCP client functionality.
-     */
-    dhcpClient?: boolean
+    /** Optional parameter to indicate which packages should be included in the network element. */
+    packageOptions?: TPackageOptions
 }): IUltraPcConfig {
 
     const initialProperties: TPcElementProperties = {
-        "elementId": `${id}`,
-        "resolved": true,
-        "ipv4-forwarding": false,
-        "filesystem": createFilesystem()
+        "elementId": `${id}`
+        , "filesystem": createFilesystem()
+        , "ipv4-forwarding": false
     }
 
     const [properties, setProperties, subscribeToProperties] = ultraState<TPcElementProperties>(initialProperties);
     const [buffer, setBuffer, subscribeToBuffer] = ultraState<Packet[]>([]);
     const { visualize } = ultraAnimations();
     
+    //basic packages
     const ifaceConfig = ultraIfaceConfig({ initialIfaces: 1 });
     const routingConfig = ultraRoutingConfig();
     const arpConfig = ultraARPConfig();
-    const dhcpServerConfig = dhcpServer === true && ultraDhcpServerConfig();
-    const dhcpClientConfig = dhcpClient === true && ultraDhcpClientConfig(ifaceConfig);
+
+    //optional packages
+    const dhcpServerConfig = (packageOptions?.dhcpServer) === true && ultraDhcpServerConfig();
+    const dhcpClientConfig = (packageOptions?.dhcpClient) === true && ultraDhcpClientConfig(ifaceConfig);
 
     const self = {
         properties,

@@ -18,7 +18,9 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
 
     const serverAPI = ultraPcConfig({ 
         id, 
-        dhcpServer: true
+        packageOptions: {
+            dhcpServer: true
+        }
     }); 
     
     const [

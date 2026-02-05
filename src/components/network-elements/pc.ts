@@ -15,7 +15,9 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
     const pcAPI  = ultraPcConfig({ 
         id,
-        dhcpClient: true
+        packageOptions: {
+            dhcpClient: true
+        }
     });
 
     const [
