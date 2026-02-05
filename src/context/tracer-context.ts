@@ -1,4 +1,4 @@
-import { Packet } from "@/types/packets";
+import { Packet } from "@/types/Tpackets";
 import { UltraContext } from "@/ultra-light/ultra-light";
 
 export type TracerMenuCtx = {

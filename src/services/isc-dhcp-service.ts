@@ -1,6 +1,6 @@
 import { IUltraDHCPServerConfig, TDhcpServerProperties, TLayer3Config } from "@/types/TConfig";
 import { isValidIp, ipToBinary, getNetwork } from "@/utils/network_lib";
-import { DhcpDiscover, isDhcpAck } from "@/types/packets";
+import { DhcpDiscover, isDhcpAck } from "@/types/Tpackets";
 import { InterfaceDoesNotExistError } from "@/errors";
 import { ENV } from "@/context/env-context";
 import { hasDHCPClient } from "@/types/typeguards";

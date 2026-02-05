@@ -1,4 +1,4 @@
-import { DhcpAck } from "@/types/packets";
+import { DhcpAck } from "@/types/Tpackets";
 import type { IUltraDhcpClientConfig, IUltraIfaceConfig, Lease } from "@/types/TConfig";
 import { ultraState } from "@/ultra-light/ultra-light";
 import { InterfaceDoesNotExistError } from "@/errors";

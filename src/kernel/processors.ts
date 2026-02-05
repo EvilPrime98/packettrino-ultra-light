@@ -1,4 +1,4 @@
-import { ArpReply, IcmpEchoReply, Packet } from "@/types/packets";
+import { ArpReply, IcmpEchoReply, Packet } from "@/types/Tpackets";
 import { IUltraPcConfig, IUltraRouterConfig, TLayer3Config } from "@/types/TConfig";
 import { getAvailableIps } from "@/utils/network_lib";
 import { dhcpProcessor } from "@/kernel/dhcp-processor";

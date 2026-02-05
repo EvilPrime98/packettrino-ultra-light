@@ -1,5 +1,5 @@
 import { TERMINAL_CONTEXT } from "@/context/terminal-context";
-import { IcmpEchoRequest } from "@/types/packets";
+import { IcmpEchoRequest } from "@/types/Tpackets";
 import { TLayer3Config } from "@/types/TConfig";
 import { ENV } from "@/context/env-context";
 import { routing } from "@/kernel/routing";

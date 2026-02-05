@@ -1,5 +1,5 @@
-import { DhcpAck, DhcpRequest, isDhcpAck, isDhcpDiscover, isDhcpOffer, isDhcpRequest, type Packet } from "@/types/packets";
-import { DhcpOffer } from "@/types/packets";
+import { DhcpAck, DhcpRequest, isDhcpAck, isDhcpDiscover, isDhcpOffer, isDhcpRequest, type Packet } from "@/types/Tpackets";
+import { DhcpOffer } from "@/types/Tpackets";
 import { type TLayer3Config } from "@/types/TConfig";
 import { hasDHCPServer, hasDHCPClient } from "@/types/typeguards";
 

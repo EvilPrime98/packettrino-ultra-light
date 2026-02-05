@@ -1,4 +1,4 @@
-import { Packet } from "@/types/packets";
+import { Packet } from "@/types/Tpackets";
 import { UltraLightElement } from "@/ultra-light/types";
 import { UltraComponent } from "@/ultra-light/ultra-light";
 import styles from './packet-tracer.module.css'

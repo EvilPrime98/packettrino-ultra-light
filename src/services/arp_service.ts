@@ -1,6 +1,6 @@
 import type { iface, IUltraRouterConfig } from "@/types/TConfig";
 import { IUltraPcConfig } from "@/types/TConfig";
-import { ArpRequest } from "@/types/packets";
+import { ArpRequest } from "@/types/Tpackets";
 import { ENV } from "@/context/env-context";
 
 /**

@@ -1,4 +1,4 @@
-import { Packet } from "@/types/packets";
+import { Packet } from "@/types/Tpackets";
 import { TLayer3Config } from "@/types/TConfig";
 import { getNetwork } from "@/utils/network_lib";
 import type { WritableKeys } from "@/types/types";

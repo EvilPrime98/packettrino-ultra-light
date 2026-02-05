@@ -1,7 +1,7 @@
 import { UltraActivity, UltraComponent, ultraEffect, ultraState } from "@/ultra-light/ultra-light";
 import styles from './packet-tracer.module.css'
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
-import { Packet } from "@/types/packets";
+import { Packet } from "@/types/Tpackets";
 import MenuFrame from "@/components/menus/menu-frame";
 import PacketTrafficTable from "./packet-tracer-table";
 import FilterTraffic from "./packet-tracer-filter";

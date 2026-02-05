@@ -1,6 +1,6 @@
 import { WORK_SPACE_CONTEXT as wsCtx } from "@/context/workspace-context";
 import { CANVAS_CONTEXT as csCtxd} from "@/context/canvas-context";
-import { Packet } from "@/types/packets";
+import { Packet } from "@/types/Tpackets";
 import { IUltraAnimations } from "@/types/TConfig";
 import { ENV } from "@/context/env-context";
 

@@ -1,5 +1,5 @@
 import { IPTTFolder } from "@/utils/pttFileSystem";
-import { DhcpAck, Packet } from "./packets";
+import { DhcpAck, Packet } from "./Tpackets";
 import { MacRecord } from "./types";
 
 export type TConnection = {

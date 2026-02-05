@@ -3,7 +3,7 @@ import { MacRecord } from "@/types/types";
 import { isValidMac } from "@/utils/network_lib";
 import { AlignmentError, ConnectionAlreadyEstablishedError, InvalidMacAddressError, NotFoundMacRecord } from "@/errors";
 import { ISwitchElementProperties, IUltraSwitchConfig, TConnection  } from "@/types/TConfig";
-import { Packet } from "@/types/packets";
+import { Packet } from "@/types/Tpackets";
 import { ENV } from "@/context/env-context";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import ultraAnimations from "@/hooks/ultraAnimations";

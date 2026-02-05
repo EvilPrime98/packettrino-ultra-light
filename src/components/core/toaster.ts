@@ -3,7 +3,7 @@ import styles from "./toaster.module.css";
 import '@assets/error.svg';
 import CheckMarkIcon from "../icons/check-mark-icon";
 import CrossIcon from "../icons/cross-icon";
-import { ToasterProperties, TToasterNotification } from "@/types/types";
+import { ToasterProperties, TToasterNotification } from "@/types/TToaster";
 import { TOASTER_CONTEXT } from "@/context/toaster-context";
 
 const TOAST_ICONS = {

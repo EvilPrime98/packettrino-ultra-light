@@ -4,7 +4,7 @@ import type { IUltraRouterConfig, IRouterElementProperties } from "@/types/TConf
 import ultraIfaceConfig from "./ultraIfaceConfig";
 import ultraARPConfig from "./ultraARPConfig";
 import ultraRoutingConfig from "./ultraRoutingConfig";
-import { Packet } from "@/types/packets";
+import { Packet } from "@/types/Tpackets";
 import { ENV } from "@/context/env-context";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { packetProcessor } from "@/kernel/processors";
