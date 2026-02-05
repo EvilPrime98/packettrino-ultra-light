@@ -1,17 +1,16 @@
 import { ultraState } from "@ultra-light";
 import { createFilesystem } from "@/utils/component";
-import { IUltraPcConfig, TPackageOptions, TPcElementProperties } from "@/types/TConfig";
+import { IUltraPcConfig, TPackageConfigs, TPackageOptions, TPcElementProperties } from "@/types/TConfig";
 import { Packet } from "@/types/Tpackets";
 import { ENV } from "@/context/env-context";
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { packetProcessor } from "@/kernel/processors";
 import { routing } from "@/kernel/routing";
-import { ultraDhcpClientConfig } from "./ultraDHCPClientConfig";
 import ultraRoutingConfig from "./ultraRoutingConfig";
 import ultraAnimations from "./ultraAnimations";
 import ultraARPConfig from "./ultraARPConfig";
 import ultraIfaceConfig from "./ultraIfaceConfig";
-import ultraDhcpServerConfig from "./ultraDHCPServerConfig";
+import { dpkg } from "@/services/dpkg_service";
 
 export default function ultraPcConfig({
     id,
@@ -26,25 +25,20 @@ export default function ultraPcConfig({
 }): IUltraPcConfig {
 
     const initialProperties: TPcElementProperties = {
-        "elementId": `${id}`
-        , "filesystem": createFilesystem()
-        , "ipv4-forwarding": false
+        "elementId": `${id}`, 
+        "filesystem": createFilesystem(),
+        "ipv4-forwarding": false,
+        "packageList": []
     }
 
     const [properties, setProperties, subscribeToProperties] = ultraState<TPcElementProperties>(initialProperties);
     const [buffer, setBuffer, subscribeToBuffer] = ultraState<Packet[]>([]);
     const { visualize } = ultraAnimations();
-    
-    //basic packages
     const ifaceConfig = ultraIfaceConfig({ initialIfaces: 1 });
     const routingConfig = ultraRoutingConfig();
     const arpConfig = ultraARPConfig();
 
-    //optional packages
-    const dhcpServerConfig = (packageOptions?.dhcpServer) === true && ultraDhcpServerConfig();
-    const dhcpClientConfig = (packageOptions?.dhcpClient) === true && ultraDhcpClientConfig(ifaceConfig);
-
-    const self = {
+    const self: IUltraPcConfig = {
         properties,
         subscribeToProperties,
         replaceProperties,
@@ -56,8 +50,7 @@ export default function ultraPcConfig({
         ...ifaceConfig,
         ...routingConfig,
         ...arpConfig,
-        ...(dhcpServerConfig ?? {}),
-        ...(dhcpClientConfig ?? {})
+        install
     };
 
     function replaceProperties(newProperties: TPcElementProperties) {
@@ -156,6 +149,14 @@ export default function ultraPcConfig({
         )?.gateway || "";
         return gateway;
     }
+
+    function install(
+        packageConfig: TPackageConfigs 
+    ) {
+        Object.assign(self, packageConfig);
+    }
+
+    if (packageOptions) dpkg(self, packageOptions);
 
     return self;
 

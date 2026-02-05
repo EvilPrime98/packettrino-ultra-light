@@ -2,6 +2,7 @@ import { IPTTFolder } from "@/utils/pttFileSystem";
 import { DhcpAck, Packet } from "./Tpackets";
 import { MacRecord } from "./types";
 
+//TO BE DETERMINED
 export type TConnection = {
     /**
      * Unique identifier of the device connected to the interface.
@@ -67,21 +68,6 @@ export type TCreateGraphicalConnection = {
     elementApi: IUltraPcConfig;
 }
 
-export interface TPcElementProperties {
-    /**
-     * The unique identifier of the network element.
-     */
-    "elementId": string;
-    /**
-     * Returns the filesystem of the network element as an object.
-     */
-    "filesystem": Record<string, IPTTFolder>;
-    /**
-     * Returns true or false based on whether IPv4 forwarding is enabled for the network element.
-     */
-    "ipv4-forwarding": boolean;
-}
-
 export interface ICableElementProperties {
     "id": string;
     "position": ICableElementPosition;
@@ -110,47 +96,109 @@ export interface IUltraAnimations {
     visualize: (itemId1: string, itemId2: string, packet: Packet) => Promise<void>;
 }
 
-//ROUTING CONFIG
-export interface IUltraRoutingConfig {
-    /**
-     * Returns the routing rules of the network element.
-     * @returns 
-     */
-    routingRules: () => IRoutingRule[];
-    /**
-     * Returns the subscriber function for the routing rules of the network element.
-     * @param fn 
-     * @returns 
-     */
-    subscribeToRoutingRules: (fn: (value: IRoutingRule[]) => void) => () => void;
-    /**
-     * Adds a routing rule to the network element, or edits an existing one.
-     * @param rule 
-     * @returns 
-     */
-    addRoutingRule: (rule: IRoutingRule) => void;
-    /**
-     * Removes a routing rule from the network element if it exists.
-     * @param destinationIp 
-     * @param destinationNetmask 
-     * @returns 
-     */
-    removeRoutingRule: (destinationIp: string, destinationNetmask: string) => void;
-    /**
-     * Edits a routing rule in the network element if it exists. Throws an error if the rule does not exist.
-     * @param newRule 
-     * @returns 
-     * @throws Error if the rule does not exist
-     */
-    editRoutingRule: (newRule: IRoutingRule) => void;
-}
-
-//ARP CONFIG
 export type ArpCache = Record<string, {
     "mac": string;
     "timeOutId": NodeJS.Timeout;
 }>;
 
+export type TDhcpServerReservations = {
+    [ip: string]: {
+        mac: string;
+    }
+}
+
+export type TDhcpServerProperties = {
+    /** Whether the DHCP server is enabled or not. */
+    state: boolean;
+    /**
+     * The interfaces that the DHCP server will listen on.
+     */
+    listenOnIfaces: string[];
+    /**
+     * The first IP address that the DHCP server will offer.
+     */
+    offerRangeStart: string;
+    /**
+     * The last IP address that the DHCP server will offer.
+     */
+    offerRangeEnd: string;
+    /**
+     * The netmask that the DHCP server will offer.
+     */
+    offerNetmask: string;
+    /**
+     * The gateway that the DHCP server will offer.
+     */
+    offerGateway: string;
+    /**
+     * The DNS server that the DHCP server will offer.
+     */
+    offerDns: string;
+    /**
+     * The lease time that the DHCP server will offer.
+     */
+    offerLeaseTime: number;
+}
+
+export interface IUltraDhcpLease {
+    mac: string;
+    leaseTime: number;
+}
+
+export interface Lease {
+    ifaceId: string;
+    leasetime: number;
+    serverIp: string;
+}
+
+//ELEMENT PROPERTIES
+
+export interface ILayer3ElementProperties {
+    /**
+     * The unique identifier of the network element.
+     */
+    "elementId": string;
+    /**
+     * Returns the filesystem of the network element as an object.
+     */
+    "filesystem": Record<string, IPTTFolder>;
+    /**
+     * Returns true or false based on whether IPv4 forwarding is enabled for the network element.
+     */
+    "ipv4-forwarding": boolean;
+    /**
+     * Returns a list of packages that are currently installed on the network element.
+     */
+    "packageList": TAvailablePackages[];
+}
+
+/**
+ * Basic properties for a PC element.
+ */
+export interface TPcElementProperties extends ILayer3ElementProperties {
+    test?: string; //TODO: remove
+}
+
+/**
+ * Basic properties for a router element.
+ */
+export interface IRouterElementProperties extends ILayer3ElementProperties {
+    test?: string; //TODO: remove
+}
+
+/**
+ * Basic properties for a switch element.
+ */
+export interface ISwitchElementProperties {
+    elementId: string;
+    "connections": TConnection[];
+}
+
+//CONFIGS
+
+/**
+ * Core ARP configuration.
+ */
 export interface IUltraARPConfig {
     /**
      * Returns the ARP cache of the network element.
@@ -177,7 +225,9 @@ export interface IUltraARPConfig {
     deleteArpCache: (ip: string) => void;
 }
 
-//IFACE CONFIG
+/**
+ * Core interface configuration.
+ */
 export interface IUltraIfaceConfig {
     /**
      * Returns the interfaces of the network element as a properties dictionary.
@@ -266,137 +316,60 @@ export interface IUltraIfaceConfig {
     getAvailableIps: () => string[];
 }
 
-export type TDhcpServerReservations = {
-    [ip: string]: {
-        mac: string;
-    }
-}
-
-export type TDhcpServerProperties = {
-    /** Whether the DHCP server is enabled or not. */
-    state: boolean;
+/**
+ * Core routing configuration.
+ */
+export interface IUltraRoutingConfig {
     /**
-     * The interfaces that the DHCP server will listen on.
-     */
-    listenOnIfaces: string[];
-    /**
-     * The first IP address that the DHCP server will offer.
-     */
-    offerRangeStart: string;
-    /**
-     * The last IP address that the DHCP server will offer.
-     */
-    offerRangeEnd: string;
-    /**
-     * The netmask that the DHCP server will offer.
-     */
-    offerNetmask: string;
-    /**
-     * The gateway that the DHCP server will offer.
-     */
-    offerGateway: string;
-    /**
-     * The DNS server that the DHCP server will offer.
-     */
-    offerDns: string;
-    /**
-     * The lease time that the DHCP server will offer.
-     */
-    offerLeaseTime: number;
-}
-
-export interface IUltraDHCPServerConfig {
-    /**
-     * Returns the properties of the DHCP server.
-     * @returns
-     */
-    getProperties: () => TDhcpServerProperties;
-    /** Updates the properties of the DHCP server. */
-    updateProperties: (newProperties: Partial<TDhcpServerProperties>) => void;
-    /**
-     * Subscriber function for the properties of the DHCP server.
-     * @param fn
-     * @returns
-     */
-    subscribeToProperties: (fn: (value: TDhcpServerProperties) => void) => () => void;
-    /**
-     * Returns the reservations of the DHCP server.
-     * @returns
-     */
-    getReservations: () => TDhcpServerReservations;
-    /**
-     * Adds a reservation to the DHCP server.
-     * @param ip Ipv4 address of the reservation.
-     * @param mac 48-bit MAC address of the reservation.
-     * @returns
-     * @throws InvalidIpv4AddressError if the ip is not a valid IPv4 address.
-     * @throws Invalid48BitMacAddressError if the mac is not a valid 48-bit MAC address.
-     */
-    addReservation: (ip: string, mac: string) => void;
-    /**
-     * Removes a reservation from the DHCP server.
-     * @param ip Ipv4 address of the reservation.
-     * @returns
-     */
-    removeReservation: (ip: string) => void;
-    /**
-     * Assigns an IP address to a MAC address.
-     * @param mac 48-bit MAC address.
-     * @returns
-     */
-    assignIp: (mac: string) => string | null;
-    /**
-     * Gets the leases table.
-     */
-    getLeases: () => Record<string, IUltraDhcpLease>;
-    /**
-     * Subscribes to the leases table.
-     */
-    subscribeToLeases: (fn: (value: Record<string, IUltraDhcpLease>) => void) => () => void;
-}
-
-export interface IUltraDhcpLease {
-    mac: string;
-    leaseTime: number;
-}
-
-export interface Lease {
-    ifaceId: string;
-    leasetime: number;
-    serverIp: string;
-}
-
-export interface IUltraDhcpClientConfig {
-    /** Returns an array of the interfaces that the DHCP client is listening on. */
-    getDhcpIfaces: () => string[];
-    /**
-     * Assigns a lease to an interface.
-     * @param ifaceId 
-     * @param ackPacket 
+     * Returns the routing rules of the network element.
      * @returns 
      */
-    assignIp: (ifaceId: string, ackPacket: DhcpAck) => void;
+    routingRules: () => IRoutingRule[];
     /**
-     * Returns the leases of the DHCP client.
-     * @returns 
-     */
-    getLeases: () => Lease[];
-    /**
-     * Subscriber function for the leases of the DHCP client.
+     * Returns the subscriber function for the routing rules of the network element.
      * @param fn 
      * @returns 
      */
-    subscribeToLeases: (fn: (value: Lease[]) => void) => () => void;
+    subscribeToRoutingRules: (fn: (value: IRoutingRule[]) => void) => () => void;
     /**
-     * Enables the DHCP client on a specific interface.
-     * @param ifaceId 
+     * Adds a routing rule to the network element, or edits an existing one.
+     * @param rule 
      * @returns 
      */
-    addDhcpIface: (ifaceId: string) => void;
+    addRoutingRule: (rule: IRoutingRule) => void;
+    /**
+     * Removes a routing rule from the network element if it exists.
+     * @param destinationIp 
+     * @param destinationNetmask 
+     * @returns 
+     */
+    removeRoutingRule: (destinationIp: string, destinationNetmask: string) => void;
+    /**
+     * Edits a routing rule in the network element if it exists. Throws an error if the rule does not exist.
+     * @param newRule 
+     * @returns 
+     * @throws Error if the rule does not exist
+     */
+    editRoutingRule: (newRule: IRoutingRule) => void;
 }
 
+/**
+ * Core package configuration.
+ */
+export interface IUltraDpkgConfig {
+    /**
+     * Installs a package on the network element.
+     * @param packageName 
+     * @returns 
+     */
+    install: (packageConfig: TPackageConfigs) => void;
+}
+
+/**
+ * Basic configuration for a PC element.
+ */
 export interface IUltraPcConfig extends 
-IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
+IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig, IUltraDpkgConfig {
     /**
      * Returns the properties of the network element.
      * @returns 
@@ -445,27 +418,11 @@ IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
     getDefaultGateway: () => string;
 }
 
-export interface IRouterElementProperties {
-    /**
-     * The unique identifier of the network element.
-     */
-    "elementId": string;
-    /**
-     * Returns the filesystem of the network element as an object.
-     */
-    "filesystem": Record<string, IPTTFolder>;
-    /**
-     * Returns true or false based on whether the resolver is active for the network element.
-     */
-    "resolved": boolean;
-    /**
-     * Returns true or false based on whether IPv4 forwarding is enabled for the network element.
-     */
-    "ipv4-forwarding"?: boolean;
-}
-
+/**
+ * Basic configuration for a router element.
+ */
 export interface IUltraRouterConfig extends 
-IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
+IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig, IUltraDpkgConfig {
     /**
      * Returns the properties of the network element.
      * @returns 
@@ -514,11 +471,9 @@ IUltraARPConfig, IUltraRoutingConfig, IUltraIfaceConfig {
     getDefaultGateway: () => string;
 }
 
-export interface ISwitchElementProperties {
-    elementId: string;
-    "connections": TConnection[];
-}
-
+/**
+ * Basic configuration for a switch element.
+ */
 export interface IUltraSwitchConfig {
     /**
      * Returns the properties of the switch element.
@@ -582,6 +537,8 @@ export interface IUltraSwitchConfig {
     broadcast: (packet: Packet, originId: string) => void;
 }
 
+//UNION TYPES
+
 /**
  * Devices that only work at layer 2.
  */
@@ -592,14 +549,111 @@ export type TLayer2Config = IUltraSwitchConfig;
  */
 export type TLayer3Config = IUltraPcConfig | IUltraRouterConfig;
 
+//PACKAGES
 
+/**
+ * List of available packages.
+ */
 export const PACKAGES = [
-    'dhcpServer'
-    , 'dhcpClient'
+    'isc-dhcp-server',
+    'isc-dhcp-client'
 ] as const;
 
+/**
+ * Type that represents the possible packages that can be installed on a network element.
+ */
 export type TAvailablePackages = typeof PACKAGES[number];
 
+/**
+ * Type that represents the options for the packages that can be installed on a network element.
+ */
 export type TPackageOptions = {
     [key in TAvailablePackages]?: boolean;
 }
+
+/**
+ * Package configuration for the DHCP client.
+ */
+export interface IUltraDhcpClientConfig {
+    /** Returns an array of the interfaces that the DHCP client is listening on. */
+    getDhcpIfaces: () => string[];
+    /**
+     * Assigns a lease to an interface.
+     * @param ifaceId 
+     * @param ackPacket 
+     * @returns 
+     */
+    assignIp: (ifaceId: string, ackPacket: DhcpAck) => void;
+    /**
+     * Returns the leases of the DHCP client.
+     * @returns 
+     */
+    getLeases: () => Lease[];
+    /**
+     * Subscriber function for the leases of the DHCP client.
+     * @param fn 
+     * @returns 
+     */
+    subscribeToLeases: (fn: (value: Lease[]) => void) => () => void;
+    /**
+     * Enables the DHCP client on a specific interface.
+     * @param ifaceId 
+     * @returns 
+     */
+    addDhcpIface: (ifaceId: string) => void;
+}
+
+/**
+ * Package configuration for the DHCP server.
+ */
+export interface IUltraDHCPServerConfig {
+    /**
+     * Returns the properties of the DHCP server.
+     * @returns
+     */
+    getProperties: () => TDhcpServerProperties;
+    /** Updates the properties of the DHCP server. */
+    updateProperties: (newProperties: Partial<TDhcpServerProperties>) => void;
+    /**
+     * Subscriber function for the properties of the DHCP server.
+     * @param fn
+     * @returns
+     */
+    subscribeToProperties: (fn: (value: TDhcpServerProperties) => void) => () => void;
+    /**
+     * Returns the reservations of the DHCP server.
+     * @returns
+     */
+    getReservations: () => TDhcpServerReservations;
+    /**
+     * Adds a reservation to the DHCP server.
+     * @param ip Ipv4 address of the reservation.
+     * @param mac 48-bit MAC address of the reservation.
+     * @returns
+     * @throws InvalidIpv4AddressError if the ip is not a valid IPv4 address.
+     * @throws Invalid48BitMacAddressError if the mac is not a valid 48-bit MAC address.
+     */
+    addReservation: (ip: string, mac: string) => void;
+    /**
+     * Removes a reservation from the DHCP server.
+     * @param ip Ipv4 address of the reservation.
+     * @returns
+     */
+    removeReservation: (ip: string) => void;
+    /**
+     * Assigns an IP address to a MAC address.
+     * @param mac 48-bit MAC address.
+     * @returns
+     */
+    assignIp: (mac: string) => string | null;
+    /**
+     * Gets the leases table.
+     */
+    getLeases: () => Record<string, IUltraDhcpLease>;
+    /**
+     * Subscribes to the leases table.
+     */
+    subscribeToLeases: (fn: (value: Record<string, IUltraDhcpLease>) => void) => () => void;
+}
+
+export type TPackageConfigs = IUltraDHCPServerConfig | IUltraDhcpClientConfig;

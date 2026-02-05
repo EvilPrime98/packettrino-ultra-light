@@ -16,9 +16,11 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
     const pcAPI  = ultraPcConfig({ 
         id,
         packageOptions: {
-            dhcpClient: true
+            'isc-dhcp-client': true,
         }
     });
+
+    console.log(pcAPI);
 
     const [
         arpTableState, 

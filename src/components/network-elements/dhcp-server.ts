@@ -19,7 +19,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
     const serverAPI = ultraPcConfig({ 
         id, 
         packageOptions: {
-            dhcpServer: true
+            'isc-dhcp-server': true
         }
     }); 
     
