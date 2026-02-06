@@ -7,6 +7,7 @@ import { command_ping } from "@/commands/ping";
 import { command_history } from "@/commands/history";
 import { command_nano } from "@/commands/nano";
 import { command_dhcp } from "@/commands/dhcp";
+import { command_apt } from "@/commands/apt";
 
 /**
  * Compiles, interprets and executes a terminal command
@@ -26,7 +27,8 @@ export default async function unix() {
         "ping": () => command_ping(),
         "history": () => command_history(),
         "nano": () => command_nano(),
-        "dhcp": () => command_dhcp()
+        "dhcp": () => command_dhcp(),
+        "apt": () => command_apt()
     }
 
     try {

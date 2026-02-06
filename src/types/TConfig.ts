@@ -358,8 +358,8 @@ export interface IUltraRoutingConfig {
  */
 export interface IUltraDpkgConfig {
     /**
-     * Installs a package on the network element.
-     * @param packageName 
+     * Installs a package in the network element.
+     * @param packageConfig Package configuration.
      * @returns 
      */
     install: (packageConfig: TPackageConfigs) => void;
