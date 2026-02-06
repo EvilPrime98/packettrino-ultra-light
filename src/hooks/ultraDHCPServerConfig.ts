@@ -11,13 +11,13 @@ export default function ultraDhcpServerConfig(): Record<"dhcpserver", IUltraDHCP
         , subscribeToProperties
     ] = ultraState<TDhcpServerProperties>({
         "state": true,
-        "listenOnIfaces": ["enp0s3"],
-        "offerRangeStart": "192.168.1.100",
-        "offerRangeEnd": "192.168.1.150",
-        "offerNetmask": "255.255.255.0",
-        "offerGateway": "192.168.1.1",
-        "offerDns": "8.8.8.8",
-        "offerLeaseTime": 86400
+        "listenOnIfaces": [],
+        "offerRangeStart": "",
+        "offerRangeEnd": "",
+        "offerNetmask": "",
+        "offerGateway": "",
+        "offerDns": "",
+        "offerLeaseTime": 0
     });
 
     const [

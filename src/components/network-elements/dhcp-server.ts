@@ -1,11 +1,9 @@
 import { UltraActivity, UltraComponent, ultraState, type UltraLightElement } from "@ultra-light";
 import { ARPTable } from "../tables/arp_tab";
-import { AdvancedOptions } from "@components/core/adv-options";
-import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
+import { AdvancedOptionsDyn } from "@components/core/adv-options";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import ultraPcConfig from "@/hooks/ultraPcConfig";
-import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
 import { TNewNetworkElementProperties } from "@/types/TConfig";
 import { hasDHCPServer } from "@/types/typeguards";
@@ -13,58 +11,22 @@ import { ENV } from "@/context/env-context";
 import styles from "./pc.module.css";
 import { quick_ping } from "@/utils/quick_ping";
 import { DhcpLeasesTable } from "../tables/dhcp_tab";
+import { ultraAdvOptions } from "@/hooks/ultraAdvOptions";
 
 export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
-    const serverAPI = ultraPcConfig({ 
-        id, 
-        packageOptions: {
-            'isc-dhcp-server': true
-        }
-    }); 
-    
-    const [
-        arpTableState, 
-        setArpTableState, 
-        subscribeArpTableState
-    ] = ultraState(false);
-    
-    const [
-        advOptionsState, 
-        setAdvOptionsState, 
-        subscribeAdvOptionsState
-    ] = ultraState(false);
-    
-    const [
-        leasesTableState, 
-        setLeasesTableState, 
-        subscribeLeasesTableState
-    ] = ultraState(false);
-    
-    const [
-        packetState, 
-        setPacketState, 
-        subscribePacketState
-    ] = ultraState(false);
-    
-    const [
-        contextClickEvent, 
-        setContextClickEvent,
-    ] = ultraState<null | Event>(null);
-
-    const [
-        , 
-        setIsDeleting, 
-        subscribeIsDeleting
-    ] = ultraState(false);
-
-    const options: AdvancedOption[] = [
+    const serverAPI = ultraPcConfig({ id, packageOptions: { 'isc-dhcp-server': true } }); 
+    const [ arpTableState, setArpTableState, subscribeArpTableState ] = ultraState(false);
+    const [ advOptionsState, setAdvOptionsState, subscribeAdvOptionsState ] = ultraState(false);
+    const [ leasesTableState, setLeasesTableState, subscribeLeasesTableState ] = ultraState(false);
+    const [ packetState, setPacketState, subscribePacketState ] = ultraState(false);
+    const [ contextClickEvent, setContextClickEvent, ] = ultraState<null | Event>(null);
+    const [ , setIsDeleting, subscribeIsDeleting ] = ultraState(false);
+    const options = ultraAdvOptions(serverAPI, [
         { message: "Network Configuration", callback: onNetworkConfig },
         { message: "Leases Table", callback: () => setLeasesTableState(true) },
-        { message: "ARP Table", callback: () => setArpTableState(true) },
-        { message: "Terminal", callback: showTerminal },
         { message: "Delete", callback: () => setIsDeleting(true) }
-    ]
+    ]);
 
     function canConnect() {
         const ifaces = serverAPI.getIfaces();
@@ -73,14 +35,6 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
             ifaces[ifaceId].connection.api !== null
         ).length;
         return numofConnections < numofInterfaces;
-    }
-
-    function showTerminal() {
-        if (tCtx.get().isVisible) return;
-        tCtx.get().update({
-            "isVisible": true,
-            "elementAPI": serverAPI,
-        })
     }
 
     function onClick() {
@@ -195,10 +149,11 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
 
             UltraActivity({
 
-                component: AdvancedOptions({
+                component: AdvancedOptionsDyn({
                     onClose: () => setAdvOptionsState(false),
                     contextClickEvent,
-                    options: [...options],
+                    options: options.get,
+                    optionsSubscriber: options.subscribe,
                     subscribeAdvOptionsState
                 }),
 
