@@ -1,60 +1,28 @@
 import { UltraActivity, UltraComponent, ultraState, type UltraLightElement } from "@ultra-light";
 import { ARPTable } from "../tables/arp_tab";
-import { AdvancedOptions } from "@components/core/adv-options";
-import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
+import { AdvancedOptionsDyn } from "@components/core/adv-options";
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import ultraPcConfig from "@/hooks/ultraPcConfig";
-import type { AdvancedOption } from "@/types/types";
 import { WORK_SPACE_CONTEXT } from "@context/workspace-context";
 import { TNewNetworkElementProperties } from "@/types/TConfig";
 import { ENV } from "@/context/env-context";
 import styles from "./pc.module.css";
 import { quick_ping } from "@/utils/quick_ping";
+import { ultraAdvOptions } from "@/hooks/ultraAdvOptions";
 
 export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
-    const pcAPI  = ultraPcConfig({ 
-        id,
-        packageOptions: {
-            'isc-dhcp-client': true,
-        }
-    });
-
-    const [
-        arpTableState, 
-        setArpTableState, 
-        subscribeArpTableState
-    ] = ultraState(false);
-    
-    const [
-        advOptionsState, 
-        setAdvOptionsState, 
-        subscribeAdvOptionsState
-    ] = ultraState(false);
-
-    const [
-        packetState, 
-        setPacketState, 
-        subscribePacketState
-    ] = ultraState(false);
-
-    const [
-        contextClickEvent, 
-        setContextClickEvent,
-    ] = ultraState<null | Event>(null);
-    
-    const [
-        , 
-        setIsDeleting, 
-        subscribeIsDeleting
-    ] = ultraState(false);
-    
-    const options: AdvancedOption[] = [
+    const pcAPI  = ultraPcConfig({ id,packageOptions: { 'isc-dhcp-client': true, }});
+    const [ arpTableState, setArpTableState, subscribeArpTableState ] = ultraState(false);
+    const [ advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
+    const [ packetState, setPacketState, subscribePacketState] = ultraState(false);
+    const [ contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
+    const [, setIsDeleting, subscribeIsDeleting ] = ultraState(false);
+    const pcOptions = ultraAdvOptions(pcAPI, [
         { message: "Show ARP Table", callback: () => setArpTableState(true) },
-        { message: "Terminal", callback: showTerminal },
         { message: "Delete", callback: () => setIsDeleting(true) }
-    ]
-
+    ]);
+    
     function canConnect() {
         const ifaces = pcAPI.getIfaces();
         const numofInterfaces = Object.keys(ifaces).length;
@@ -62,18 +30,6 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
             ifaces[ifaceId].connection.api !== null
         ).length;
         return numofConnections < numofInterfaces;
-    }
-
-    function showTerminal() {
-
-        if (tCtx.get().isVisible) return;
-
-        tCtx.set({
-            ...tCtx.get(),
-            "isVisible": true,
-            "elementAPI": pcAPI,
-        })
-
     }
 
     function onClick() {
@@ -151,16 +107,17 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
         children: [
 
+            //icon
             UltraComponent({
 
                 component: (`
-                        <img 
-                            src="./assets/board/pc.svg"
-                            alt="pc"
-                            draggable="true"
-                            class="${styles['clickable']}"
-                        />
-                    `),
+                    <img 
+                        src="./assets/board/pc.svg"
+                        alt="pc"
+                        draggable="true"
+                        class="${styles['clickable']}"
+                    />
+                `),
 
                 trigger: [
                     {
@@ -171,6 +128,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
             }),
 
+            //arp table
             UltraActivity({
 
                 component: ARPTable({
@@ -186,12 +144,14 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
             }),
 
+            //advanced options
             UltraActivity({
 
-                component: AdvancedOptions({
+                component: AdvancedOptionsDyn({
                     onClose: () => setAdvOptionsState(false),
                     contextClickEvent,
-                    options: [...options],
+                    options: pcOptions.get,
+                    optionsSubscriber: pcOptions.subscribe,
                     subscribeAdvOptionsState
                 }),
 
@@ -202,6 +162,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
             }),
 
+            //packet animation
             UltraActivity({
 
                 component: (`
