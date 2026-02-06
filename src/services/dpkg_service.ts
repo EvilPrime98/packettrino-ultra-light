@@ -3,6 +3,11 @@ import ultraDhcpServerConfig from "@/hooks/ultraDHCPServerConfig";
 import type { TAvailablePackages, TLayer3Config, TPackageOptions } from "@/types/TConfig";
 import { PACKAGES } from "@/types/TConfig";
 import { extractIfaceConfig } from "@/types/TExtractor";
+import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
+
+interface IDpkgInstallOptions {
+    verbose?: boolean;
+}
 
 export function dpkg(
     elementAPI: TLayer3Config
@@ -18,17 +23,29 @@ export function dpkg(
     }
 
     function install(
-        packageOptions: TPackageOptions
+        packageOptions: TPackageOptions,
+        options?: IDpkgInstallOptions
     ) {
-        PACKAGES.forEach(packageName => {
-            if (Object.hasOwn(packageOptions, packageName) 
-                && packageOptions[packageName] === true) {
-                elementAPI.editProperty('packageList',
-                    [...elementAPI.properties().packageList, packageName]
-                );
-                elementAPI.install(PACKAGE_CONFIG_MAP[packageName]());
+
+        if (!options) options = {
+            verbose: false
+        };
+        
+        for (const key of Object.keys(packageOptions)){
+            const packageName = key as TAvailablePackages;
+            if (PACKAGES.includes(packageName)){
+                if (packageOptions[packageName] === true){
+                    elementAPI.install(PACKAGE_CONFIG_MAP[packageName]());
+                    elementAPI.editProperty('packageList',
+                        [...elementAPI.properties().packageList, packageName]
+                    );
+                    if (options.verbose === true) tCtx.get().write(`Package ${packageName} installed successfully.`);
+                }
+            }else{
+                throw new Error(`Package "${packageName}" is not available.`);
             }
-        });
+        }
+
     }
 
     return dpkgService;
