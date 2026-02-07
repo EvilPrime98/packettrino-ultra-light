@@ -257,3 +257,9 @@
         scale: 0;
     }
 }
+
+.dhcp-client-field {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}

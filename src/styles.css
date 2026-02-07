@@ -193,7 +193,7 @@ img {
 
     &.no-animation {
         animation: none;
-
+        transition: none;
         &:hover {
             transform: none;
             background-color: #4361ee;
@@ -204,9 +204,10 @@ img {
     &:active {
         scale: 0.8;
         color: #4361ee;
+        background-color: #fff;
         box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
     }
-    
+
 }
 
 .btn-modern-yellow {

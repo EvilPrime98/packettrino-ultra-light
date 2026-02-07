@@ -14,15 +14,37 @@ import { encodeCidr } from "@/utils/network_lib";
 import PcMenuFrame from "./pc-menu-frame";
 import Ipv4Forwarding from "./ipv4-forwarding";
 import { DhcpClientField } from "./dhcp-client-field";
+import { hasDHCPClient } from "@/types/typeguards";
 
+/**
+ * Defines the structure of the reducer that holds the state of the PC menu fields.
+ */
 export interface IUltraPcFields {
+    /**
+     * Staful getter for one of the fields.
+     * @param key 
+     * @returns 
+     */
     get: (key: 'iface' | 'ip' | 'netmask' | 'gateway') => string;
+    /**
+     * Staful setter for one of the fields.
+     * @param key 
+     * @param value 
+     */
     set: (key: 'iface' | 'ip' | 'netmask' | 'gateway', value: string) => void;
+    /**
+     * Staful subscriber for one of the fields.
+     * @param key 
+     * @returns 
+     */
     subscribe: (key: 'iface' | 'ip' | 'netmask' | 'gateway') => (fn: (value: string) => void) => () => void;
 }
 
 export default function PcMenu() {
 
+    /**
+     * Reducer that holds the state of the PC menu fields.
+     */
     const fields: IUltraPcFields = (function () {
 
         const [getInterfaceField, setInterfaceField, subscribeToInterfaceField] = ultraState<string>('');
@@ -75,8 +97,16 @@ export default function PcMenu() {
 
     })();
 
+    /**
+     * State that holds a function that cleans up the global events.
+     */
     const [eventCleaner, setEventCleaner,] = ultraState<(() => void) | null>(null);
 
+    /**
+     * This function is called when the PC menu is opened. Sets 
+     * up the initial values of the fields and starts listening to
+     * global events.
+     */
     function onStart() {
         setEventCleaner(onGlobalEvents());
         const elementAPI = pmCtx.get().pcElementAPI;
@@ -89,11 +119,19 @@ export default function PcMenu() {
         fields.set('gateway', elementAPI.getDefaultGateway());
     }
 
+    /**
+     * Keydown event handler.
+     * @param event 
+     */
     function onKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") onClose();
         if (event.key === "Enter") onSave();
     }
 
+    /**
+     * This function is called when the PC menu is closed. Cleans up
+     * the state of the PC menu.
+     */
     function onClose() {
         onCleanup();
         pmCtx.get().update({
@@ -102,6 +140,11 @@ export default function PcMenu() {
         });
     }
 
+    /**
+     * This function is called when the user clicks the save button.
+     * It validates the input fields and sends a packet to the PC element
+     * to update its properties.
+     */
     function onSave() {
 
         if (!pmCtx.get()?.isVisible) return;
@@ -155,6 +198,11 @@ export default function PcMenu() {
 
     }
 
+    /**
+     * This function is called when the PC menu is opened. It adds global
+     * events to the window.
+     * @returns A function that removes the added global events from the window.
+     */
     function onGlobalEvents() {
         window.addEventListener("keydown", onKeydown);
         return () => {
@@ -162,12 +210,49 @@ export default function PcMenu() {
         }
     }
 
+    /**
+     * This function cleans up 
+     * the state of the PC menu.
+     */
     function onCleanup() {
         eventCleaner()?.();
         fields.set('iface', "");
         fields.set('ip', "");
         fields.set('netmask', "");
         fields.set('gateway', "");
+    }
+
+    /**
+     * This function is called when the DHCP client checkbox is changed.
+     * It updates the DHCP client on the PC element.
+     * @param $input A node reference to the input element.
+     */
+    function onDhcpClientChange(
+        $input: HTMLInputElement
+    ){
+        try {
+            const elementAPI = pmCtx.get().pcElementAPI;
+            if (!elementAPI) return;
+            if (!hasDHCPClient(elementAPI)) return;
+            if ($input.checked) {
+                elementAPI.dhcpClient.addDhcpIface(fields.get('iface')); //TODO: we need to alter the fields
+                toCtx.get().createNotification(
+                    `DHCP Client enabled on ${fields.get('iface')}`,
+                    'success'
+                );
+            }else {
+                elementAPI.dhcpClient.removeDhcpIface(fields.get('iface'));
+                toCtx.get().createNotification(
+                    `DHCP Client disabled on ${fields.get('iface')}`,
+                    'success'
+                );
+            }
+        }catch (error) {
+            toCtx.get().createNotification(
+                (error instanceof Error) ? error.message : 'Unknown error',
+                'error'
+            );
+        }
     }
 
     return UltraActivity({
@@ -193,7 +278,7 @@ export default function PcMenu() {
                     NetmaskField({ fields }),
                     GatewayField({ fields }),
                     Ipv4Forwarding(),
-                    DhcpClientField({ fields })
+                    DhcpClientField({ fields, onDhcpClientChange })
                 ],
             }),
 
