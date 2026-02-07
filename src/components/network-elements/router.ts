@@ -1,5 +1,5 @@
 import { UltraLightElement, UltraComponent, ultraState, UltraActivity } from "@ultra-light";
-import { AdvancedOptions } from "@components/core/adv-options";
+import { AdvancedOptionsDyn } from "@components/core/adv-options";
 import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
 import { WORK_SPACE_CONTEXT } from "@/context/workspace-context";
 import ultraRouterConfig from "@/hooks/ultraRouterConfig";
@@ -9,6 +9,7 @@ import { RoutingTable } from "../tables/routing_tab";
 import { ENV } from "@/context/env-context";
 import { quick_ping } from "@/utils/quick_ping";
 import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
+import { ultraAdvOptions } from "@/hooks/ultraAdvOptions";
 
 export default function Router({ x, y, id }: TNewNetworkElementProperties) {
 
@@ -43,11 +44,11 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
         subscribePacketState
     ] = ultraState(false);
 
-    const options = [
-        { message: "Terminal", callback: onTerminalOption },
-        { message: "Routing Table", callback: () => setRoutingTableState(true) },
-        { message: "Delete", callback: () => setIsDeleting(true) }
-    ]
+    const options = ultraAdvOptions(elementAPI, [
+        { message: "Terminal", callback: onTerminalOption, id: 'terminal' },
+        { message: "Routing Table", callback: () => setRoutingTableState(true), id: 'routing-table' },
+        { message: "Delete", callback: () => setIsDeleting(true), id: 'delete' }
+    ]);
 
     function canConnect() {
         const ifaces = elementAPI.getIfaces();
@@ -164,10 +165,12 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
 
                 UltraActivity({
 
-                    component: AdvancedOptions({
+                    component: AdvancedOptionsDyn({
                         onClose: () => setAdvOptionsState(false),
                         subscribeAdvOptionsState,
-                        options: [...options],
+                        options: options.get,
+                        optionsSubscriber: options.subscribe,
+                        deleteOption: options.delete,
                         contextClickEvent
                     }),
 

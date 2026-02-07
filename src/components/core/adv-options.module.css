@@ -7,9 +7,9 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12),
         0 2px 8px rgba(0, 0, 0, 0.08);
     text-align: center;
-    width: 160px;
     padding: 5px;
     z-index: 3;
+    width: 160px;
     animation: fadeIn 0.2s ease-in-out;
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -26,6 +26,20 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.delete-icon {
+    transition: all 0.2s ease;
+    &:hover {
+        transform: scale(1.1);
+    }
+    &:active {
+        transform: scale(0.9);
+    }
 }
 
 .advanced-options-modal button:hover {

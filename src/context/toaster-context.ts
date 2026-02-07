@@ -1,4 +1,4 @@
-import type { TToasterNotification } from "@/types/types";
+import type { TToasterNotification } from "@/types/TToaster";
 import { UltraContext } from "@ultra-light";
 
 export interface IToasterContext {
@@ -12,5 +12,5 @@ export interface IToasterContext {
 }
 
 export const TOASTER_CONTEXT = UltraContext<IToasterContext>({
-    createNotification: () => {}
+  createNotification: () => {}
 });

@@ -18,9 +18,10 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
     const [ packetState, setPacketState, subscribePacketState] = ultraState(false);
     const [ contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
     const [, setIsDeleting, subscribeIsDeleting ] = ultraState(false);
+
     const pcOptions = ultraAdvOptions(pcAPI, [
-        { message: "Show ARP Table", callback: () => setArpTableState(true) },
-        { message: "Delete", callback: () => setIsDeleting(true) }
+        { id: 'arp-table' , message: "Show ARP Table", callback: () => setArpTableState(true) },
+        { id: 'delete', message: "Delete", callback: () => setIsDeleting(true) }
     ]);
     
     function canConnect() {
@@ -152,7 +153,8 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
                     contextClickEvent,
                     options: pcOptions.get,
                     optionsSubscriber: pcOptions.subscribe,
-                    subscribeAdvOptionsState
+                    subscribeAdvOptionsState,
+                    deleteOption: pcOptions.delete
                 }),
 
                 mode: {

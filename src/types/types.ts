@@ -12,9 +12,19 @@ export interface MacRecord {
 }
 
 export type AdvancedOption = {
+  id: keyof typeof ADVANCED_OPTIONS;
   message: string;
   callback: (event: Event | null) => void;
 }
+
+export const ADVANCED_OPTIONS = {
+  'dhcp-server': 'dhcp-server',
+  'terminal': 'terminal',
+  'network-config': 'network-config',
+  'delete': 'delete',
+  'arp-table': 'arp-table',
+  'routing-table': 'routing-table',
+} as const;
 
 export type PcMenuFields = {
   interfaceField: string;

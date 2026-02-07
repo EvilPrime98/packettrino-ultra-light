@@ -1,12 +1,13 @@
 import styles from "./switch.module.css";
-import { AdvancedOption, MacRecord } from "@/types/types";
+import {  MacRecord } from "@/types/types";
 import { UltraActivity, UltraLightElement, UltraComponent, ultraState } from "@ultra-light";
-import { AdvancedOptions } from "../core/adv-options";
+import { AdvancedOptionsDyn } from "../core/adv-options";
 import ultraSwitchConfig from "@/hooks/ultraSwitchConfig";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { WORK_SPACE_CONTEXT as wCtx } from "@/context/workspace-context";
 import { IUltraSwitchConfig, TNewNetworkElementProperties } from "@/types/TConfig";
 import { CANVAS_CONTEXT as cCtx } from "@/context/canvas-context"
+import { ultraAdvOptions } from "@/hooks/ultraAdvOptions";
 
 export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties): HTMLElement {
 
@@ -16,9 +17,9 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
     const [, setIsDeleting, subscribeIsDeleting] = ultraState<boolean>(false);
     const [macTableState, setMacTableState, subscribeToMacTable] = ultraState<boolean>(false);
 
-    const options: AdvancedOption[] = [
-        { message: "Delete", callback: () => setIsDeleting(true) }
-    ]
+    const options = ultraAdvOptions(selfApi, [
+        { message: "Delete", callback: () => setIsDeleting(true), id: 'delete' }
+    ]);
 
     function canMove() {
         const activeConnections = selfApi.properties().connections
@@ -170,10 +171,12 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
 
                 UltraActivity({
 
-                    component: AdvancedOptions({
+                    component: AdvancedOptionsDyn({
                         onClose: () => setAdvOptionsState(false),
                         contextClickEvent,
-                        options: [...options],
+                        options: options.get,
+                        optionsSubscriber: options.subscribe,
+                        deleteOption: options.delete,
                         subscribeAdvOptionsState
                     }),
 

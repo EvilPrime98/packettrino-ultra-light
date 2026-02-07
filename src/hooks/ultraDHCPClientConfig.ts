@@ -34,6 +34,7 @@ export function ultraDhcpClientConfig(
                     leases.filter(l => l.ifaceId !== lease.ifaceId);
                 }
             }
+            console.log(leases[0]);
             if (leases.length === 0 
                 && intervalId !== null) {
                 clearInterval(intervalId);

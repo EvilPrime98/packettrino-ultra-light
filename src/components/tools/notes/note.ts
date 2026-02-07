@@ -1,8 +1,8 @@
 import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
 import styles from './note.module.css';
-import { AdvancedOptions } from "@/components/core/adv-options";
-import type { AdvancedOption } from "@/types/types";
+import { AdvancedOptionsDyn } from "@/components/core/adv-options";
 import DragIcon from "@/components/icons/drag-icon";
+import { ultraAdvOptions } from "@/hooks/ultraAdvOptions";
 
 interface TextObjectProps {
     id: string;
@@ -19,11 +19,12 @@ export default function TextObject({ id, x, y }: TextObjectProps) {
     ] = ultraState<boolean>(false);
 
     const [, setIsDeleting, subscribeIsDeleting] = ultraState<boolean>(false);
+
     const [currentEvent, setCurrentEvent,] = ultraState<Event | null>(null);
 
-    const options: AdvancedOption[] = [
-        { message: "Delete", callback: () => setIsDeleting(true) }
-    ];
+    const options = ultraAdvOptions(null, [
+        { message: "Delete", callback: () => setIsDeleting(true), id: 'delete' }
+    ])  ;
 
     function onRightClick(event: Event) {
         event.preventDefault();
@@ -119,10 +120,12 @@ export default function TextObject({ id, x, y }: TextObjectProps) {
 
             UltraActivity({
 
-                component: AdvancedOptions({
+                component: AdvancedOptionsDyn({
                     onClose: () => setOptionsState(false),
                     contextClickEvent: currentEvent,
-                    options: [...options],
+                    options: options.get,
+                    optionsSubscriber: options.subscribe,
+                    deleteOption: options.delete,
                     subscribeAdvOptionsState: subscribeToOptionsState
                 }),
 
