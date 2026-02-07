@@ -1,9 +1,38 @@
+import { UltraLightElement, UltraRenderableElement } from "@/ultra-light/types";
 import { UltraComponent, UltraTrigger } from "@/ultra-light/ultra-light";
 
 /**
  * Renders a form input element. The default structure is a
  * div element with an optional label and an input element.
- * @param param0 
+ * @param param0
+ * @example 
+ * FormInput({
+ *     id: 'input-id',
+ *     name: 'input-name',
+ *     label: 'Input Label',
+ *     type: 'text',
+ *     getValue: () => 'input-value',
+ *     changeSubscriber: (fn: (value: any) => void) => () => void,
+ *     onInput: (event: Event) => void,
+ *     onChange: (event: Event) => void,
+ *     className: ['class-1', 'class-2'],
+ *     adTriggers: [
+ *         { subscriber: subscriber, triggerFunction: triggerFunction }
+ *     ],
+ *     adChildren: [
+ *         <div>Child 1</div>,
+ *         <div>Child 2</div>
+ *     ]
+ * })
+ * 
+ * The above code will render a div element with the following structure:
+ * 
+ * <div class="class-1 class-2">
+ *     <label for="input-name">Input Label</label>
+ *     <input type="text" id="input-id" name="input-name" />
+ *     <div>Child 1</div>
+ *     <div>Child 2</div>
+ * </div>
  * @returns 
  */
 export function FormInput({
@@ -16,7 +45,8 @@ export function FormInput({
     className,
     type,
     label,
-    adTriggers
+    adTriggers,
+    adChildren
 }: {
     /**
      * Unique identifier of the input.
@@ -55,9 +85,13 @@ export function FormInput({
      */
     label?: string;
     /**
-     * Optional aditional triggers for the input. These will be applied to the input element.
+     * Optional aditional triggers for the input. If provided, they will be applied to the input element.
      */
     adTriggers?: UltraTrigger[];
+    /**
+     * Optional additional children. If provided, they will be rendered as siblings of the input element.
+     */
+    adChildren?: (Node | UltraRenderableElement | UltraLightElement | null)[] | undefined;
 
 }) {
 
@@ -99,7 +133,9 @@ export function FormInput({
 
                     ],
 
-                })
+                }),
+
+                ...adChildren || []
 
             ]
 
@@ -131,7 +167,9 @@ export function FormInput({
                         ($input as HTMLInputElement).value = getValue().toString();
                     }
                 }]
-            })
+            }),
+
+            ...adChildren || []
 
         ],
 

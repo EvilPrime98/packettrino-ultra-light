@@ -13,8 +13,6 @@ export async function command_dhcp(){
     .split(" ")
     .slice(1);
 
-    console.log(elementApi);
-
     await sendDHCPDiscover(
         elementApi,
         ifaceId
