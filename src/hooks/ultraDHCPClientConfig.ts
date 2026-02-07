@@ -76,13 +76,24 @@ export function ultraDhcpClientConfig(
         setDhcpIfaces([...getDhcpIfaces(), ifaceId]);
     }
 
+    function removeDhcpIface(
+        ifaceId: string
+    ){
+        const ifaceIds = Object.keys({ ...ifaceApi.getIfaces()});
+        if (!ifaceIds.includes(ifaceId)) {
+            throw new InterfaceDoesNotExistError(ifaceId);
+        }
+        setDhcpIfaces(getDhcpIfaces().filter(iface => iface !== ifaceId));
+    }
+
     return {
         "dhcpClient": {
             getDhcpIfaces,
             assignIp: assignLeaseToIface,
             subscribeToLeases,
             getLeases,
-            addDhcpIface
+            addDhcpIface,
+            removeDhcpIface
         }
     }
 

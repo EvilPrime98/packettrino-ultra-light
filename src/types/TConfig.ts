@@ -601,6 +601,12 @@ export interface IUltraDhcpClientConfig {
      * @returns 
      */
     addDhcpIface: (ifaceId: string) => void;
+    /**
+     * Removes the DHCP client from a specific interface.
+     * @param ifaceId 
+     * @returns 
+     */
+    removeDhcpIface: (ifaceId: string) => void;
 }
 
 /**
