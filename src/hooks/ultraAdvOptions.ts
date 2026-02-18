@@ -8,7 +8,9 @@ import { ultraState } from "@/ultra-light/ultra-light";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 
 /**
- * This hook returns a stateful getter for the advanced options of a network element.
+ * Returns a stateful getter, setter and subscriber for the advanced options of a network element.
+ * The options are generated based on the element API, its package options and the 
+ * optional starting options.
  * @param elementApi Element API of the network element.
  * @param startingOptions Optional starting options.
  * @returns 
