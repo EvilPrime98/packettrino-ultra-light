@@ -161,7 +161,10 @@ img {
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, 
+        box-shadow 0.3s ease, 
+        background-color 0.3s ease,
+        scale 0.3s ease;
     box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
     text-align: center;
     text-decoration: none;
@@ -206,6 +209,13 @@ img {
         color: #4361ee;
         background-color: #fff;
         box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    &:disabled {
+        background-color: #e8e8e8;
+        color: #333;
+        box-shadow: none;
+        cursor: not-allowed;
     }
 
 }
