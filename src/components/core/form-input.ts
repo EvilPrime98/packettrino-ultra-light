@@ -46,7 +46,9 @@ export function FormInput({
     type,
     label,
     adTriggers,
-    adChildren
+    adChildren,
+    disabled,
+    disabledSubscriber,
 }: {
     /**
      * Unique identifier of the input.
@@ -92,6 +94,14 @@ export function FormInput({
      * Optional additional children. If provided, they will be rendered as siblings of the input element.
      */
     adChildren?: (Node | UltraRenderableElement | UltraLightElement | null)[] | undefined;
+    /**
+     * Optional disabled state. If provided, it will be applied to the input element.
+     */
+    disabled?: () => boolean;
+    /**
+     * Optional disabled subscriber. If provided, it will be triggered when the disabled state changes.
+     */
+    disabledSubscriber?: (fn: (value: boolean) => void) => () => void;
 
 }) {
 
@@ -121,13 +131,21 @@ export function FormInput({
                     eventHandler: (onChange) ? { 'change': onChange } : {},
 
                     trigger: [
-                        
-                        {  
-                            subscriber: changeSubscriber, 
+
+                        {
+                            subscriber: changeSubscriber,
                             triggerFunction: ($input: HTMLElement) => {
                                 ($input as HTMLInputElement).checked = Boolean(getValue());
                             }
                         },
+
+                        ...(disabledSubscriber ? [{
+                            subscriber: disabledSubscriber,
+                            triggerFunction: ($input: HTMLElement) => {
+                                ($input as HTMLInputElement).disabled = disabled ? !disabled() : false;
+                            }
+                        }] : []),
+
 
                         ...adTriggers || []
 
@@ -147,6 +165,8 @@ export function FormInput({
 
         component: '<div></div>',
 
+        className: (!className) ? [] : className,
+
         children: [
 
             (label) ? `<label for="${name}">${label}</label>` : null,
@@ -154,19 +174,35 @@ export function FormInput({
             UltraComponent({
 
                 component: (`
-                <input 
-                    type="${type || 'text'}"
-                    id="${id}" 
-                    name="${name}"
-                />
-            `),
+                    <input 
+                        type="${type || 'text'}"
+                        id="${id}" 
+                        name="${name}"
+                        ${disabled?.() ? 'disabled' : ''}
+                    />
+                `),
 
-                trigger: [{ 
-                    subscriber: changeSubscriber, 
-                    triggerFunction: ($input: HTMLElement) => {
-                        ($input as HTMLInputElement).value = getValue().toString();
-                    }
-                }]
+                trigger: [
+
+                    {
+                        subscriber: changeSubscriber,
+                        triggerFunction: ($input: HTMLElement) => {
+                            ($input as HTMLInputElement).value = getValue().toString();
+                        }
+                    },
+
+                    ...(disabledSubscriber ? [{
+                        subscriber: disabledSubscriber,
+                        triggerFunction: ($input: HTMLElement) => {
+                            if (!disabled) return;
+                            ($input as HTMLInputElement).disabled = disabled();
+                        }
+                    }] : []),
+
+                    ...adTriggers || []
+
+                ]
+
             }),
 
             ...adChildren || []

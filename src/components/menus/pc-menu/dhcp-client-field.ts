@@ -4,38 +4,74 @@ import styles from './pc-menu.module.css'
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import { hasDHCPClient } from "@/types/typeguards";
 import { IUltraPcFields } from "./pc-menu";
-import { sendDHCPDiscover } from "@/services/isc-dhcp-service";
+import { Loader } from "@/components/core/loader";
 
 export function DhcpClientField({
     fields,
-    onDhcpClientChange
+    blockFields,
+    onDhcpClientChange,
+    onDhcpProcess
 }: {
+    /**
+     * The fields reducer object from the PC Menu component.
+     */
     fields: IUltraPcFields,
+    /**
+     * Blocks the form fields.
+     */
+    blockFields: () => void,
+    /**
+     * A function that is called when the DHCP client checkbox state changes.
+     */
     onDhcpClientChange: ($input: HTMLInputElement) => void
+    /**
+     * A function that is called when the DHCP process button is clicked.
+     */
+    onDhcpProcess: () => Promise<void>
 }) {
 
+    //State that indicates whether the DHCP client field should be visible or not.
     const [getVisible, setVisible, subscribeToVisible] = ultraState<boolean>(false);
+    //State that indicates whether the DHCP client is enabled or not for the interface.
     const [isDhcpEnabled, setDhcpEnabled, subscribeToDhcpEnabled] = ultraState<boolean>(false);
+    //State that indicates if there's a dhcp process running.
+    const [isSearching, setSearching, subscribeToSearching] = ultraState<boolean>(false);
 
+    /**
+     * This function is called when the PC Menu context changes.
+     * @returns 
+     */
     function onLoad() {
+        
         if (!pmCtx.get().isVisible) {
             onCleanup();
             return;
         }
+        
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
+        
         if (!hasDHCPClient(elementAPI)) {
             setVisible(false);
             setDhcpEnabled(false);
             return;
         }
+
         setVisible(true);
+        
         const dhcpIfaces = elementAPI.dhcpClient.getDhcpIfaces();
-        setDhcpEnabled(
-            dhcpIfaces.includes(fields.get('iface'))
-        );
+
+        if (dhcpIfaces.includes(fields.get('iface'))) {
+            setDhcpEnabled(true);
+            blockFields();
+        }
+        
     }
 
+    /**
+     * This function is called when the DHCP client checkbox state changes.
+     * @param event 
+     */
     function onChange(
         event: Event
     ) {
@@ -44,18 +80,22 @@ export function DhcpClientField({
         onDhcpClientChange($input);
     }
 
+    /**
+     * Cleans up the DHCP client field and sets its states to their initial values.
+     */
     function onCleanup() {
         setVisible(false);
         setDhcpEnabled(false);
     }
 
+    /**
+     * Starts a DHCP (discover) process on the selected interface.
+     * @returns 
+     */
     async function onSearch() {
-        const elementAPI = pmCtx.get().pcElementAPI;
-        if (!elementAPI) return;
-        await sendDHCPDiscover(
-            elementAPI,
-            fields.get('iface')
-        )
+        setSearching(true);
+        await onDhcpProcess();
+        setSearching(false);
     }
 
     return UltraActivity({
@@ -74,19 +114,16 @@ export function DhcpClientField({
             children: [
 
                 FormInput({
-                    
+
                     id: 'dhcp-client-field',
                     name: 'dhcp-client-field',
                     label: 'DHCP Client',
                     type: 'checkbox',
                     className: [styles['form-item']],
-                    
                     getValue: isDhcpEnabled,
-                    
                     changeSubscriber: subscribeToDhcpEnabled,
-                    
                     onChange: onChange,
-                    
+
                     adTriggers: [
                         {
                             subscriber: pmCtx.subscribe,
@@ -96,13 +133,36 @@ export function DhcpClientField({
                     ],
 
                     adChildren: [
+
                         UltraActivity({
                             mode: { state: isDhcpEnabled, subscriber: subscribeToDhcpEnabled },
-                            component: '<button type="button">Search</button>',
+                            type: 'visibility',
+                            component: '<button type="button"></button>',
                             className: ['btn-modern-blue', 'small'],
                             eventHandler: { click: onSearch },
-                            type: 'visibility'
+                            trigger: [
+                                {
+                                    subscriber: subscribeToSearching,
+                                    triggerFunction: ($button: HTMLElement) => {
+                                        ($button as HTMLButtonElement).disabled = isSearching();
+                                    }
+                                }
+                            ],
+                            children: [
+
+                                UltraActivity({
+                                    mode: { state: () => !isSearching(), subscriber: subscribeToSearching },
+                                    component: '<span>Search</span>',
+                                }),
+
+                                UltraActivity({
+                                    mode: { state: isSearching, subscriber: subscribeToSearching },
+                                    component: Loader({ size: 20, border: 3 }),
+                                })
+
+                            ]
                         })
+
                     ]
 
                 }),

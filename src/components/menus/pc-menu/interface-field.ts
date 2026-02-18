@@ -10,11 +10,7 @@ import { IUltraPcFields } from "./pc-menu";
 
 export default function InterfaceField({ fields }: { fields: IUltraPcFields }) {
 
-    const [
-        ifacesList,
-        setIfacesList,
-        subscribeIfacesList
-    ] = ultraState<string[]>([]);
+    const [ ifacesList, setIfacesList,subscribeIfacesList ] = ultraState<string[]>([]); 
 
     function onLoadIfaces(self: HTMLElement) {
         if (!pmCtx.get()?.isVisible) return;
@@ -104,7 +100,5 @@ export default function InterfaceField({ fields }: { fields: IUltraPcFields }) {
         ],
 
     })
-
-
 
 }

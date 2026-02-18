@@ -4,9 +4,6 @@ import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { PcFormValidator } from "@/schemas/pc-menu-schema";
 import InterfaceField from "./interface-field";
 import styles from "./pc-menu.module.css";
-import IpField from "./ip-field";
-import NetmaskField from "./netmask-field";
-import GatewayField from "./gateway-field";
 import BasicButtons from "./basic-buttons";
 import { ip_addr } from "@/services/ifaces_service";
 import { ip_route } from "@/services/routing_service";
@@ -15,6 +12,8 @@ import PcMenuFrame from "./pc-menu-frame";
 import Ipv4Forwarding from "./ipv4-forwarding";
 import { DhcpClientField } from "./dhcp-client-field";
 import { hasDHCPClient } from "@/types/typeguards";
+import { dhcp_service } from "@/services/isc-dhcp-service";
+import { FormInput } from "@/components/core/form-input";
 
 /**
  * Defines the structure of the reducer that holds the state of the PC menu fields.
@@ -101,6 +100,11 @@ export default function PcMenu() {
      * State that holds a function that cleans up the global events.
      */
     const [eventCleaner, setEventCleaner,] = ultraState<(() => void) | null>(null);
+
+    /**
+     * State that indicates whether the fields are blocked or not.
+     */
+    const [blockedFields, setBlockedFields, subscribeToBlockedFields] = ultraState(false);
 
     /**
      * This function is called when the PC menu is opened. Sets 
@@ -220,11 +224,12 @@ export default function PcMenu() {
         fields.set('ip', "");
         fields.set('netmask', "");
         fields.set('gateway', "");
+        setBlockedFields(false);
     }
 
     /**
      * This function is called when the DHCP client checkbox is changed.
-     * It updates the DHCP client on the PC element.
+     * It enables or disables the DHCP client on the PC element interface.
      * @param $input A node reference to the input element.
      */
     function onDhcpClientChange(
@@ -247,11 +252,36 @@ export default function PcMenu() {
                     'success'
                 );
             }
+            setBlockedFields($input.checked);
         }catch (error) {
             toCtx.get().createNotification(
                 (error instanceof Error) ? error.message : 'Unknown error',
                 'error'
             );
+        }
+    }
+
+    /**
+     * This function is called when the DHCP process button is clicked.
+     * It sends a DHCP (discover) packet for the selected interface.
+     */
+    async function onDhcpProcess(){
+        const elementAPI = pmCtx.get().pcElementAPI;
+        if (!elementAPI) return;
+        try {
+            await dhcp_service(
+                elementAPI,
+                fields.get('iface'),
+                'discover'
+            )
+            const ifaces = elementAPI.getIfaces();
+            fields.set('ip', ifaces[fields.get('iface')].ip);
+            fields.set('netmask', ifaces[fields.get('iface')].netmask);
+        } catch (e) {
+            toCtx.get().createNotification(
+                (e instanceof Error) ? e.message : 'Error while searching DHCP server...',
+                'error'
+            )
         }
     }
 
@@ -271,14 +301,70 @@ export default function PcMenu() {
             PcMenuFrame({ onClose }),
 
             UltraComponent({
+                
                 component: `<section class="basic-section"></section>`,
+                
                 children: [
+                    
                     InterfaceField({ fields }),
-                    IpField({ fields }),
-                    NetmaskField({ fields }),
-                    GatewayField({ fields }),
+                    
+                    FormInput({
+                        id: 'ip-field',
+                        name: 'ip-field',
+                        label: 'IP(ipv4):',
+                        className: [styles['form-item']],
+                        getValue: () => fields.get('ip'),
+                        changeSubscriber: fields.subscribe('ip'),
+                        onInput: (event: Event) => {
+                            event.stopPropagation();
+                            const $input = event.target as HTMLInputElement;
+                            fields.set('ip', $input.value);
+                        },
+                        disabled: blockedFields,
+                        disabledSubscriber: subscribeToBlockedFields
+                    }),
+
+                    FormInput({
+                        id: 'netmask-field',
+                        name: 'netmask-field',
+                        label: 'Netmask:',
+                        className: [styles['form-item']],
+                        getValue: () => fields.get('netmask'),
+                        changeSubscriber: fields.subscribe('netmask'),
+                        onInput: (event: Event) => {
+                            event.stopPropagation();
+                            const $input = event.target as HTMLInputElement;
+                            fields.set('netmask', $input.value);
+                        },
+                        disabled: blockedFields,
+                        disabledSubscriber: subscribeToBlockedFields
+                    }),
+
+                    FormInput({
+                        id: 'gateway-field',
+                        name: 'gateway-field',
+                        label: 'Gateway:',
+                        className: [styles['form-item']],
+                        getValue: () => fields.get('gateway'),
+                        changeSubscriber: fields.subscribe('gateway'),
+                        onInput: (event: Event) => {
+                            event.stopPropagation();
+                            const $input = event.target as HTMLInputElement;
+                            fields.set('gateway', $input.value);
+                        },
+                        disabled: blockedFields,
+                        disabledSubscriber: subscribeToBlockedFields
+                    }),
+                    
                     Ipv4Forwarding(),
-                    DhcpClientField({ fields, onDhcpClientChange })
+
+                    DhcpClientField({ 
+                        fields,
+                        blockFields: () => setBlockedFields(true),
+                        onDhcpClientChange,
+                        onDhcpProcess
+                    })
+
                 ],
             }),
 
