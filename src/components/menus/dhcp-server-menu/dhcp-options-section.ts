@@ -4,7 +4,7 @@ import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-co
 import { hasDHCPServer } from "@/types/typeguards";
 import { FormInput } from "@/components/core/form-input";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
-import { iscDhcpServerValidator } from "@/services/isc-dhcp-service";
+import { iscDhcpServerValidator } from "@/schemas/dhcp-menu-schema";
 
 export function DhcpOptionsSection() {
 
