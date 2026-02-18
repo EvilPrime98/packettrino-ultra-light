@@ -1,4 +1,4 @@
-import { sendDHCPDiscover } from "@/services/isc-dhcp-service";
+import { dhcp_service } from "@/services/isc-dhcp-service";
 import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
 
 export async function command_dhcp(){
@@ -13,9 +13,10 @@ export async function command_dhcp(){
     .split(" ")
     .slice(1);
 
-    await sendDHCPDiscover(
+    await dhcp_service(
         elementApi,
-        ifaceId
+        ifaceId,
+        'discover'
     );
     
 }
