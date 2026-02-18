@@ -9,21 +9,37 @@ import { ENV } from "@/context/env-context";
 import styles from "./pc.module.css";
 import { quick_ping } from "@/utils/quick_ping";
 import { ultraAdvOptions } from "@/hooks/ultraAdvOptions";
+import { deleteElement } from "@/utils/component";
 
 export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElement {
 
-    const pcAPI  = ultraPcConfig({ id,packageOptions: { 'isc-dhcp-client': true, }});
-    const [ arpTableState, setArpTableState, subscribeArpTableState ] = ultraState(false);
-    const [ advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
-    const [ packetState, setPacketState, subscribePacketState] = ultraState(false);
-    const [ contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
-    const [, setIsDeleting, subscribeIsDeleting ] = ultraState(false);
+    const pcAPI  = ultraPcConfig({ 
+        id,
+        packageOptions: { 
+            'isc-dhcp-client': true, 
+        }
+    });
 
+    //state that indicates whether the ARP table should be visible or not.
+    const [ arpTableState, setArpTableState, subscribeArpTableState ] = ultraState(false);
+    //state that indicates whether the advanced options should be visible or not.
+    const [ advOptionsState, setAdvOptionsState, subscribeAdvOptionsState] = ultraState(false);
+    //state that indicates whether the packet animation should be visible or not.
+    const [ packetState, setPacketState, subscribePacketState] = ultraState(false);
+    //state that saves the context menu event.
+    const [ contextClickEvent, setContextClickEvent,] = ultraState<null | Event>(null);
+    //state that indicates whether the element is being deleted or not.
+    const [ , setIsDeleting, subscribeIsDeleting ] = ultraState(false);
+    //advanced options for the PC element.
     const pcOptions = ultraAdvOptions(pcAPI, [
         { id: 'arp-table' , message: "Show ARP Table", callback: () => setArpTableState(true) },
         { id: 'delete', message: "Delete", callback: () => setIsDeleting(true) }
     ]);
     
+    /**
+     * Returns whether the PC element has available connections or not
+     * @returns 
+     */
     function canConnect() {
         const ifaces = pcAPI.getIfaces();
         const numofInterfaces = Object.keys(ifaces).length;
@@ -52,43 +68,44 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
     }
 
-    function onRightClick(event: Event) {
+    function onRightClick(
+        event: Event
+    ) {
         event.preventDefault();
         setContextClickEvent(event);
         setAdvOptionsState(!advOptionsState());
     }
 
-    function onDelete(self: UltraLightElement) {
-        self._cleanup?.();
-        self.remove();
-    }
-
-    function onDragStart(event: Event) {
-
+    function onDragStart(
+        event: Event
+    ) {
         const dragEvent = event as DragEvent;
-        const self = event.currentTarget;
-
+        const $pc = event.currentTarget;
         if (!(dragEvent instanceof DragEvent)) return;
-        if (!(self instanceof HTMLElement)) return;
-
-        WORK_SPACE_CONTEXT.set({
-            ...WORK_SPACE_CONTEXT.get(),
+        if (!($pc instanceof HTMLElement)) return;
+        WORK_SPACE_CONTEXT.get().update({
             elementAPI: {
                 config: pcAPI,
-                originx: self.style.left,
-                originy: self.style.top,
+                originx: $pc.style.left,
+                originy: $pc.style.top,
                 state: 'dropped',
                 itemType: 'pc'
             }
         })
-
     }
 
-    function onIfaceChanges(self: UltraLightElement) {
-        const icon = self as HTMLImageElement;
-        if (!icon) return;
-        icon.draggable = canConnect();
-        icon.classList.toggle(styles['clickable'], canConnect());
+    /**
+     * This function is called when there is a change in the interfaces
+     * of the PC element.
+     * @param self 
+     * @returns 
+     */
+    function onIfaceChanges(
+        self: UltraLightElement
+    ) {
+        const $icon = self as HTMLImageElement;
+        $icon.draggable = canConnect();
+        $icon.classList.toggle(styles['clickable'], canConnect());
     }
 
     return UltraComponent({
@@ -192,7 +209,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
         trigger: [
             {
                 subscriber: subscribeIsDeleting,
-                triggerFunction: onDelete
+                triggerFunction: ($pc) => deleteElement($pc, pcAPI, true)
             }
         ]
 
