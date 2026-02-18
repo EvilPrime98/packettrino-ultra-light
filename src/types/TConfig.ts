@@ -151,6 +151,8 @@ export interface Lease {
     serverIp: string;
 }
 
+export type TDhcpClientActions = 'discover' | 'release' | 'request';
+
 //ELEMENT PROPERTIES
 
 export interface ILayer3ElementProperties {
