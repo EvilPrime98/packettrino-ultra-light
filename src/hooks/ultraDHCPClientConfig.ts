@@ -7,23 +7,18 @@ export function ultraDhcpClientConfig(
     ifaceApi: IUltraIfaceConfig
 ): Record<"dhcpClient", IUltraDhcpClientConfig> {
 
-    const [
-        getDhcpIfaces
-        , setDhcpIfaces
-        ,
-    ] = ultraState<string[]>([]);
-
-    const [
-        getLeases
-        , setLeases
-        , subscribeToLeases
-    ] = ultraState<Lease[]>([]);
-
+    const [ getDhcpIfaces, setDhcpIfaces,] = ultraState<string[]>([]);
+    const [ getLeases, setLeases, subscribeToLeases ] = ultraState<Lease[]>([]);
     let intervalId: NodeJS.Timeout | null = null;
 
+    /**
+     * This function updates the leases of the DHCP client. It decrements the lease time of each lease by 1.
+     * If the lease time is less than or equal to 0, the interface is removed from the DHCP client and the 
+     * lease is removed from the leases table.
+     */
     function updateLeases(){
         intervalId = setInterval(() => {
-            const leases = [...getLeases()];
+            let leases = [...getLeases()];
             for (const lease of leases) {
                 lease.leasetime -= 1;
                 if (lease.leasetime <= 0) {
@@ -31,17 +26,16 @@ export function ultraDhcpClientConfig(
                         'ip': '',
                         'netmask': ''
                     });
-                    leases.filter(l => l.ifaceId !== lease.ifaceId);
+                    leases = leases.filter(l => l.ifaceId !== lease.ifaceId);
                 }
             }
-            console.log(leases[0]);
-            if (leases.length === 0 
-                && intervalId !== null) {
+            if (leases.length === 0 && intervalId !== null) {
+                console.log('Clearing interval');
                 clearInterval(intervalId);
                 intervalId = null;
             }
             setLeases(leases);
-        }, 1000);
+        }, 1000);  
     }
 
     function assignLeaseToIface(
