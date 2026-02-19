@@ -16,19 +16,20 @@ type TPages = typeof pages[keyof typeof pages];
 
 export function Dhcp_Server_Menu() {
 
-    const [
-        getTitle,
-        setTitle,
-        subscribeToTitle
-    ] = ultraState<string>("");
+    //state for the frame title
+    const [ getTitle, setTitle, subscribeToTitle ] = ultraState<string>("");
+    //state for the current page
+    const [ getPage, setPage, subscribeToPage ] = ultraState<TPages>(pages.main);
 
-    const [
-        getPage,
-        setPage,
-        subscribeToPage
-    ] = ultraState<TPages>(pages.main);
-
-    function onLoad($form: UltraLightElement) {
+    /**
+     * This function is executed when the DHCP-Server-Menu-Context 
+     * visibility changes.
+     * @param $form 
+     * @returns 
+     */
+    function onLoad(
+        $form: UltraLightElement
+    ) {
         if (!dsCtx.get().isVisible) {
             cleanup($form);
             return;
@@ -44,14 +45,12 @@ export function Dhcp_Server_Menu() {
         })
     }
 
-    function cleanup($form: UltraLightElement) {
+    function cleanup(
+        $form: UltraLightElement
+    ) {
         ($form as HTMLFormElement).reset();
         setPage(pages.main);
         setTitle('');
-    }
-
-    function onSave() {
-        console.log("saving");
     }
 
     return UltraActivity({
@@ -74,6 +73,7 @@ export function Dhcp_Server_Menu() {
                 getTitle: getTitle,
             }),
 
+            //navigation panel
             UltraComponent({
 
                 component: (`<div></div>`),
@@ -102,6 +102,7 @@ export function Dhcp_Server_Menu() {
 
             }),
 
+            //main section
             UltraActivity({
 
                 mode: {
@@ -117,6 +118,7 @@ export function Dhcp_Server_Menu() {
 
             }),
 
+            //reservations section
             UltraActivity({
 
                 mode: {
@@ -129,10 +131,6 @@ export function Dhcp_Server_Menu() {
             })
 
         ],
-
-        eventHandler: {
-            "submit": onSave
-        },
 
         trigger: [
             { subscriber: dsCtx.subscribe, triggerFunction: onLoad }

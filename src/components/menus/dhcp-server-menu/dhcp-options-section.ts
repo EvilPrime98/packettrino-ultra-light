@@ -1,4 +1,4 @@
-import { UltraComponent, ultraState } from "@/ultra-light/ultra-light";
+import { UltraComponent, ultraCompState, ultraState } from "@/ultra-light/ultra-light";
 import styles from "./dhcp-server-menu.module.css";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
 import { hasDHCPServer } from "@/types/typeguards";
@@ -9,14 +9,22 @@ import { iscDhcpServerValidator } from "@/schemas/dhcp-menu-schema";
 export function DhcpOptionsSection() {
 
     const [getState, setState, subscribeToState] = ultraState(false);
-    const [getListenOnInterfaces, setListenOnInterfaces, subscribeToListenOnInterfaces] = ultraState("");
-    const [getRangeStart, setRangeStart, subscribeToRangeStart] = ultraState("");
-    const [getRangeEnd, setRangeEnd, subscribeToRangeEnd] = ultraState("");
-    const [getOfferNetmask, setOfferNetmask, subscribeToOfferNetmask] = ultraState("");
-    const [getOfferGateway, setOfferGateway, subscribeToOfferGateway] = ultraState("");
-    const [getOfferDns, setOfferDns, subscribeToOfferDns] = ultraState("");
-    const [getOfferLeaseTime, setOfferLeaseTime, subscribeToOfferLeaseTime] = ultraState(0);
+    const [getEventsCleanup, setEventsCleanup, ] = ultraState<() => void>(() => {});
 
+    const sectionState = ultraCompState({
+        listenOnInterface: '',
+        rangeStart: '',
+        rangeEnd: '',
+        offerNetmask: '',
+        offerGateway: '',
+        offerDns: '',
+        offerLeaseTime: 0
+    });
+
+    /**
+     * This function is executed when the DHCP-Server-Menu-Context visibility changes.
+     * @returns 
+     */
     function onLoad() {
         if (!dsCtx.get().isVisible) {
             onCleanup();
@@ -26,25 +34,28 @@ export function DhcpOptionsSection() {
         if (serverAPI && hasDHCPServer(serverAPI)) {
             const serverProperties = serverAPI.dhcpserver.getProperties();
             setState(serverProperties.state);
-            setListenOnInterfaces(serverProperties.listenOnIfaces.join(", "));
-            setRangeStart(serverProperties.offerRangeStart);
-            setRangeEnd(serverProperties.offerRangeEnd);
-            setOfferNetmask(serverProperties.offerNetmask);
-            setOfferGateway(serverProperties.offerGateway);
-            setOfferDns(serverProperties.offerDns);
-            setOfferLeaseTime(serverProperties.offerLeaseTime);
+            sectionState.listenOnInterface.set(serverProperties.listenOnIfaces.join(", "));
+            sectionState.rangeStart.set(serverProperties.offerRangeStart);
+            sectionState.rangeEnd.set(serverProperties.offerRangeEnd);
+            sectionState.offerNetmask.set(serverProperties.offerNetmask);
+            sectionState.offerGateway.set(serverProperties.offerGateway);
+            sectionState.offerDns.set(serverProperties.offerDns);
+            sectionState.offerLeaseTime.set(serverProperties.offerLeaseTime);
+            setEventsCleanup(onGlobalEvents());
         }
     }
 
     function onCleanup() {
         setState(false);
-        setListenOnInterfaces("");
-        setRangeStart("");
-        setRangeEnd("");
-        setOfferNetmask("");
-        setOfferGateway("");
-        setOfferDns("");
-        setOfferLeaseTime(0);
+        sectionState.listenOnInterface.set("");
+        sectionState.rangeStart.set("");
+        sectionState.rangeEnd.set("");
+        sectionState.offerNetmask.set("");
+        sectionState.offerGateway.set("");
+        sectionState.offerDns.set("");
+        sectionState.offerLeaseTime.set(0);
+        getEventsCleanup()();
+        setEventsCleanup(() => {});
     }
 
     function onSave() {
@@ -52,13 +63,13 @@ export function DhcpOptionsSection() {
         if (!serverAPI || !hasDHCPServer(serverAPI)) return;
         const newProperties = {
             state: getState(),
-            listenOnIfaces: getListenOnInterfaces().split(",").map(x => x.trim()),
-            offerRangeStart: getRangeStart(),
-            offerRangeEnd: getRangeEnd(),
-            offerNetmask: getOfferNetmask(),
-            offerGateway: getOfferGateway(),
-            offerDns: getOfferDns(),
-            offerLeaseTime: getOfferLeaseTime()
+            listenOnIfaces: sectionState.listenOnInterface.get().split(",").map(x => x.trim()),
+            offerRangeStart: sectionState.rangeStart.get(),
+            offerRangeEnd: sectionState.rangeEnd.get(),
+            offerNetmask: sectionState.offerNetmask.get(),
+            offerGateway: sectionState.offerGateway.get(),
+            offerDns: sectionState.offerDns.get(),
+            offerLeaseTime: sectionState.offerLeaseTime.get()
         }
         try {
             iscDhcpServerValidator(
@@ -79,6 +90,29 @@ export function DhcpOptionsSection() {
                 'error'
             )
         }
+    }
+
+    /**
+     * This function adds global event listeners to the window.
+     * @returns A function that removes the event listeners.
+     */
+    function onGlobalEvents(){
+        
+        function onKeyDown(
+            event: Event
+        ){
+            const kEvent = event as KeyboardEvent;
+            if (kEvent.key === 'Enter') {
+                onSave();
+            }
+        }
+
+        window.addEventListener('keydown', onKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+        }
+
     }
 
     return UltraComponent({
@@ -106,10 +140,10 @@ export function DhcpOptionsSection() {
             FormInput({
                 id: "dhcp-listen-on-interfaces"
                 , name: "dhcp-listen-on-interfaces"
-                , getValue: getListenOnInterfaces
-                , changeSubscriber: subscribeToListenOnInterfaces
+                , getValue: sectionState.listenOnInterface.get
+                , changeSubscriber: sectionState.listenOnInterface.subscribe
                 , onInput: (event: Event) => {
-                    setListenOnInterfaces((event.target as HTMLInputElement).value);
+                    sectionState.listenOnInterface.set((event.target as HTMLInputElement).value);
                 }
                 , label: "Listen on Interfaces:"
             }),
@@ -117,10 +151,10 @@ export function DhcpOptionsSection() {
             FormInput({
                 id: "range-start"
                 , name: "range-start"
-                , getValue: getRangeStart
-                , changeSubscriber: subscribeToRangeStart
+                , getValue: sectionState.rangeStart.get
+                , changeSubscriber: sectionState.rangeStart.subscribe
                 , onInput: (event: Event) => {
-                    setRangeStart((event.target as HTMLInputElement).value);
+                    sectionState.rangeStart.set((event.target as HTMLInputElement).value);
                 }
                 , label: "Range Start:"
             }),
@@ -128,10 +162,10 @@ export function DhcpOptionsSection() {
             FormInput({
                 id: "range-end"
                 , name: "range-end"
-                , getValue: getRangeEnd
-                , changeSubscriber: subscribeToRangeEnd
+                , getValue: sectionState.rangeEnd.get
+                , changeSubscriber: sectionState.rangeEnd.subscribe
                 , onInput: (event: Event) => {
-                    setRangeEnd((event.target as HTMLInputElement).value);
+                    sectionState.rangeEnd.set((event.target as HTMLInputElement).value);
                 }
                 , label: "Range End:"
             }),
@@ -139,10 +173,10 @@ export function DhcpOptionsSection() {
             FormInput({
                 id: "dhcp-offer-netmask"
                 , name: "dhcp-offer-netmask"
-                , getValue: getOfferNetmask
-                , changeSubscriber: subscribeToOfferNetmask
+                , getValue: sectionState.offerNetmask.get
+                , changeSubscriber: sectionState.offerNetmask.subscribe
                 , onInput: (event: Event) => {
-                    setOfferNetmask((event.target as HTMLInputElement).value);
+                    sectionState.offerNetmask.set((event.target as HTMLInputElement).value);
                 }
                 , label: "Offer Netmask:"
             }),
@@ -150,10 +184,10 @@ export function DhcpOptionsSection() {
             FormInput({
                 id: "dhcp-offer-gateway"
                 , name: "dhcp-offer-gateway"
-                , getValue: getOfferGateway
-                , changeSubscriber: subscribeToOfferGateway
-                , onInput: (event: Event) => {
-                    setOfferGateway((event.target as HTMLInputElement).value);
+                , getValue: sectionState.offerGateway.get
+                , changeSubscriber: sectionState.offerGateway.subscribe
+                , onInput: (event: Event) => {  
+                    sectionState.offerGateway.set((event.target as HTMLInputElement).value);
                 }
                 , label: "Offer Gateway:"
             }),
@@ -161,10 +195,10 @@ export function DhcpOptionsSection() {
             FormInput({
                 id: "dhcp-offer-dns"
                 , name: "dhcp-offer-dns"
-                , getValue: getOfferDns
-                , changeSubscriber: subscribeToOfferDns
+                , getValue: sectionState.offerDns.get
+                , changeSubscriber: sectionState.offerDns.subscribe
                 , onInput: (event: Event) => {
-                    setOfferDns((event.target as HTMLInputElement).value);
+                    sectionState.offerDns.set((event.target as HTMLInputElement).value);
                 }
                 , label: "Offer DNS:"
             }),
@@ -172,10 +206,10 @@ export function DhcpOptionsSection() {
             FormInput({
                 id: "dhcp-offer-lease-time"
                 , name: "dhcp-offer-lease-time"
-                , getValue: getOfferLeaseTime
-                , changeSubscriber: subscribeToOfferLeaseTime
+                , getValue: sectionState.offerLeaseTime.get
+                , changeSubscriber: sectionState.offerLeaseTime.subscribe
                 , onInput: (event: Event) => {
-                    setOfferLeaseTime(parseInt((event.target as HTMLInputElement).value));
+                    sectionState.offerLeaseTime.set(parseInt((event.target as HTMLInputElement).value));
                 }
                 , label: "Offer Lease Time:"
             }),

@@ -10,7 +10,7 @@ import { ENV } from "@/context/env-context";
  * @throws Error if the configuration is not valid.
  */
 export function iscDhcpServerValidator(
-    serverAPI : TLayer3Config & IUltraDHCPServerConfig,
+    serverAPI : TLayer3Config & Record<'dhcpserver', IUltraDHCPServerConfig>,
     newServerProperties: TDhcpServerProperties
 ){
 
