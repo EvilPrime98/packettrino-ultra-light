@@ -14,8 +14,6 @@ export interface UltraContextReturn<T> {
     subscribe: (fn: (value: T) => void) => () => void;
 }
 
-// Routing
-
 export interface UltraRouteMatch {
     params: Record<string, string>;
     matched: boolean;
@@ -35,8 +33,6 @@ export interface UltraLinkProps {
     child: string | HTMLElement | DocumentFragment;
 }
 
-// Component System
-
 export type UltraRenderableElement = string | HTMLElement | DocumentFragment;
 
 export type UltraCleanupFunction = () => void | Promise<void>;
@@ -55,13 +51,9 @@ export interface UltraTrigger<T = HTMLElement> {
     defer?: boolean;
 }
 
-// Type Guards & Utilities
-
 export function hasCleanup(element: HTMLElement | Node): element is UltraLightElement {
     return '_cleanup' in element;
 }
-
-// Specialized Element Types
 
 export interface UltraLightAnchor extends HTMLAnchorElement {
     _cleanup?: UltraCleanupFunction;

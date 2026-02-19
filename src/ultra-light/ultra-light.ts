@@ -778,3 +778,40 @@ export function ultraStyles(cssString: string): Record<string, string> {
 
     return classMap;
 }
+
+/**
+ * Returns a stateful object that contains ultraState getters, setters, and subscribers.
+ * Useful for managing complex or nested states.
+ * @param initialComp Initial composite state object.
+ * @returns 
+ */
+export function ultraCompState<T extends Record<string, unknown>>(
+    initialComp: T
+): {
+    [K in keyof T]: {
+        get: () => T[K];
+        set: (newValue: T[K]) => void;
+        subscribe: (fn: (value: T[K]) => void) => () => void;
+    };
+} {
+
+    const comp = {} as {
+        [K in keyof T]: {
+            get: () => T[K];
+            set: (newValue: T[K]) => void;
+            subscribe: (fn: (value: T[K]) => void) => () => void;
+        };
+    };
+
+    (Object.keys(initialComp) as (keyof T)[]).forEach(key => {
+        const [getValue, setValue, subscribeToValue] = ultraState(initialComp[key]);
+        comp[key] = {
+            get: getValue,
+            set: setValue,
+            subscribe: subscribeToValue,
+        };
+    });
+
+    return comp;
+    
+}
