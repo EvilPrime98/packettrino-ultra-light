@@ -62,7 +62,8 @@
 
 }
 
-.form-item {
+.form-item,
+.dhcp-client-field {
 
     display: flex;
     flex-direction: row;
@@ -256,10 +257,4 @@
         opacity: 0;
         scale: 0;
     }
-}
-
-.dhcp-client-field {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
 }
