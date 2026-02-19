@@ -3,8 +3,8 @@ import { UltraActivity, UltraComponent, ultraState } from "@/ultra-light/ultra-l
 import styles from './pc-menu.module.css'
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import { hasDHCPClient } from "@/types/typeguards";
-import { IUltraPcFields } from "./pc-menu";
 import { Loader } from "@/components/core/loader";
+import { IUltraPcFields } from "./pc-menu";
 
 export function DhcpClientField({
     fields,
@@ -13,63 +13,60 @@ export function DhcpClientField({
     onDhcpProcess
 }: {
     /**
-     * The fields reducer object from the PC Menu component.
+     * Composite state object that holds the fields of the PC menu.
      */
     fields: IUltraPcFields,
     /**
-     * Blocks the form fields.
+     * Blocks/Unblocks the form fields.
      */
-    blockFields: () => void,
+    blockFields: (state: boolean) => void,
     /**
-     * A function that is called when the DHCP client checkbox state changes.
+     * Executed when the DHCP client checkbox state changes.
      */
     onDhcpClientChange: ($input: HTMLInputElement) => void
     /**
-     * A function that is called when the DHCP process button is clicked.
+     * Executed when the DHCP process button is clicked.
      */
     onDhcpProcess: () => Promise<void>
 }) {
 
-    //State that indicates whether the DHCP client field should be visible or not.
     const [getVisible, setVisible, subscribeToVisible] = ultraState<boolean>(false);
-    //State that indicates whether the DHCP client is enabled or not for the interface.
     const [isDhcpEnabled, setDhcpEnabled, subscribeToDhcpEnabled] = ultraState<boolean>(false);
-    //State that indicates if there's a dhcp process running.
     const [isSearching, setSearching, subscribeToSearching] = ultraState<boolean>(false);
 
     /**
-     * This function is called when the PC Menu context changes.
+     * Executes when:
+     * - the PC Menu context changes
+     * - the selected interface changes
      * @returns 
      */
     function onLoad() {
-        
         if (!pmCtx.get().isVisible) {
             onCleanup();
             return;
         }
-        
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
-        
         if (!hasDHCPClient(elementAPI)) {
             setVisible(false);
             setDhcpEnabled(false);
-            return;
+            blockFields(false);
+        }else{
+            setVisible(true);
+            const dhcpIfaces = elementAPI.dhcpClient.getDhcpIfaces();
+            const currIface = fields.iface.get();
+            if (dhcpIfaces.includes(currIface)) {
+                setDhcpEnabled(true);
+                blockFields(true);
+            }else {
+                setDhcpEnabled(false);
+                blockFields(false);
+            }
         }
-
-        setVisible(true);
-        
-        const dhcpIfaces = elementAPI.dhcpClient.getDhcpIfaces();
-
-        if (dhcpIfaces.includes(fields.get('iface'))) {
-            setDhcpEnabled(true);
-            blockFields();
-        }
-        
     }
 
     /**
-     * This function is called when the DHCP client checkbox state changes.
+     * Executes when the DHCP client checkbox state changes.
      * @param event 
      */
     function onChange(
@@ -81,14 +78,6 @@ export function DhcpClientField({
     }
 
     /**
-     * Cleans up the DHCP client field and sets its states to their initial values.
-     */
-    function onCleanup() {
-        setVisible(false);
-        setDhcpEnabled(false);
-    }
-
-    /**
      * Starts a DHCP (discover) process on the selected interface.
      * @returns 
      */
@@ -96,6 +85,11 @@ export function DhcpClientField({
         setSearching(true);
         await onDhcpProcess();
         setSearching(false);
+    }
+
+    function onCleanup() {
+        setVisible(false);
+        setDhcpEnabled(false);
     }
 
     return UltraActivity({
@@ -123,14 +117,6 @@ export function DhcpClientField({
                     getValue: isDhcpEnabled,
                     changeSubscriber: subscribeToDhcpEnabled,
                     onChange: onChange,
-
-                    adTriggers: [
-                        {
-                            subscriber: pmCtx.subscribe,
-                            triggerFunction: onLoad,
-                            defer: true
-                        }
-                    ],
 
                     adChildren: [
 
@@ -170,6 +156,18 @@ export function DhcpClientField({
             ]
 
         }),
+
+        trigger: [
+            {
+                subscriber: pmCtx.subscribe,
+                triggerFunction: onLoad,
+                defer: true
+            },
+            { 
+                subscriber: fields.iface.subscribe, 
+                triggerFunction: onLoad
+            }
+        ]
 
     })
 

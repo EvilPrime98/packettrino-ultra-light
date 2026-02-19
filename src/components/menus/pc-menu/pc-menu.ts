@@ -1,4 +1,4 @@
-import { UltraComponent, ultraState, UltraActivity } from "@ultra-light";
+import { UltraComponent, ultraState, UltraActivity, ultraCompState } from "@ultra-light";
 import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { PcFormValidator } from "@/schemas/pc-menu-schema";
@@ -15,95 +15,39 @@ import { hasDHCPClient } from "@/types/typeguards";
 import { dhcp_service } from "@/services/isc-dhcp-service";
 import { FormInput } from "@/components/core/form-input";
 
-/**
- * Defines the structure of the reducer that holds the state of the PC menu fields.
- */
 export interface IUltraPcFields {
-    /**
-     * Staful getter for one of the fields.
-     * @param key 
-     * @returns 
-     */
-    get: (key: 'iface' | 'ip' | 'netmask' | 'gateway') => string;
-    /**
-     * Staful setter for one of the fields.
-     * @param key 
-     * @param value 
-     */
-    set: (key: 'iface' | 'ip' | 'netmask' | 'gateway', value: string) => void;
-    /**
-     * Staful subscriber for one of the fields.
-     * @param key 
-     * @returns 
-     */
-    subscribe: (key: 'iface' | 'ip' | 'netmask' | 'gateway') => (fn: (value: string) => void) => () => void;
+    iface: {
+        get: () => string;
+        set: (newValue: string) => void;
+        subscribe: (fn: (value: string) => void) => () => void;
+    };
+    ip: {
+        get: () => string;
+        set: (newValue: string) => void;
+        subscribe: (fn: (value: string) => void) => () => void;
+    };
+    netmask: {
+        get: () => string;
+        set: (newValue: string) => void;
+        subscribe: (fn: (value: string) => void) => () => void;
+    };
+    gateway: {
+        get: () => string;
+        set: (newValue: string) => void;
+        subscribe: (fn: (value: string) => void) => () => void;
+    };
 }
 
 export default function PcMenu() {
 
-    /**
-     * Reducer that holds the state of the PC menu fields.
-     */
-    const fields: IUltraPcFields = (function () {
+    const fields: IUltraPcFields = ultraCompState({
+        iface: '',
+        ip: '',
+        netmask: '',
+        gateway: ''
+    })
 
-        const [getInterfaceField, setInterfaceField, subscribeToInterfaceField] = ultraState<string>('');
-        const [getIpField, setIpField, subscribeToIpField] = ultraState<string>('');
-        const [getNetmaskField, setNetmaskField, subscribeToNetmaskField] = ultraState<string>('');
-        const [getGatewayField, setGatewayField, subscribeToGatewayField] = ultraState<string>('');
-
-        const fieldOperations = {
-            iface: {
-                get: getInterfaceField,
-                set: setInterfaceField,
-                subscribe: subscribeToInterfaceField
-            },
-            ip: {
-                get: getIpField,
-                set: setIpField,
-                subscribe: subscribeToIpField
-            },
-            netmask: {
-                get: getNetmaskField,
-                set: setNetmaskField,
-                subscribe: subscribeToNetmaskField
-            },
-            gateway: {
-                get: getGatewayField,
-                set: setGatewayField,
-                subscribe: subscribeToGatewayField
-            }
-        } as const;
-
-        type FieldKey = keyof typeof fieldOperations;
-
-        function get(key: FieldKey) {
-            return fieldOperations[key].get();
-        }
-
-        function set(key: FieldKey, value: string) {
-            fieldOperations[key].set(value);
-        }
-
-        function subscribe(key: FieldKey) {
-            return fieldOperations[key].subscribe;
-        }
-
-        return {
-            get,
-            set,
-            subscribe
-        };
-
-    })();
-
-    /**
-     * State that holds a function that cleans up the global events.
-     */
     const [eventCleaner, setEventCleaner,] = ultraState<(() => void) | null>(null);
-
-    /**
-     * State that indicates whether the fields are blocked or not.
-     */
     const [blockedFields, setBlockedFields, subscribeToBlockedFields] = ultraState(false);
 
     /**
@@ -117,10 +61,10 @@ export default function PcMenu() {
         if (!elementAPI) return;
         const ifaces = elementAPI.getIfaces();
         const initialIfaceId = Object.keys(ifaces)[0];
-        fields.set('iface', initialIfaceId);
-        fields.set('ip', ifaces[initialIfaceId].ip);
-        fields.set('netmask', ifaces[initialIfaceId].netmask);
-        fields.set('gateway', elementAPI.getDefaultGateway());
+        fields.iface.set(initialIfaceId);
+        fields.ip.set(ifaces[initialIfaceId].ip);
+        fields.netmask.set(ifaces[initialIfaceId].netmask);
+        fields.gateway.set(elementAPI.getDefaultGateway());
     }
 
     /**
@@ -155,10 +99,10 @@ export default function PcMenu() {
         const { pcElementAPI } = pmCtx.get();
         if (!pcElementAPI) return;
 
-        const ip = fields.get('ip');
-        const netmask = fields.get('netmask');
-        const gateway = fields.get('gateway');
-        const ifaceId = fields.get('iface');
+        const ip = fields.ip.get();
+        const netmask = fields.netmask.get();
+        const gateway = fields.gateway.get();
+        const ifaceId = fields.iface.get();
 
         try {
 
@@ -183,7 +127,7 @@ export default function PcMenu() {
             }
 
             toCtx.get().createNotification(
-                `Interface ${fields.get('iface').toUpperCase()} updated successfully!`,
+                `Interface ${fields.iface.get().toUpperCase()} updated successfully!`,
                 'success'
             )
 
@@ -220,10 +164,10 @@ export default function PcMenu() {
      */
     function onCleanup() {
         eventCleaner()?.();
-        fields.set('iface', "");
-        fields.set('ip', "");
-        fields.set('netmask', "");
-        fields.set('gateway', "");
+        fields.iface.set("");
+        fields.ip.set("");
+        fields.netmask.set("");
+        fields.gateway.set("");
         setBlockedFields(false);
     }
 
@@ -240,15 +184,15 @@ export default function PcMenu() {
             if (!elementAPI) return;
             if (!hasDHCPClient(elementAPI)) return;
             if ($input.checked) {
-                elementAPI.dhcpClient.addDhcpIface(fields.get('iface')); //TODO: we need to alter the fields
+                elementAPI.dhcpClient.addDhcpIface(fields.iface.get()); //TODO: we need to alter the fields
                 toCtx.get().createNotification(
-                    `DHCP Client enabled on ${fields.get('iface')}`,
+                    `DHCP Client enabled on ${fields.iface.get()}`,
                     'success'
                 );
             }else {
-                elementAPI.dhcpClient.removeDhcpIface(fields.get('iface'));
+                elementAPI.dhcpClient.removeDhcpIface(fields.iface.get());
                 toCtx.get().createNotification(
-                    `DHCP Client disabled on ${fields.get('iface')}`,
+                    `DHCP Client disabled on ${fields.iface.get()}`,
                     'success'
                 );
             }
@@ -271,12 +215,12 @@ export default function PcMenu() {
         try {
             await dhcp_service(
                 elementAPI,
-                fields.get('iface'),
+                fields.iface.get(),
                 'discover'
             )
             const ifaces = elementAPI.getIfaces();
-            fields.set('ip', ifaces[fields.get('iface')].ip);
-            fields.set('netmask', ifaces[fields.get('iface')].netmask);
+            fields.ip.set(ifaces[fields.iface.get()].ip);
+            fields.netmask.set(ifaces[fields.iface.get()].netmask);
         } catch (e) {
             toCtx.get().createNotification(
                 (e instanceof Error) ? e.message : 'Error while searching DHCP server...',
@@ -313,12 +257,12 @@ export default function PcMenu() {
                         name: 'ip-field',
                         label: 'IP(ipv4):',
                         className: [styles['form-item']],
-                        getValue: () => fields.get('ip'),
-                        changeSubscriber: fields.subscribe('ip'),
+                        getValue: () => fields.ip.get(),
+                        changeSubscriber: fields.ip.subscribe,
                         onInput: (event: Event) => {
                             event.stopPropagation();
                             const $input = event.target as HTMLInputElement;
-                            fields.set('ip', $input.value);
+                            fields.ip.set($input.value);
                         },
                         disabled: blockedFields,
                         disabledSubscriber: subscribeToBlockedFields
@@ -329,12 +273,12 @@ export default function PcMenu() {
                         name: 'netmask-field',
                         label: 'Netmask:',
                         className: [styles['form-item']],
-                        getValue: () => fields.get('netmask'),
-                        changeSubscriber: fields.subscribe('netmask'),
+                        getValue: () => fields.netmask.get(),
+                        changeSubscriber: fields.netmask.subscribe,
                         onInput: (event: Event) => {
                             event.stopPropagation();
                             const $input = event.target as HTMLInputElement;
-                            fields.set('netmask', $input.value);
+                            fields.netmask.set($input.value);
                         },
                         disabled: blockedFields,
                         disabledSubscriber: subscribeToBlockedFields
@@ -345,12 +289,12 @@ export default function PcMenu() {
                         name: 'gateway-field',
                         label: 'Gateway:',
                         className: [styles['form-item']],
-                        getValue: () => fields.get('gateway'),
-                        changeSubscriber: fields.subscribe('gateway'),
+                        getValue: () => fields.gateway.get(),
+                        changeSubscriber: fields.gateway.subscribe,
                         onInput: (event: Event) => {
                             event.stopPropagation();
                             const $input = event.target as HTMLInputElement;
-                            fields.set('gateway', $input.value);
+                            fields.gateway.set($input.value);
                         },
                         disabled: blockedFields,
                         disabledSubscriber: subscribeToBlockedFields
@@ -358,9 +302,9 @@ export default function PcMenu() {
                     
                     Ipv4Forwarding(),
 
-                    DhcpClientField({ 
+                    DhcpClientField({
                         fields,
-                        blockFields: () => setBlockedFields(true),
+                        blockFields: setBlockedFields,
                         onDhcpClientChange,
                         onDhcpProcess
                     })
