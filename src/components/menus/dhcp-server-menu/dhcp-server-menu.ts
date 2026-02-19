@@ -20,6 +20,8 @@ export function Dhcp_Server_Menu() {
     const [ getTitle, setTitle, subscribeToTitle ] = ultraState<string>("");
     //state for the current page
     const [ getPage, setPage, subscribeToPage ] = ultraState<TPages>(pages.main);
+    //state for the global events cleanup
+    const [ getEventCleanup, setEventCleanup,  ] = ultraState<(() => void)>(() => {});
 
     /**
      * This function is executed when the DHCP-Server-Menu-Context 
@@ -31,9 +33,10 @@ export function Dhcp_Server_Menu() {
         $form: UltraLightElement
     ) {
         if (!dsCtx.get().isVisible) {
-            cleanup($form);
+            onCleanup($form);
             return;
         }
+        setEventCleanup(onGlobalEvents());
         const serverAPI = dsCtx.get().serverAPI;
         if (!serverAPI) return;
         setTitle(serverAPI.properties().elementId);
@@ -45,12 +48,29 @@ export function Dhcp_Server_Menu() {
         })
     }
 
-    function cleanup(
+    function onCleanup(
         $form: UltraLightElement
     ) {
         ($form as HTMLFormElement).reset();
         setPage(pages.main);
         setTitle('');
+        getEventCleanup()();
+    }
+    
+    /**
+     * This function adds event listeners to the global window object.
+     * @returns A function that removes the event listeners.
+     */
+    function onGlobalEvents() {
+        function onKeyDown(event: KeyboardEvent) {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        }
+        window.addEventListener('keydown', onKeyDown);
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+        }
     }
 
     return UltraActivity({
