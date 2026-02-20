@@ -34,6 +34,7 @@ export function DhcpClientField({
     const [isDhcpEnabled, setDhcpEnabled, subscribeToDhcpEnabled] = ultraState<boolean>(false);
     const [isSearching, setSearching, subscribeToSearching] = ultraState<boolean>(false);
     const [getLeaseTime, setLeaseTime, subscribeToLeaseTime] = ultraState<number>(0);
+    let leaseTimeUnsubscribe: () => void;
 
     /**
      * Executes when:
@@ -43,6 +44,7 @@ export function DhcpClientField({
     function onContextChange() {
         if (!pmCtx.get().isVisible) {
             onCleanup();
+            setVisible(false);
             return;
         }
     }
@@ -52,30 +54,43 @@ export function DhcpClientField({
      * - on initial load
      * - when the selected interface changes.
      */
-    function dhcpClientHandler(){
+    function dhcpClientHandler() {
+        
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
+        
         if (!hasDHCPClient(elementAPI)) {
+            onCleanup();
             setVisible(false);
-            setDhcpEnabled(false);
-            blockFields(false);
-        } else {
-            setVisible(true);
-            const dhcpIfaces = elementAPI.dhcpClient.getDhcpIfaces();
-            const currIface = fields.iface.get();
-            if (dhcpIfaces.includes(currIface)) {
-                setDhcpEnabled(true);
-                blockFields(true);
-                const lease = elementAPI.dhcpClient.getLeases()
-                .find(lease => lease.ifaceId === currIface);
-                if (lease) {
-                    setLeaseTime(lease.leasetime);
-                }
-            } else {
-                setDhcpEnabled(false);
-                blockFields(false);
-            }
+            return;
         }
+
+        setVisible(true);
+        
+        const dhcpIfaces = elementAPI.dhcpClient.getDhcpIfaces();
+        const currIface = fields.iface.get();
+        
+        if (!dhcpIfaces.includes(currIface)) {
+            onCleanup();
+            return;
+        }
+        
+        setDhcpEnabled(true);
+        blockFields(true);
+
+        const lease = elementAPI.dhcpClient.getLeases()
+        .find(lease => lease.ifaceId === currIface);
+
+        if (lease) {
+            setLeaseTime(lease.leasetime);
+            leaseTimeUnsubscribe = elementAPI.dhcpClient.subscribeToLeases(() => {
+                setLeaseTime(lease.leasetime);
+            })
+        }else{
+            setLeaseTime(0);
+            leaseTimeUnsubscribe();
+        }
+               
     }
 
     /**
@@ -96,26 +111,20 @@ export function DhcpClientField({
      * @returns 
      */
     async function onSearch() {
-        
         setSearching(true);
         await onDhcpProcess();
         setSearching(false);
-        
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
-        
         if (!hasDHCPClient(elementAPI)) return;
-        
         const leases = elementAPI.dhcpClient.getLeases();
         const lease = leases.find(lease => lease.ifaceId === fields.iface.get());
-
         if (lease) {
             setLeaseTime(lease.leasetime);
-            elementAPI.dhcpClient.subscribeToLeases(() => {
+            leaseTimeUnsubscribe = elementAPI.dhcpClient.subscribeToLeases(() => {
                 setLeaseTime(lease.leasetime);
             })
         }
-
     }
 
     /**
@@ -124,15 +133,17 @@ export function DhcpClientField({
      */
     function updateLeaseTime(
         self: HTMLElement
-    ){
+    ) {
         const $span = self as HTMLSpanElement;
         const leaseTime = getLeaseTime();
-        $span.innerText = `${leaseTime}s`;
+        $span.innerText = (leaseTime > 0) ? `${leaseTime}s` : 'Search';
     }
 
     function onCleanup() {
-        setVisible(false);
+        blockFields(false);
         setDhcpEnabled(false);
+        setLeaseTime(0);
+        leaseTimeUnsubscribe?.();
     }
 
     return UltraActivity({
@@ -166,6 +177,12 @@ export function DhcpClientField({
                             subscriber: subscribeToSearching,
                             triggerFunction: ($button: HTMLElement) => {
                                 ($button as HTMLButtonElement).disabled = isSearching();
+                            }
+                        },
+                        {
+                            subscriber: subscribeToLeaseTime,
+                            triggerFunction: ($button: HTMLElement) => {
+                                ($button as HTMLButtonElement).disabled = getLeaseTime() > 0;
                             }
                         }
                     ],

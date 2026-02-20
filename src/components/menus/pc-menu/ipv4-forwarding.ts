@@ -5,7 +5,9 @@ import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 
 export default function Ipv4Forwarding(){
 
-    function onStart(self: HTMLElement) {
+    function onStart(
+        self: HTMLElement
+    ) {
         if (!pmCtx.get().isVisible) return;
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
@@ -13,7 +15,9 @@ export default function Ipv4Forwarding(){
         $input.checked = elementAPI.properties()["ipv4-forwarding"];
     }
 
-    function onChange(event: Event) {
+    function onChange(
+        event: Event
+    ) {
         
         const elementAPI = pmCtx.get().pcElementAPI;
         if (!elementAPI) return;
