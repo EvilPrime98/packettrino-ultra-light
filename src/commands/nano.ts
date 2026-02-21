@@ -14,19 +14,20 @@ export function command_nano() {
             throw new AlignmentError("No element API available");
         }
 
-        const argument = tCtx.get().input
+        const args = tCtx.get().input
         .trim()
         .replaceAll(/\s+/g, ' ')
-        .split(' ')[1];
+        .split(' ')
+        .slice(1);
 
-        if (!argument) {
+        if (args.length === 0) {
             throw new EmptyArgumentError("No input provided");
         }
 
-        const path = pathBuilder(argument);
+        const path = pathBuilder(args[0]);
         const fileName = path.pop();
 
-        if (path.length === 0 || !fileName) {
+        if (!fileName) {
             throw new EmptyArgumentError("No file name provided");
         }
 
@@ -34,7 +35,7 @@ export function command_nano() {
         const fileContent = fs.read(fileName, path);
 
         tCtx.get().update({
-            editorPath: argument
+            editorPath: args[0]
         });
 
         tCtx.get().openEditor(
