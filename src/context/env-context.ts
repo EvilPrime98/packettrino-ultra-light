@@ -66,6 +66,10 @@ interface IEnv {
      * Returns the maximum DHCP lease time in seconds.
      */
     dhcpMaxLeaseTime: number;
+    /**
+     * Maximum number of interfaces for a device.
+     */
+    maxNumberOfIfaces: number;
 }
 
 const ENV = UltraContext<IEnv>({
@@ -84,7 +88,8 @@ const ENV = UltraContext<IEnv>({
     quickPingMode: false,
     quickPingObject: [],
     dhcpMinLeaseTime: 10,
-    dhcpMaxLeaseTime: 86400
+    dhcpMaxLeaseTime: 86400,
+    maxNumberOfIfaces: 6
 });
 
 export { ENV as ENV };

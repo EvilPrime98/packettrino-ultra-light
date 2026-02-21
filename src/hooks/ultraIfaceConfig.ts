@@ -1,3 +1,4 @@
+import { ENV } from "@/context/env-context";
 import { AlreadyExistsError, NoAvailableInterfaceError, MaxInterfacesError } from "@/errors";
 import { iface, IUltraIfaceConfig, TConnection } from "@/types/TConfig";
 import { getRandomMac } from "@/utils/network_lib";
@@ -11,13 +12,7 @@ export default function ultraIfaceConfig({
     initialIfaces = 1 
 }: props): IUltraIfaceConfig {
 
-    const [
-        getIfaces,
-        setIfaces,
-        subscribeToIfaces
-    ] = ultraState<Record<string, iface>>({});
-
-    const maxIfaces = 6;
+    const [ getIfaces, setIfaces, subscribeToIfaces ] = ultraState<Record<string, iface>>({});
 
     function getNewIfaceId(){
         const currIfaces = getIfaces();
@@ -70,7 +65,7 @@ export default function ultraIfaceConfig({
             throw new AlreadyExistsError(`Interface ${interfaceId} already exists`);
         }
 
-        if (Object.keys(currIfaces).length >= maxIfaces) {
+        if (Object.keys(currIfaces).length >= ENV.get().maxNumberOfIfaces) {
             throw new MaxInterfacesError(`Maximum number of interfaces reached`);
         }
 
