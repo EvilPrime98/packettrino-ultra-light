@@ -8,10 +8,10 @@ import { command_history } from "@/commands/history";
 import { command_nano } from "@/commands/nano";
 import { command_dhcp } from "@/commands/dhcp";
 import { command_apt } from "@/commands/apt";
+import { command_mkdir } from "@/commands/mkdir";
 
 /**
  * Compiles, interprets and executes a terminal command
- * @returns
  */
 export default async function unix() {
 
@@ -28,7 +28,8 @@ export default async function unix() {
         "history": () => command_history(),
         "nano": () => command_nano(),
         "dhcp": () => command_dhcp(),
-        "apt": () => command_apt()
+        "apt": () => command_apt(),
+        "mkdir": () => command_mkdir()
     }
 
     try {
@@ -50,10 +51,3 @@ export default async function unix() {
     }
 
 }
-
-// window.clearInterval(window.pingInterval); //limpiamos todos los procesos de terminal en funcionamiento
-// document.querySelector(".terminal-output").innerHTML = ""; //limpiamos la salida
-// terminalBuffer.push(input); //añadimos el comando en el buffer
-// currentCommandIndex++; //actualizamos el indice del cursor de comandos
-// $terminal.querySelector("input").value = ""; //limpiamos la entrada
-// commandFunctions[command] ? commandFunctions[command]() : terminalMessage(`Error: comando ${command} desconocido.`, networkObjectId); //ejecutamos la función correspondiente

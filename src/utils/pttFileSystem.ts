@@ -3,7 +3,8 @@ import {
     DirectoryDoesNotExistError, 
     DirectoryIsNotADirectoryError, 
     FileDoesNotExistError, 
-    FileIsNotAFileError 
+    FileIsNotAFileError,
+    DirectoryAlreadyExistsError
 } from "@/errors";
 import { printcol } from "./prints";
 
@@ -220,6 +221,35 @@ export class pttFileSystem {
 
         currentDirectory[fileName] = content;
 
+    }
+
+    /**
+     * Creates a directory in the file system.
+     * @param directoryPath An array of strings representing the absolute path to the directory to create.
+     * @param directoryName The name of the directory to create.
+     * @throws DirectoryDoesNotExistError
+     * @throws DirectoryIsNotADirectoryError
+     * @throws DirectoryAlreadyExistsError
+     */
+    mkdir(
+        directoryPath: string[],
+        directoryName: string
+    ) {
+
+        let currentDirectory: IPTTFile | IPTTFolder = this.structure;
+
+        for (const dir of directoryPath) {
+            if (!currentDirectory[dir]) throw new DirectoryDoesNotExistError(dir);
+            if (!(currentDirectory[dir] instanceof Object)) throw new DirectoryIsNotADirectoryError(dir);
+            currentDirectory = currentDirectory[dir] as IPTTFolder;
+        }
+
+        if (Object.hasOwn(currentDirectory, directoryName)) {
+            throw new DirectoryAlreadyExistsError(directoryName);
+        }
+
+        currentDirectory[directoryName] = {};
+        
     }
 
 }

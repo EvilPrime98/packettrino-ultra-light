@@ -144,3 +144,11 @@ export class Invalid48BitMacAddressError extends Error {
         this.name = "InvalidMacAddressError";
     }
 }
+
+export class DirectoryAlreadyExistsError extends Error {
+    constructor(directory: string) {
+        const message = `The directory ${directory} already exists.`;
+        super(message);
+        this.name = "DirectoryAlreadyExistsError";
+    }
+}
