@@ -9,6 +9,7 @@ import { command_nano } from "@/commands/nano";
 import { command_dhcp } from "@/commands/dhcp";
 import { command_apt } from "@/commands/apt";
 import { command_mkdir } from "@/commands/mkdir";
+import { command_rm } from "@/commands/rm";
 
 /**
  * Compiles, interprets and executes a terminal command
@@ -29,7 +30,8 @@ export default async function unix() {
         "nano": () => command_nano(),
         "dhcp": () => command_dhcp(),
         "apt": () => command_apt(),
-        "mkdir": () => command_mkdir()
+        "mkdir": () => command_mkdir(),
+        "rm": () => command_rm()
     }
 
     try {

@@ -252,4 +252,33 @@ export class pttFileSystem {
         
     }
 
+    /**
+     * Deletes a file or directory from the file system.
+     * @param directoryPath An array of strings representing the absolute path to the directory containing the file or directory to delete.
+     * @param fileName The name of the file or directory to delete.
+     * @throws DirectoryDoesNotExistError
+     * @throws DirectoryIsNotADirectoryError
+     * @throws FileDoesNotExistError
+     */
+    rm(
+        directoryPath: string[],
+        fileName: string
+    ) {
+
+        let currentDirectory: IPTTFile | IPTTFolder = this.structure;
+
+        for (const dir of directoryPath) {
+            if (!currentDirectory[dir]) throw new DirectoryDoesNotExistError(dir);
+            if (!(currentDirectory[dir] instanceof Object)) throw new DirectoryIsNotADirectoryError(dir);
+            currentDirectory = currentDirectory[dir] as IPTTFolder;
+        }
+
+        if (!Object.hasOwn(currentDirectory, fileName)) {
+            throw new FileDoesNotExistError(fileName);
+        }
+
+        delete currentDirectory[fileName];
+        
+    }
+
 }
