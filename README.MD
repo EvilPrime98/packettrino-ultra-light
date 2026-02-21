@@ -50,7 +50,7 @@ export default function Counter() {
 - `ultraState` works like React's `useState` but exposes a subscriber for fine-grained DOM updates
 - `UltraComponent` wraps a raw HTML string and wires up event handlers and reactive triggers
 - `UltraFragment` composes multiple components without an extra wrapper element
-- When the button is clicked, only the `<h1>` is updated — no virtual DOM diffing, no full re-render
+- When the button is clicked, only the `<h1>` is updated. No virtual DOM diffing, no full re-render.
 
 ---
 
