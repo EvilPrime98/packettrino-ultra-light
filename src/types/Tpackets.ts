@@ -1,10 +1,5 @@
-/**
- * Network Packet Classes for Network Simulation
- * Implements common network protocols: ARP, ICMP, DHCP, DNS, TCP, HTTP
- */
-
-export type MacAddress = string; // Format: "xx:xx:xx:xx:xx:xx"
-export type IpAddress = string;  // Format: "xxx.xxx.xxx.xxx"
+export type MacAddress = string;
+export type IpAddress = string;
 export type Port = number | string;
 
 export interface PacketOptions {
@@ -34,8 +29,6 @@ export abstract class Packet {
     this.xid = Math.floor(Math.random() * 10000);
   }
 }
-
-// ==================== ARP Protocol ====================
 
 export type ArpType = "request" | "reply";
 
@@ -74,8 +67,6 @@ export class ArpReply extends Packet {
     super({ originIp, destinationIp, originMac, destinationMac });
   }
 }
-
-// ==================== ICMP Protocol ====================
 
 export type IcmpType = "request" | "reply" | "time-exceeded";
 
@@ -123,8 +114,6 @@ export class IcmpTimeExceeded extends Packet {
     super({ originIp, destinationIp, originMac, destinationMac });
   }
 }
-
-// ==================== DHCP Protocol ====================
 
 export type DhcpType = "discover" | "offer" | "request" | "ack" | "release";
 
@@ -327,8 +316,6 @@ export class DhcpRelease extends Packet {
   }
 }
 
-// ==================== DNS Protocol ====================
-
 export type DnsType = "request" | "reply";
 export type DnsRecordType = "A" | "AAAA" | "CNAME" | "MX" | "NS" | "TXT" | "";
 
@@ -382,8 +369,6 @@ export class DnsReply extends Packet {
     this.answer = answer;
   }
 }
-
-// ==================== TCP Protocol ====================
 
 export type TcpType = "syn" | "syn-ack" | "syn-ack-reply" | "fin" | "rst";
 
@@ -461,8 +446,6 @@ export class TcpAck extends Packet {
   }
 }
 
-// ==================== HTTP Protocol ====================
-
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
 export type HttpType = "request" | "reply";
 
@@ -534,8 +517,6 @@ export class HttpReply extends Packet {
   }
 }
 
-// ==================== Type Guards ====================
-
 export function isArpPacket(packet: Packet): packet is ArpRequest | ArpReply {
   return packet.protocol === "arp";
 }
@@ -595,8 +576,6 @@ export function isDhcpRequest(packet: Packet): packet is DhcpRequest {
 export function isDhcpAck(packet: Packet): packet is DhcpAck {
   return packet.protocol === 'dhcp' && packet.type === 'ack';
 }
-
-// ==================== Union Types ====================
 
 export type AnyPacket =
   | ArpRequest

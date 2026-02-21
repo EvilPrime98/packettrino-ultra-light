@@ -8,7 +8,7 @@
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #333;
+    background-color: #000;
     font-size: var(--fSize);
     color: white;
     width: 1000px;
