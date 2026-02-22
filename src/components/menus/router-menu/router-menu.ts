@@ -6,47 +6,31 @@ import { IRoutingRule } from "@/types/TConfig";
 import styles from './router-menu.module.css';
 import MenuFrame from "../menu-frame";
 
-export interface IRouterMenuFields {
-    ip: string;
-    netmask: string;
-}
-
 type TPages = "basic" | "routing";
 
 export function RouterMenu() {
 
-    //ifaces information
-    const [
-        getIfaces, 
-        setIfaces, 
-        subscribeToIfaces
-    ] = ultraState<string[]>([]);
+    const [ getIfaces, setIfaces, subscribeToIfaces ] = ultraState<string[]>([]);
+    const [ getRoutingRules, setRoutingRules, subscribeToRoutingRules] = ultraState<IRoutingRule[]>([]);
+    const [ getPage, setPage, subscribeToPage ] = ultraState<TPages>("basic");
+    const [ getTitle, setTitle, subscribeToTitle ] = ultraState<string>("");
+    const [ getEventCleanup, setEventCleanup, ] = ultraState<(() => void) | null>(null);
 
-    //routing rules information
-    const [
-        getRoutingRules, 
-        setRoutingRules, 
-        subscribeToRoutingRules
-    ] = ultraState<IRoutingRule[]>([]);
-
-    //current page
-    const [
-        getPage, 
-        setPage, 
-        subscribeToPage
-    ] = ultraState<TPages>("basic");
-
-    //current title
-    const [
-        getTitle, 
-        setTitle, 
-        subscribeToTitle
-    ] = ultraState<string>("");
-
-    const [
-        getEventCleanup, 
-        setEventCleanup
-    ] = ultraState<(() => void) | null>(null);
+    /**
+     * Executes when the router menu context changes. It checks if the 
+     * context is visible and if it is, it loads the data from the router element
+     * API into the state variables.
+     * @returns
+     */
+    function onContextChange(
+        self: UltraLightElement
+    ) {
+        if (rmCtx.get().isVisible) {
+            onLoad();
+        } else {
+            onCleanup(self);
+        }
+    }
 
     /**
      * Dumps all the data from the router element API into the state variables
@@ -86,25 +70,14 @@ export function RouterMenu() {
     }
 
     /**
-     * This function is called when the router menu context changes. It checks if the 
-     * context is visible and if it is, it loads the data from the router element
-     * API into the state variables.
-     * @returns
-     */
-    function onContextChange(self: UltraLightElement) {
-        if (rmCtx.get().isVisible) {
-            onLoad();
-        } else {
-            onCleanup(self);
-        }
-    }
-
-    /**
-     * This function is called when the router menu is closed. It cleans up the
+     * Executes when the router menu is closed. It cleans up the
      * event listeners and sets the state variables to their initial values.
+     * @param self - HTML Form element
      * @returns
      */
-    function onCleanup(self: UltraLightElement) {
+    function onCleanup(
+        self: HTMLElement
+    ) {
         (self as HTMLFormElement).reset();
         setPage('basic');
         setIfaces([]);
@@ -143,9 +116,14 @@ export function RouterMenu() {
             window.removeEventListener("keydown", onKeyDown);
         }
 
-    }
+    }   
 
     return UltraActivity({
+
+        mode: {
+            state: () => rmCtx.get().isVisible,
+            subscriber: rmCtx.subscribe
+        },
 
         component: UltraComponent({
 
@@ -166,6 +144,7 @@ export function RouterMenu() {
                     titleSubscriber: subscribeToTitle
                 }),
 
+                //nav panel
                 UltraComponent({
 
                     component: (`<div></div>`),
@@ -210,6 +189,7 @@ export function RouterMenu() {
 
                 }),
 
+                //basic section
                 UltraActivity({
 
                     component: BasicSection({
@@ -226,6 +206,7 @@ export function RouterMenu() {
 
                 }),
 
+                //routing rules section
                 UltraActivity({
 
                     component: RoutingRulesSection({
@@ -248,11 +229,6 @@ export function RouterMenu() {
             }
 
         }),
-
-        mode: {
-            state: () => rmCtx.get().isVisible,
-            subscriber: rmCtx.subscribe
-        },
 
         trigger: [
             { 
