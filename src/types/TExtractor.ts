@@ -1,4 +1,4 @@
-import type { IUltraIfaceConfig, TLayer3Config } from "./TConfig";
+import type { IUltraIfaceConfig, IUltraRoutingConfig, TLayer3Config } from "./TConfig";
 
 /**
  * Extracts the iface config from a layer 3 config.
@@ -42,5 +42,32 @@ export function extractIfaceConfig(
         promiscuousMode,
         getAvailableIps
     };
+
+}
+
+/**
+ * Extracts the routing config from a layer 3 config.
+ * @param config 
+ * @returns 
+ */
+export function extractRoutingConfig(
+    config: TLayer3Config
+): IUltraRoutingConfig {
+
+    const {
+        routingRules,
+        subscribeToRoutingRules,
+        addRoutingRule,
+        removeRoutingRule,
+        editRoutingRule
+    } = config;
+
+    return {
+        routingRules,
+        subscribeToRoutingRules,
+        addRoutingRule,
+        removeRoutingRule,
+        editRoutingRule
+    }
 
 }
