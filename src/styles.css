@@ -329,6 +329,14 @@ img {
     &:checked {
         background: linear-gradient(135deg, #4ade80, #16a34a);
     }
+
+    &:disabled {
+        cursor: not-allowed;
+        background-color: #ccc;
+        &::before {
+            background-color: #ccc;
+        }
+    }
 }
 
 .btn-modern-red {
