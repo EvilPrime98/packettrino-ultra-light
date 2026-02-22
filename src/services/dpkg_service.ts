@@ -2,7 +2,7 @@ import { ultraDhcpClientConfig } from "@/hooks/ultraDHCPClientConfig";
 import ultraDhcpServerConfig from "@/hooks/ultraDHCPServerConfig";
 import type { TAvailablePackages, TLayer3Config, TPackageOptions } from "@/types/TConfig";
 import { PACKAGES } from "@/types/TConfig";
-import { extractIfaceConfig } from "@/types/TExtractor";
+import { extractIfaceConfig, extractRoutingConfig } from "@/types/TExtractor";
 import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
 
 interface IDpkgInstallOptions {
@@ -18,7 +18,12 @@ export function dpkg(
     };
 
     const PACKAGE_CONFIG_MAP: Record<TAvailablePackages, any> = {
-        'isc-dhcp-client': () => { return ultraDhcpClientConfig(extractIfaceConfig(elementAPI)) },
+        'isc-dhcp-client': () => { 
+            return ultraDhcpClientConfig(
+                extractIfaceConfig(elementAPI),
+                extractRoutingConfig(elementAPI)
+            ) 
+        },
         'isc-dhcp-server': () => { return ultraDhcpServerConfig() }
     }
 

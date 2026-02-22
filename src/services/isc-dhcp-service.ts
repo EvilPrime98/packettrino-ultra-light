@@ -1,11 +1,15 @@
 import type { TLayer3Config, IUltraDhcpClientConfig, TDhcpClientActions } from "@/types/TConfig";
-import { DhcpDiscover, isDhcpAck } from "@/types/Tpackets";
-import { InterfaceDoesNotExistError } from "@/errors";
+import { DhcpDiscover, DhcpRelease, isDhcpAck } from "@/types/Tpackets";
+import { 
+    InterfaceDoesNotExistError, 
+    NoLeaseFoundError ,
+    InterfaceNotConnectedError
+} from "@/errors";
 import { hasDHCPClient } from "@/types/typeguards";
 import { ENV } from "@/context/env-context";
 
 /** 
- * Executes a DHCP cliente service action on a network element.
+ * Executes a DHCP client service action on a network element.
  * @param elementAPI Network element API.
  * @param ifaceId Interface ID.
  * @param action Action to execute. Can be 'discover', 'release' or 'request'.
@@ -39,10 +43,17 @@ export async function dhcp_service(
         );
     }
 
+    if (action === 'release') {
+        await sendDHCPRelease(
+            elementAPI, 
+            ifaceId
+        );
+    }
+
 }
 
 /**
- * Sends a DHCP discover packet to the netowork.
+ * Sends a DHCP discover packet to the network.
  * @param elementAPI Network element API
  * @param ifaceId Interface ID
  * @returns
@@ -89,6 +100,61 @@ export async function sendDHCPDiscover(
             packet, 
             elementAPI.properties().elementId
         );
+
+    });
+
+}
+
+/**
+ * Sends a DHPC release packet to the network.
+ * @param elementAPI Network element API
+ * @param ifaceId Interface ID
+ * @returns
+ * @throws Error if the interface does not exist.
+ * @throws Error if the interface is not connected.
+ */
+export async function sendDHCPRelease(
+    elementAPI: TLayer3Config & Record<'dhcpClient', IUltraDhcpClientConfig>,
+    ifaceId: string
+): Promise<void> {
+
+    const ifaces = elementAPI.getIfaces();
+    const iface = ifaces[ifaceId];
+    
+    if (!iface) {
+        throw new InterfaceDoesNotExistError(ifaceId);
+    }
+
+    const leases = elementAPI.dhcpClient.getLeases();
+    const lease = leases.find(lease => lease.ifaceId === ifaceId);
+
+    if (!lease) {
+        throw new NoLeaseFoundError(ifaceId);
+    }
+
+    const packet = new DhcpRelease({
+        originIp: iface.ip,
+        destinationIp: lease.serverIp,
+        originMac: iface.mac,
+        destinationMac: 'ff:ff:ff:ff:ff:ff' //the routing service will take care of this
+    });
+
+    const connectionAPI = iface.connection.api;
+    
+    if (!connectionAPI) {
+        throw new InterfaceNotConnectedError(ifaceId);
+    }
+
+    return new Promise((resolve) => {
+
+        connectionAPI.sendPacket(
+            packet, 
+            elementAPI.properties().elementId
+        );
+
+        elementAPI.dhcpClient.removeIp(ifaceId);
+        
+        resolve();
 
     });
 

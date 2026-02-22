@@ -61,10 +61,14 @@ export class NoAvailableInterfaceError extends Error {
     }
 }
 
+/**
+ * Error thrown when an interface is not connected to any device.
+ */
 export class InterfaceNotConnectedError extends Error {
-    constructor(message: string) {
+    constructor(ifaceId: string) {
+        const message = `The interface "${ifaceId}" is not connected.`;
         super(message);
-        this.name = "InterfaceNotConnectedError";
+        this.name = "InterfaceNotConnected";
     }
 }
 
@@ -158,5 +162,16 @@ export class DirectoryAlreadyExistsError extends Error {
         const message = `The directory ${directory} already exists.`;
         super(message);
         this.name = "DirectoryAlreadyExistsError";
+    }
+}
+
+/**
+ * Error thrown when no lease is found for a given interface.
+ */
+export class NoLeaseFoundError extends Error {
+    constructor(ifaceId: string) {
+        const message = `No lease found for interface ${ifaceId}`;
+        super(message);
+        this.name = "NoLeaseFoundError";
     }
 }

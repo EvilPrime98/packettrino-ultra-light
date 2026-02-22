@@ -84,7 +84,7 @@ export default function ultraDhcpServerConfig(): Record<"dhcpserver", IUltraDHCP
         mac: string,
     ): string | null {
         const newLeases = { ...getLeases() };
-        const ip = '192.168.1.100';
+        const ip = '192.168.1.100'; //TODO: change this to a random IP from the available IPs
         newLeases[ip] = {
             mac,
             leaseTime: getProperties().offerLeaseTime
@@ -92,6 +92,14 @@ export default function ultraDhcpServerConfig(): Record<"dhcpserver", IUltraDHCP
         setLeases(newLeases);
         if (intervalId === null) updateLeasesTime();
         return ip;
+    }
+
+    function removeIp(
+        ip: string
+    ) {
+        const newLeases = { ...getLeases() };
+        delete newLeases[ip];
+        setLeases(newLeases);
     }
 
     return {
@@ -103,6 +111,7 @@ export default function ultraDhcpServerConfig(): Record<"dhcpserver", IUltraDHCP
             addReservation: addReservation,
             removeReservation: removeReservation,
             assignIp,
+            removeIp,
             getLeases,
             subscribeToLeases
         }

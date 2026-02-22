@@ -581,11 +581,17 @@ export interface IUltraDhcpClientConfig {
     getDhcpIfaces: () => string[];
     /**
      * Assigns a lease to an interface.
-     * @param ifaceId 
+     * @param ifaceId
      * @param ackPacket 
      * @returns 
      */
     assignIp: (ifaceId: string, ackPacket: DhcpAck) => void;
+    /**
+     * Removes a lease from an interface.
+     * @param ifaceId Interface ID.
+     * @returns 
+     */
+    removeIp: (ifaceId: string) => void;
     /**
      * Returns the leases of the DHCP client.
      * @returns 
@@ -654,6 +660,12 @@ export interface IUltraDHCPServerConfig {
      * @returns
      */
     assignIp: (mac: string) => string | null;
+    /**
+     * Removes the lease associated with a MAC address.
+     * @param ip ipv4 address.
+     * @returns 
+     */
+    removeIp: (ip: string) => void;
     /**
      * Gets the leases table.
      */

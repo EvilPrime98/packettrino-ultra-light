@@ -1,8 +1,15 @@
-import { DhcpAck, DhcpRequest, isDhcpAck, isDhcpDiscover, isDhcpOffer, isDhcpRequest, type Packet } from "@/types/Tpackets";
+import { DhcpAck, DhcpRequest, isDhcpAck, isDhcpDiscover, isDhcpOffer, isDhcpRelease, isDhcpRequest, type Packet } from "@/types/Tpackets";
 import { DhcpOffer } from "@/types/Tpackets";
 import { type TLayer3Config } from "@/types/TConfig";
 import { hasDHCPServer, hasDHCPClient } from "@/types/typeguards";
 
+/**
+ * Core DHCP processor for DHCP-type packets.
+ * @param packet Packet to be processed.
+ * @param elementAPI Element API.
+ * @param receiverIfaceId Interface ID of the device that received the packet.
+ * @returns An array containing the reply packet and a boolean indicating whether the packet was processed.
+ */
 export function dhcpProcessor(
     packet: Packet,
     elementAPI: TLayer3Config,
@@ -98,6 +105,13 @@ export function dhcpProcessor(
 
         return [null, true];
 
+    }
+
+    if (isDhcpRelease(packet)) {
+        if (!hasDHCPServer(elementAPI)) return [null, false];
+        if (packet.siaddr !== elementAPI.getIfaces()[receiverIfaceId].ip) return [null, false];
+        elementAPI.dhcpserver.removeIp(packet.ciaddr);
+        return [null, true];
     }
 
     return [null, false];
