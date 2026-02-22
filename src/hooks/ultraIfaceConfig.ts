@@ -1,5 +1,11 @@
 import { ENV } from "@/context/env-context";
-import { AlreadyExistsError, NoAvailableInterfaceError, MaxInterfacesError } from "@/errors";
+import { 
+    AlreadyExistsError, 
+    NoAvailableInterfaceError, 
+    MaxInterfacesError, 
+    InterfaceDoesNotExistError,
+    MinimumInterfacesError
+} from "@/errors";
 import { iface, IUltraIfaceConfig, TConnection } from "@/types/TConfig";
 import { getRandomMac } from "@/utils/network_lib";
 import { ultraState } from "@ultra-light";
@@ -22,11 +28,6 @@ export default function ultraIfaceConfig({
         .map(ifaceId => Number(ifaceId.split('enp0s')[1]))
         .sort((a, b) => b - a)[0];
         return `enp0s${maxIndex + 1}`;
-    }
-
-    function removeInterface(interfaceId: string) {
-        const { [interfaceId]: _removed, ...remainingIfaces } = getIfaces();
-        setIfaces(remainingIfaces);
     }
 
     function getAvailableInterface(): string {
@@ -57,7 +58,9 @@ export default function ultraIfaceConfig({
         }
     }
 
-    function addInterface(interfaceId: string) {
+    function addInterface(
+        interfaceId: string
+    ) {
         
         const currIfaces = getIfaces();
 
@@ -87,6 +90,20 @@ export default function ultraIfaceConfig({
             [interfaceId]: newInterface
         });
 
+    }
+
+    function removeInterface(
+        interfaceId: string
+    ) {
+        const currIfaces = getIfaces();
+        if (Object.keys(currIfaces).length === 1) {
+            throw new MinimumInterfacesError();
+        }
+        if (!Object.keys(currIfaces).includes(interfaceId)) {
+            throw new InterfaceDoesNotExistError(`Interface "${interfaceId}" does not exist`);
+        }
+        const { [interfaceId]: _removed, ...remainingIfaces } = currIfaces;
+        setIfaces(remainingIfaces);
     }
 
     function addConnection({ itemId, api }: TConnection): string {

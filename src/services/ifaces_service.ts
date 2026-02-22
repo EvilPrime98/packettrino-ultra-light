@@ -21,10 +21,13 @@ export function ip_addr(
         return getCurrIfaceInfo(elementApi);
     }
 
-    const [ip, netmask] = parseCidr(
-        $OPTS["add"]?.toString() 
-        || $OPTS["del"]?.toString()
-    );
+    const cidr = $OPTS["add"]?.toString() || $OPTS["del"]?.toString();
+
+    if (!cidr) {
+        throw new Error("Either add or del must be specified");
+    }
+
+    const [ip, netmask] = parseCidr(cidr);
 
     const ifaceId = $OPTS["dev"].toString();
 
@@ -113,7 +116,7 @@ function getCurrIfaceInfo(
  * @param elementApi 
  * @param ifaceId 
  */
-function deconfigureInterface(
+export function deconfigureInterface(
     elementApi: TLayer3Config,
     ifaceId: string
 ) {

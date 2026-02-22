@@ -97,6 +97,14 @@ export class MaxInterfacesError extends Error {
     }
 }
 
+export class MinimumInterfacesError extends Error {
+    constructor() {
+        const message = `At least one interface is required.`;
+        super(message);
+        this.name = "MinimumInterfacesError";
+    }
+}
+
 export class DirectoryDoesNotExistError extends Error {
     constructor(directory: string) {
         const message = `The directory ${directory} does not exist.`;

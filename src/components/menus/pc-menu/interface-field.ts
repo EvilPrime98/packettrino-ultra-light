@@ -7,6 +7,8 @@ import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import AddIcon from "@/components/icons/add-icon";
 import styles from "./pc-menu.module.css";
 import { IUltraPcFields } from "./pc-menu";
+import { RemoveIcon } from "@/components/icons/remove-icon";
+import { deconfigureInterface } from "@/services/ifaces_service";
 
 export default function InterfaceField(
     { fields }: 
@@ -17,7 +19,7 @@ export default function InterfaceField(
     
     /**
      * Initial load of the interface field.
-     * @param self 
+     * @param self Select HTML element.
      * @returns 
      */
     function onLoadIfaces(
@@ -35,27 +37,7 @@ export default function InterfaceField(
     };
 
     /**
-     * Executes when the interface option is changed by the user.
-     * @param event 
-     * @returns 
-     */
-    function onIfaceChanges(
-        event: Event
-    ) {
-        const element = event.target;
-        if (!element || !(element instanceof HTMLSelectElement)) return;
-        const elementProperties = pmCtx.get().pcElementAPI;
-        if (!elementProperties) return;
-        const iface = elementProperties.getIfaces()[element.value];
-        if (!iface) return;
-        fields.iface.set(element.value);
-        fields.ip.set(iface.ip);
-        fields.netmask.set(iface.netmask);   
-    }
-
-    /**
-     * Executes when the user clicks the add interface button.
-     * @returns 
+     * Executes when the user clicks on the add interface button.
      */
     function onAddIface() {
         const elementAPI = pmCtx.get().pcElementAPI;
@@ -68,6 +50,33 @@ export default function InterfaceField(
                 'success'
             )
             setIfacesList([...ifacesList(), newIfaceId]);
+        } catch (error: unknown) {
+            const message = error instanceof Error
+            ? error.message
+            : 'Unknown error';
+            toCtx.get().createNotification(
+                message,
+                'error'
+            );
+        }
+    }
+
+    /**
+     * Executes when the user clicks on the remove interface button.
+     */
+    function onDelIface(){
+        const elementAPI = pmCtx.get().pcElementAPI;
+        if (!elementAPI) return;
+        const ifaceId = fields.iface.get();
+        try {
+            deconfigureInterface(elementAPI, ifaceId);
+            elementAPI.removeInterface(ifaceId);
+            toCtx.get().createNotification(
+                `Interface ${ifaceId} removed successfully`,
+                'success'
+            )
+            setIfacesList(ifacesList().filter(iface => iface !== ifaceId));
+            fields.iface.set(ifacesList()[0]);
         } catch (error: unknown) {
             const message = error instanceof Error
             ? error.message
@@ -97,7 +106,9 @@ export default function InterfaceField(
 
             UltraComponent({
                 component: `<select id="iface" name="iface"></select>`,
-                eventHandler: { 'change': onIfaceChanges },
+                eventHandler: { 'change': (event: Event) => {
+                    fields.iface.set((event.target as HTMLSelectElement).value) 
+                }},
                 trigger: [
                     { subscriber: pmCtx.subscribe, triggerFunction: onLoadIfaces },
                     { subscriber: subscribeIfacesList, triggerFunction: onSync }
@@ -107,6 +118,11 @@ export default function InterfaceField(
             UltraComponent({
                 component: AddIcon({ size: 55, className: styles['icon'] }),
                 eventHandler: { 'click': onAddIface },
+            }),
+
+            UltraComponent({
+                component: RemoveIcon({ size: 55, className: styles['icon'] }),
+                eventHandler: { 'click': onDelIface },
             })
 
         ],

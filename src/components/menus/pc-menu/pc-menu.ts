@@ -51,7 +51,7 @@ export default function PcMenu() {
     const [blockedFields, setBlockedFields, subscribeToBlockedFields] = ultraState(false);
 
     /**
-     * This function is called when the PC menu is opened. Sets 
+     * Executes when the PC menu is opened. Sets 
      * up the initial values of the fields and starts listening to
      * global events.
      */
@@ -62,8 +62,6 @@ export default function PcMenu() {
         const ifaces = elementAPI.getIfaces();
         const initialIfaceId = Object.keys(ifaces)[0];
         fields.iface.set(initialIfaceId);
-        fields.ip.set(ifaces[initialIfaceId].ip);
-        fields.netmask.set(ifaces[initialIfaceId].netmask);
         fields.gateway.set(elementAPI.getDefaultGateway());
     }
 
@@ -77,7 +75,7 @@ export default function PcMenu() {
     }
 
     /**
-     * This function is called when the PC menu is closed. Cleans up
+     * Executes when the PC menu is closed. Cleans up
      * the state of the PC menu.
      */
     function onClose() {
@@ -89,7 +87,7 @@ export default function PcMenu() {
     }
 
     /**
-     * This function is called when the user clicks the save button.
+     * Executes when the user clicks the save button.
      * It validates the input fields and sends a packet to the PC element
      * to update its properties.
      */
@@ -147,7 +145,7 @@ export default function PcMenu() {
     }
 
     /**
-     * This function is called when the PC menu is opened. It adds global
+     * Executes when the PC menu is opened. It adds global
      * events to the window.
      * @returns A function that removes the added global events from the window.
      */
@@ -159,8 +157,7 @@ export default function PcMenu() {
     }
 
     /**
-     * This function cleans up 
-     * the state of the PC menu.
+     * This function cleans up the state of the PC menu.
      */
     function onCleanup() {
         eventCleaner()?.();
@@ -172,7 +169,7 @@ export default function PcMenu() {
     }
 
     /**
-     * This function is called when the DHCP client checkbox is changed.
+     * Executes when the DHCP client checkbox is changed.
      * It enables or disables the DHCP client on the PC element interface.
      * @param $input A node reference to the input element.
      */
@@ -206,7 +203,7 @@ export default function PcMenu() {
     }
 
     /**
-     * This function is called when the DHCP process button is clicked.
+     * Executes when the DHCP process button is clicked.
      * It sends a DHCP (discover) packet for the selected interface.
      */
     async function onDhcpProcess(){
@@ -227,6 +224,20 @@ export default function PcMenu() {
                 'error'
             )
         }
+    }
+
+    /**
+     * Executes when the interface changes. Updates the fields.
+     */
+    function onIfaceChange() {
+        const elementProperties = pmCtx.get().pcElementAPI;
+        if (!elementProperties) return;
+        const ifaceId = fields.iface.get();
+        const iface = elementProperties.getIfaces()[ifaceId];
+        if (!iface) return;
+        fields.iface.set(ifaceId);
+        fields.ip.set(iface.ip);
+        fields.netmask.set(iface.netmask);  
     }
 
     return UltraActivity({
@@ -316,13 +327,22 @@ export default function PcMenu() {
 
         ],
 
-        trigger: [{
-            subscriber: pmCtx.subscribe,
-            triggerFunction: (self: HTMLElement) => {
-                self.classList.toggle(styles["hidden"], !pmCtx.get()?.isVisible);
-                if (pmCtx.get()?.isVisible) onStart();
+        trigger: [
+            
+            {
+                subscriber: pmCtx.subscribe,
+                triggerFunction: (self: HTMLElement) => {
+                    self.classList.toggle(styles["hidden"], !pmCtx.get()?.isVisible);
+                    if (pmCtx.get()?.isVisible) onStart();
+                }
+            },
+
+            {
+                subscriber: fields.iface.subscribe,
+                triggerFunction: onIfaceChange
             }
-        }]
+
+        ],
 
     })
 
