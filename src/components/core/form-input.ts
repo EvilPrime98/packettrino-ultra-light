@@ -1,6 +1,8 @@
 import { UltraLightElement, UltraRenderableElement } from "@/ultra-light/types";
 import { UltraComponent, UltraTrigger } from "@/ultra-light/ultra-light";
 
+type TSubscriberTypes = string | boolean | number;
+
 /**
  * Renders a form input element. The default structure is a
  * div element with an optional label and an input element.
@@ -65,7 +67,7 @@ export function FormInput({
     /**
      * Stateful subscriber function that is triggered when the input value changes.
      */
-    changeSubscriber: (fn: (value: any) => void) => () => void;
+    changeSubscriber: (fn: (value: TSubscriberTypes) => void) => () => void;
     /** 
      * Optional event handler for the input element.
      */
@@ -101,7 +103,7 @@ export function FormInput({
     /**
      * Optional disabled subscriber. If provided, it will be triggered when the disabled state changes.
      */
-    disabledSubscriber?: (fn: (value: boolean) => void) => () => void;
+    disabledSubscriber?: (fn: (value: TSubscriberTypes) => void) => () => void;
 
 }) {
 
