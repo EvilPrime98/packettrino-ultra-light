@@ -291,6 +291,7 @@ export class DhcpAck extends Packet {
 }
 
 export class DhcpRelease extends Packet {
+  
   public readonly protocol = "dhcp" as const;
   public readonly transportProtocol = "udp" as const;
   public readonly type: DhcpType = "release";
@@ -303,17 +304,23 @@ export class DhcpRelease extends Packet {
   public readonly giaddr: IpAddress = "";
   public readonly chaddr: MacAddress;
 
-  constructor(
-    originIp: IpAddress,
-    destinationIp: IpAddress,
-    originMac: MacAddress,
-    destinationMac: MacAddress
-  ) {
+  constructor({
+    originIp,
+    destinationIp,
+    originMac,
+    destinationMac
+  }: {
+    originIp: IpAddress;
+    destinationIp: IpAddress;
+    originMac: MacAddress;
+    destinationMac: MacAddress;
+  }){
     super({ originIp, destinationIp, originMac, destinationMac });
     this.ciaddr = originIp;
     this.siaddr = destinationIp;
     this.chaddr = originMac;
   }
+
 }
 
 export type DnsType = "request" | "reply";
@@ -575,6 +582,15 @@ export function isDhcpRequest(packet: Packet): packet is DhcpRequest {
  */
 export function isDhcpAck(packet: Packet): packet is DhcpAck {
   return packet.protocol === 'dhcp' && packet.type === 'ack';
+}
+
+/**
+ * Returns true if the packet is a DHCP release, false otherwise.
+ * @param packet Packet to be checked.
+ * @returns 
+ */
+export function isDhcpRelease(packet: Packet): packet is DhcpRelease {
+  return packet.protocol === 'dhcp' && packet.type === 'release';
 }
 
 export type AnyPacket =
