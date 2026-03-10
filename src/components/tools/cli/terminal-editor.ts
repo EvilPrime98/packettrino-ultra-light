@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent } from "@ultra-light";
+import { UltraActivity, UltraComponent } from "ultra-light.js";
 import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
 import styles from './terminal.module.css';
 import { nano_write } from "@/commands/nano";

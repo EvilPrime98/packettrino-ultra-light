@@ -1,4 +1,4 @@
-import { UltraComponent } from "@/ultra-light/ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import styles from "./dhcp-server-menu.module.css";
 import { TDhcpServerReservations } from "@/types/TConfig";
 

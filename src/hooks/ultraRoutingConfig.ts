@@ -1,4 +1,4 @@
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 import type { IRoutingRule, IUltraRoutingConfig } from "@/types/TConfig";
 
 export default function ultraRoutingConfig(): IUltraRoutingConfig {

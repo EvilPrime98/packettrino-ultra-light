@@ -1,4 +1,4 @@
-import { UltraComponent, ultraState } from "@ultra-light";
+import { UltraComponent, ultraState } from "ultra-light.js";
 import { Option } from "./option";
 import { WORK_SPACE_CONTEXT as wCtx } from "@context/workspace-context";
 import { AdvancedOption } from "@/types/types";

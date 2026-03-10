@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, ultraState } from "@/ultra-light/ultra-light";
+import { UltraActivity, UltraComponent, ultraState } from "ultra-light.js";
 import { SETTINGS_MENU_CTX as smCtx } from "@/context/settings-context";
 import { ENV } from "@/context/env-context";
 import styles from "./settings.module.css";

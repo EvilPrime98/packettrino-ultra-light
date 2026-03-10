@@ -1,5 +1,5 @@
 import { TElementApi, TElementCoordinates } from "@/types/TWorkSpace";
-import { UltraContext } from "@/ultra-light/ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export type WorkSpaceContextInterface = {
 

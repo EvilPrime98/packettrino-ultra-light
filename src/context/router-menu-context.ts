@@ -1,5 +1,5 @@
 import type { IUltraRouterConfig } from "@/types/TConfig";
-import { UltraContext } from "@ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export type RouterMenuCtx = {
   /**

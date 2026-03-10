@@ -1,4 +1,4 @@
-import { UltraComponent, ultraEffect, UltraLightElement, ultraState } from "@ultra-light";
+import { UltraComponent, ultraEffect, UltraLightElement, ultraState } from "ultra-light.js";
 import DefaultCable from "./default-cable";
 import { IDefaultCableProps, TAnimatedPacket } from "@/types/Tcanvas";
 import Packet from "./packet";

@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, ultraState } from "@ultra-light";
+import { UltraActivity, UltraComponent, ultraState } from "ultra-light.js";
 import TerminalEditor from "./terminal-editor";
 import { TERMINAL_CONTEXT as tCtx } from "../../../context/terminal-context";
 import MenuFrame from "@/components/menus/menu-frame";

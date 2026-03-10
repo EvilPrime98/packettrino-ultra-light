@@ -1,7 +1,7 @@
 import {
     UltraComponent,
     ultraState
-} from "@ultra-light";
+} from "ultra-light.js";
 import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import AddIcon from "@/components/icons/add-icon";

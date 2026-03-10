@@ -1,5 +1,5 @@
 import { TLayer3Config } from "@/types/TConfig";
-import { UltraContext } from "@ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export type TDchpServerMenuContext = {
   /**
@@ -24,7 +24,7 @@ export const DHCP_SERVER_MENU_CONTEXT = UltraContext<TDchpServerMenuContext>({
   update: (updates: Partial<TDchpServerMenuContext>) => {
     const dsCtx = DHCP_SERVER_MENU_CONTEXT;
     dsCtx.set({
-      ...dsCtx.get(),
+      ...dsCtx.get()!,
       ...updates
     });
   }

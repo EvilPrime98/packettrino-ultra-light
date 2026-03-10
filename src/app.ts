@@ -1,7 +1,7 @@
 import {
     UltraFragment,
     ultraState
-} from "@ultra-light";
+} from "ultra-light.js";
 import AppLoader from "@components/core/app-loader.ts";
 import { WorkSpace } from "@components/core/work-space.ts";
 import Panel from "@components/core/panel/panel.ts";

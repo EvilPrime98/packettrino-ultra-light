@@ -1,6 +1,6 @@
 import { Packet } from "@/types/Tpackets";
-import { UltraLightElement } from "@/ultra-light/types";
-import { UltraComponent } from "@/ultra-light/ultra-light";
+import { UltraLightElement } from "ultra-light.js";
+import { UltraComponent } from "ultra-light.js";
 import styles from './packet-tracer.module.css'
 import type { PacketWithId } from "./packet-tracer";
 

@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, ultraState, type UltraLightElement } from "@ultra-light";
+import { UltraActivity, UltraComponent, ultraState, type UltraLightElement } from "ultra-light.js";
 import { ARPTable } from "../tables/arp_tab";
 import { AdvancedOptionsDyn } from "@components/core/adv-options";
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
@@ -130,7 +130,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
                 component: (`
                     <img 
-                        src="./assets/board/pc.svg"
+                        src="/board/pc.svg"
                         alt="pc"
                         draggable="true"
                         class="${styles['clickable']}"
@@ -186,7 +186,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
                 component: (`
                         <img 
-                            src="/assets/packets/unicast.png"
+                            src="/packets/unicast.png"
                             class=${styles['packet-animation']}
                         />
                     `),

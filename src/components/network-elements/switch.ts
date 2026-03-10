@@ -1,6 +1,6 @@
 import styles from "./switch.module.css";
 import {  MacRecord } from "@/types/types";
-import { UltraActivity, UltraLightElement, UltraComponent, ultraState } from "@ultra-light";
+import { UltraActivity, UltraLightElement, UltraComponent, ultraState } from "ultra-light.js";
 import { AdvancedOptionsDyn } from "../core/adv-options";
 import ultraSwitchConfig from "@/hooks/ultraSwitchConfig";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
@@ -154,7 +154,7 @@ export default function SwitchElement({ x, y, id }: TNewNetworkElementProperties
                 UltraComponent({
                     component: (`
                         <img 
-                            src="./assets/board/switch.svg"
+                            src="/board/switch.svg"
                             alt="switch"
                             draggable="true"
                             class="${styles['clickable']}"

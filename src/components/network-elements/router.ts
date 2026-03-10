@@ -1,4 +1,4 @@
-import { UltraLightElement, UltraComponent, ultraState, UltraActivity } from "@ultra-light";
+import { UltraLightElement, UltraComponent, ultraState, UltraActivity } from "ultra-light.js";
 import { AdvancedOptionsDyn } from "@components/core/adv-options";
 import { TERMINAL_CONTEXT as tCtx } from "../../context/terminal-context";
 import { WORK_SPACE_CONTEXT } from "@/context/workspace-context";
@@ -148,7 +148,7 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
                 UltraComponent({
                     component: (`
                         <img 
-                            src="./assets/board/router.svg"
+                            src="/board/router.svg"
                             alt="pc"
                             draggable="true"
                             class="${styles['clickable']}"
@@ -200,7 +200,7 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
 
                     component: (`
                         <img 
-                            src="/assets/packets/unicast.png"
+                            src="/packets/unicast.png"
                             class=${styles['packet-animation']}
                         />
                     `),

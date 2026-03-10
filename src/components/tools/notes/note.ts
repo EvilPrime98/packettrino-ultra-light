@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
+import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "ultra-light.js";
 import styles from './note.module.css';
 import { AdvancedOptionsDyn } from "@/components/core/adv-options";
 import DragIcon from "@/components/icons/drag-icon";

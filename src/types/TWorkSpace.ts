@@ -1,4 +1,4 @@
-import { UltraLightElement } from "@/ultra-light/types";
+import { UltraLightElement } from "ultra-light.js";
 import { TLayer2Config, TLayer3Config } from "./TConfig";
 
 export type TElementCoordinates = {

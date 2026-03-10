@@ -1,5 +1,5 @@
 import type { TToasterNotification } from "@/types/TToaster";
-import { UltraContext } from "@ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export interface IToasterContext {
   /**

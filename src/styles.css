@@ -1,18 +1,16 @@
+/* PACKETTRINO */
+/* AMÍN PÉREZ 2026 */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
 
 @font-face {
   font-family: 'Ubuntu Mono';
-  src: url('../assets/fonts/UbuntuMono-R.ttf') format('truetype');
+  src: url('/fonts/UbuntuMono-R.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
-
-/* PACKETTRINO */
-/* AMÍN PÉREZ 2025 */
-
-
-/*VARIABLES */
 
 :root {
     --inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -23,8 +21,6 @@
     --dark-mode-red: #c60300;
     --ubuntu-mono: 'Ubuntu Mono', monospace;
 }
-
-/*ESTILOS GENERALES */
 
 body {
     margin: 0px;
@@ -69,8 +65,6 @@ img {
     z-index: 1000;
     animation: spinDynRouting 2s linear infinite;
 }
-
-/* BOTONES */
 
 .btn-yellow {
     width: fit-content;
@@ -389,8 +383,6 @@ img {
     }
 
 }
-
-/*** ANIMACIONES ***/
 
 @keyframes fadeIn {
     from {
@@ -741,8 +733,6 @@ img {
     }
 }
 
-/*CURSORES*/
-
 .pack-cursor {
     position: absolute;
     transform: translate(-50%, -50%);
@@ -759,8 +749,6 @@ img {
     height: 100%;
     object-fit: contain;
 }
-
-/*** MODALES ***/
 
 .modal-overlay {
     position: fixed;
@@ -960,8 +948,6 @@ img {
 
 }
 
-/**ANOTACIONES DE TEXTO */
-
 .cable {
     position: absolute;
     z-index: -1;
@@ -1026,8 +1012,6 @@ img {
 circle:hover {
     cursor: pointer;
 }
-
-/*NAVEGADOR DE INTERNET*/
 
 .browser-component {
     position: fixed;
@@ -1217,8 +1201,6 @@ circle:hover {
     }
 
 }
-
-/*MENUS*/
 
 .dhcp-relay-form {
 
@@ -1744,8 +1726,6 @@ circle:hover {
 
 }
 
-/*PANEL*/
-
 #item-panel {
 
     position: fixed;
@@ -1836,8 +1816,6 @@ circle:hover {
 
 }
 
-/*MENSAJES EMERGENTES*/
-
 .popup-content {
     position: fixed;
     top: 30%;
@@ -1900,8 +1878,6 @@ circle:hover {
 
 }
 
-/*ICONOS DEL PANEL*/
-
 .dynrouting {
 
     position: relative;
@@ -1963,8 +1939,6 @@ circle:hover {
 
 }
 
-/**GESTION DE ARCHIVOS*/
-
 .file-upload-container {
     width: 40px;
     height: 40px;
@@ -1972,7 +1946,7 @@ circle:hover {
 }
 
 .file-options .upload-file-label {
-    background: url(../assets/panel/upload.svg) no-repeat center;
+    background: url(/panel/upload.svg) no-repeat center;
     width: 100%;
     height: 100%;
     display: block;
@@ -1990,8 +1964,6 @@ circle:hover {
 .file-options .upload-file-label:active {
     transform: translateY(0);
 }
-
-/**TOOLTIP*/
 
 .tooltip {
     position: absolute;
@@ -2021,8 +1993,6 @@ circle:hover {
     }
 
 }
-
-/**VIDEO CONTROLS*/
 
 .video-controls {
 
@@ -2128,9 +2098,6 @@ circle:hover {
     }
 
 }
-
-
-/*ESTILOS PARA EL TUTORIAL*/
 
 .slide-presentation {
     position: fixed;

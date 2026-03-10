@@ -1,4 +1,4 @@
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import styles from "./pc-menu.module.css";  
 
 export default function BasicButtons({ 

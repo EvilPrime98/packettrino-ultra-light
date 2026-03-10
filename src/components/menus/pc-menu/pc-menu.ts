@@ -1,4 +1,4 @@
-import { UltraComponent, ultraState, UltraActivity, ultraCompState } from "@ultra-light";
+import { UltraComponent, ultraState, UltraActivity, ultraCompState } from "ultra-light.js";
 import { PC_MENU_CTX as pmCtx } from "@context/pc-menu-context";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 import { PcFormValidator } from "@/schemas/pc-menu-schema";

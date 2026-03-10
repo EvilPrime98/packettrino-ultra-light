@@ -1,4 +1,4 @@
-import { UltraComponent, UltraLightElement } from "@ultra-light";
+import { UltraComponent, UltraLightElement } from "ultra-light.js";
 
 export function ARPTable({ 
     onClose,

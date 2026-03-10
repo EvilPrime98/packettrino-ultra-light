@@ -4,7 +4,7 @@ export function igniteFire(networkObjectId) {
     $fire.classList.add("fire-container");
     $fire.innerHTML = `
         <div class="heat-haze"></div>
-        <img src="./assets/fire.svg" class="fire-img" alt="Animated fire">
+        <img src="/fire.svg" class="fire-img" alt="Animated fire">
     `;
     $networkObject.appendChild($fire);
 

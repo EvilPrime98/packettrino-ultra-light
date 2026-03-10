@@ -1,5 +1,5 @@
 import { ENV } from "@/context/env-context";
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 import type { ArpCache, IUltraARPConfig } from "@/types/TConfig";
 
 /**

@@ -1,4 +1,4 @@
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 //import { dynamicRoutingButton } from "./dynamic-routing-item";
 import PanelItem from "./panel-item";
 import { TPanelItem } from "@/types/TPanel";
@@ -10,25 +10,25 @@ import { SETTINGS_MENU_CTX as smCtx } from "@/context/settings-context";
 const networkItems: TPanelItem[] = [
     {
         "name": "pc",
-        "image": "./assets/panel/pc.svg",
+        "image": "/panel/pc.svg",
         "draggable": true,
         "tooltip": "PC"
     },
     {
         "name": "router",
-        "image": "./assets/panel/router.svg",
+        "image": "/panel/router.svg",
         "draggable": true,
         "tooltip": "Router"
     },
     {
         "name": "switch",
-        "image": "./assets/panel/switch.svg",
+        "image": "/panel/switch.svg",
         "draggable": true,
         "tooltip": "Switch"
     },
     {
         "name": 'dhcp-server',
-        "image": "./assets/panel/dhcpserver.svg",
+        "image": "/panel/dhcpserver.svg",
         "draggable": true,
         "tooltip": "DHCP Server"
     },
@@ -110,7 +110,7 @@ export default function Panel({
                         
                         PanelItem({
                             name: "traffic",
-                            image: "./assets/panel/traffic.svg",
+                            image: "/panel/traffic.svg",
                             draggable: false,
                             tooltip: "Tráfico de Red",
                             onClick: () => {
@@ -124,7 +124,7 @@ export default function Panel({
 
                         PanelItem({
                             name: "settings",
-                            image: "./assets/panel/settings.svg",
+                            image: "/panel/settings.svg",
                             draggable: false,
                             tooltip: "Settings",
                             onClick: () => {
@@ -138,7 +138,7 @@ export default function Panel({
 
                         PanelItem({
                             name: "note",
-                            image: "./assets/panel/annotation.svg",
+                            image: "/panel/annotation.svg",
                             draggable: true,
                             tooltip: "Note",
                             onDragStart: () => onItemDragStart("note")

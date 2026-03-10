@@ -1,6 +1,6 @@
-import { UltraComponent, ultraState } from "@ultra-light";
+import { UltraComponent, ultraState } from "ultra-light.js";
 import styles from "./toaster.module.css";
-import '@assets/error.svg';
+import '/error.svg';
 import CheckMarkIcon from "../icons/check-mark-icon";
 import CrossIcon from "../icons/cross-icon";
 import { ToasterProperties, TToasterNotification } from "@/types/TToaster";
@@ -64,11 +64,9 @@ export function Toaster() {
 
     }
 
-
     TOASTER_CONTEXT.set({
         createNotification
     })
-
 
     return UltraComponent({
 
@@ -105,7 +103,10 @@ export function Toaster() {
             })
         ],
 
-        trigger: [{ subscriber: subscribeToProperties, triggerFunction: toasterTrigger }]
+        trigger: [{ 
+            subscriber: subscribeToProperties, 
+            triggerFunction: toasterTrigger 
+        }]
 
     });
 

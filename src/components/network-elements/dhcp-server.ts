@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, ultraState, type UltraLightElement } from "@ultra-light";
+import { UltraActivity, UltraComponent, ultraState, type UltraLightElement } from "ultra-light.js";
 import { ARPTable } from "../tables/arp_tab";
 import { AdvancedOptionsDyn } from "@components/core/adv-options";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
@@ -116,7 +116,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
 
                 component: (`
                         <img 
-                            src="./assets/board/dhcp.svg"
+                            src="/board/dhcp.svg"
                             alt="pc"
                             draggable="true"
                             class="${styles['clickable']}"
@@ -182,7 +182,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
 
                 component: (`
                     <img 
-                        src="/assets/packets/unicast.png"
+                        src="/packets/unicast.png"
                         class=${styles['packet-animation']}
                     />
                 `),

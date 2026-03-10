@@ -1,5 +1,5 @@
 import { IRoutingRule } from "@/types/TConfig";
-import { UltraComponent, UltraLightElement } from "@/ultra-light/ultra-light";
+import { UltraComponent, UltraLightElement } from "ultra-light.js";
 
 export function RoutingTable({
     onClose,

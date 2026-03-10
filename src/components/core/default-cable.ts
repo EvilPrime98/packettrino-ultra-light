@@ -4,7 +4,7 @@ import {
     UltraComponent, 
     ultraState, 
     UltraLightElement 
-} from "@ultra-light";
+} from "ultra-light.js";
 
 export default function DefaultCable({ 
     x1, 

@@ -1,6 +1,6 @@
 import { ENV } from "@/context/env-context";
 import { IUltraPacketConfig } from "@/types/Tcanvas";
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 
 type Props = {
     x1: string;

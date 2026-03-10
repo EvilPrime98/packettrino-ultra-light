@@ -1,5 +1,5 @@
 import { TLayer3Config } from "@/types/TConfig";
-import { UltraContext } from "@ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export interface TerminalContextInterface {
   /**
@@ -133,7 +133,7 @@ const TERMINAL_CONTEXT = UltraContext<TerminalContextInterface>({
   update: (updates: Partial<TerminalContextInterface>) => {
     const tCtx = TERMINAL_CONTEXT;
     tCtx.set({
-      ...tCtx.get(),
+      ...tCtx.get()!,
       ...updates
     });
   },
@@ -141,29 +141,29 @@ const TERMINAL_CONTEXT = UltraContext<TerminalContextInterface>({
   closeEditor: () => {},
   write: (line: string) => {
     const tCtx = TERMINAL_CONTEXT;
-    if (!tCtx.get().isVisible) return;
+    if (!tCtx.get()!.isVisible) return;
     const currentState = tCtx.get();
     tCtx.set({
-      ...currentState,
-      output: currentState.output + line + "\n",
+      ...currentState!,
+      output: currentState!.output + line + "\n",
     });
   },
   loopwrite: (line: string, intervalTime: number) => {
     const tCtx = TERMINAL_CONTEXT;
-    if (!tCtx.get().isVisible) return;
+    if (!tCtx.get()!.isVisible) return;
     const loopId = setInterval(() => {
-      tCtx.get()
+      tCtx.get()!
         .write(line);
     }, intervalTime);
     tCtx.set({
-      ...tCtx.get(),
+      ...tCtx.get()!,
       loopId
     });
   },
   clear: () => {
     const tCtx = TERMINAL_CONTEXT;
     tCtx.set({
-      ...tCtx.get(),
+      ...tCtx.get()!,
       output: ""
     });
   }

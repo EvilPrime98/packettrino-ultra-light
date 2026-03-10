@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, ultraEffect, ultraState } from "@/ultra-light/ultra-light";
+import { UltraActivity, UltraComponent, ultraEffect, ultraState } from "ultra-light.js";
 import styles from './packet-tracer.module.css'
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { Packet } from "@/types/Tpackets";

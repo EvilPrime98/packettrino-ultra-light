@@ -1,5 +1,5 @@
 import { TLayer3Config } from "@/types/TConfig";
-import { UltraContext } from "@ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 interface IEnv {
     /**

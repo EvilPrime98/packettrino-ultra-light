@@ -1,5 +1,5 @@
-import { UltraLightElement, UltraRenderableElement } from "@/ultra-light/types";
-import { UltraComponent, UltraTrigger } from "@/ultra-light/ultra-light";
+import { UltraLightElement, UltraRenderableElement } from "ultra-light.js";
+import { UltraComponent, UltraTrigger } from "ultra-light.js";
 
 type TSubscriberTypes = string | boolean | number;
 

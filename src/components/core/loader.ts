@@ -1,4 +1,4 @@
-import { UltraComponent } from "@/ultra-light/ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import styles from './loader.module.css';
 
 export function Loader({

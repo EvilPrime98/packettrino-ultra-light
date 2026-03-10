@@ -1,4 +1,4 @@
-import { UltraLightElement, UltraComponent } from "@ultra-light";
+import { UltraLightElement, UltraComponent } from "ultra-light.js";
 import ultraPacketConfig from "@/hooks/ultraPacketConfig";
 import { CANVAS_CONTEXT } from "@/context/canvas-context";
 import { TAnimatedPacket } from "@/types/Tcanvas";
@@ -44,7 +44,7 @@ export default function Packet({ x1, y1, x2, y2, type }: Props) {
 
         component: (
             `<image
-                href="/assets/packets/${type}.png"
+                href="/packets/${type}.png"
                 width="50"
                 height="50"
                 x="${api.getPositions().x}"

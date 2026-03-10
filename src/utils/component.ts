@@ -6,7 +6,7 @@ import TextObject from "@/components/tools/notes/note";
 import { ENV } from "@/context/env-context";
 import { TElementFactory, TCreatableElement } from "@/types/TWorkSpace";
 import { IPTTFolder } from "./pttFileSystem";
-import { UltraLightElement } from "@/ultra-light/types";
+import { UltraLightElement } from "ultra-light.js";
 import { TLayer2Config, TLayer3Config } from "@/types/TConfig";
 import { isLayer3 } from "@/types/typeguards";
 import { TOASTER_CONTEXT } from "@/context/toaster-context";

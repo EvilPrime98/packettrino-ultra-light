@@ -1,4 +1,4 @@
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 import { createFilesystem } from "@/utils/component";
 import type { IUltraRouterConfig, IRouterElementProperties } from "@/types/TConfig";
 import ultraIfaceConfig from "./ultraIfaceConfig";

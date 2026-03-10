@@ -1,6 +1,6 @@
 import { TLayer3Config } from "@/types/TConfig";
 import { hasDHCPServer } from "@/types/typeguards";
-import { UltraComponent, UltraFragment, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
+import { UltraComponent, UltraFragment, UltraLightElement, ultraState } from "ultra-light.js";
 
 export function DhcpLeasesTable({
     onClose,

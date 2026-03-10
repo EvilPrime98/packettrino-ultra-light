@@ -1,5 +1,5 @@
 import { FormInput } from "@/components/core/form-input"
-import { UltraActivity, ultraState } from "@/ultra-light/ultra-light";
+import { UltraActivity, ultraState } from "ultra-light.js";
 import styles from './pc-menu.module.css'
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import { hasDHCPClient } from "@/types/typeguards";

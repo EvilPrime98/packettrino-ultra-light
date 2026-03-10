@@ -1,4 +1,4 @@
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 import { createFilesystem } from "@/utils/component";
 import { IUltraPcConfig, TPackageConfigs, TPackageOptions, TPcElementProperties } from "@/types/TConfig";
 import { Packet } from "@/types/Tpackets";

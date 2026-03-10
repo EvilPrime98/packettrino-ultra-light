@@ -23,12 +23,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@ultra-light": ["./src/ultra-light/ultra-light.ts"],
+      "ultra-light.js": ["./src/ultra-light/ultra-light.ts"],
       "@components/*": ["./src/components/*"],
       "@utils/*": ["./src/utils/*"],
       "@context/*": ["./src/context/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@assets/*": ["./assets/*"],
+      "@assets/*": ["/*"],
       "@services/*": ["./src/services/*"],
       "@kernel/*": ["./src/kernel/*"]
     }

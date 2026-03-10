@@ -1,4 +1,4 @@
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import { TERMINAL_CONTEXT } from "@/context/terminal-context";
 import styles from "./terminal.module.css";
 

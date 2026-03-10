@@ -1,5 +1,5 @@
-import { UltraActivity, UltraComponent, ultraState } from "@/ultra-light/ultra-light";
-import type { UltraLightElement } from "@/ultra-light/types";
+import { UltraActivity, UltraComponent, ultraState } from "ultra-light.js";
+import type { UltraLightElement } from "ultra-light.js";
 import MenuFrame from "@/components/menus/menu-frame";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";
 import { DhcpOptionsSection } from "./dhcp-options-section";

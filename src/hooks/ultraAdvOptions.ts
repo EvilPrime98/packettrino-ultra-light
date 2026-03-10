@@ -4,7 +4,7 @@ import { DHCP_SERVER_MENU_CONTEXT} from "@/context/dhcp-server-menu-context";
 import { TERMINAL_CONTEXT} from "@/context/terminal-context";
 import { PC_MENU_CTX } from "@/context/pc-menu-context";
 import { type AdvancedOption, ADVANCED_OPTIONS } from "@/types/types";
-import { ultraState } from "@/ultra-light/ultra-light";
+import { ultraState } from "ultra-light.js";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
 
 /**

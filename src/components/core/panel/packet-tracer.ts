@@ -1,4 +1,4 @@
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import PanelItem from "./panel-item";
 import { TRACER_MENU_CTX } from "@/context/tracer-context";
 
@@ -13,7 +13,7 @@ export default function PacketTracerButton() {
 
         component: PanelItem({
             "name": "traffic",
-            "image": "./assets/panel/traffic.svg",
+            "image": "/panel/traffic.svg",
             "draggable": false,
             "tooltip": "Tráfico de Red"
         }),

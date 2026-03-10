@@ -1,5 +1,5 @@
 import { IUltraPcConfig } from "@/types/TConfig";
-import { UltraContext } from "@ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export type PcMenuCtx = {
   /**
@@ -17,13 +17,16 @@ export type PcMenuCtx = {
 }
 
 export const PC_MENU_CTX = UltraContext<PcMenuCtx>({
+  
   isVisible: false,
+  
   pcElementAPI: null,
+  
   update: (updates: Partial<PcMenuCtx>) => {
-    const pmCtx = PC_MENU_CTX;
-    pmCtx.set({
-      ...pmCtx.get(),
+    PC_MENU_CTX.set({
+      ...PC_MENU_CTX.get()!,
       ...updates
     });
   },
+
 });

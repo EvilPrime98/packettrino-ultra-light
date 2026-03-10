@@ -1,5 +1,5 @@
-import { UltraComponent } from "@/ultra-light/ultra-light";
-import type { UltraLightElement } from "@/ultra-light/types";
+import { UltraComponent } from "ultra-light.js";
+import type { UltraLightElement } from "ultra-light.js";
 
 /**
  * This component is used to render a tab in a menu that is used to switch between different pages.

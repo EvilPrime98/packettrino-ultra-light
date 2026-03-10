@@ -1,4 +1,4 @@
-import { UltraComponent, ultraEffect, ultraState } from "@ultra-light";
+import { UltraComponent, ultraEffect, ultraState } from "ultra-light.js";
 import PanelItem from "./panel-item";
 import { ENV } from "@/context/env-context";
 
@@ -41,7 +41,7 @@ export default function QuickPingTool() {
 
         component: PanelItem({
             "name": "ping",
-            "image": "./assets/panel/bus.svg",
+            "image": "/panel/bus.svg",
             "draggable": false,
             "tooltip": "Simulador de Ping"
         }),
@@ -89,7 +89,7 @@ function PacketCursor() {
         
         component: (
             `<article class="pack-cursor">
-                <img src="/assets/board/pack.svg" />
+                <img src="/board/pack.svg" />
             </article>`
         ),
         

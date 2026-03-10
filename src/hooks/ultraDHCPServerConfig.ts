@@ -1,4 +1,4 @@
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 import type { IUltraDhcpLease, IUltraDHCPServerConfig, TDhcpServerProperties, TDhcpServerReservations } from "@/types/TConfig";
 import { isValidIp, isValidMac } from "@/utils/network_lib";
 import { InvalidIpv4AddressError, Invalid48BitMacAddressError } from '@/errors'

@@ -1,4 +1,4 @@
-import { UltraContext } from "@/ultra-light/ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export type SettingsMenuCtx = {
   /**

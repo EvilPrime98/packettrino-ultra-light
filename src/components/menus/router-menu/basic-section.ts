@@ -1,4 +1,4 @@
-import { UltraComponent, ultraCompState, UltraLightElement } from "@/ultra-light/ultra-light";
+import { UltraComponent, ultraCompState, UltraLightElement } from "ultra-light.js";
 import styles from './router-menu.module.css';
 import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";

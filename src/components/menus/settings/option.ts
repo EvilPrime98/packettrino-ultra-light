@@ -1,6 +1,6 @@
-import { UltraComponent, UltraTrigger } from "@ultra-light";
+import { UltraComponent, UltraTrigger } from "ultra-light.js";
 import styles from "./settings.module.css";
-import { UltraLightElement, UltraRenderableElement } from "@/ultra-light/types";
+import { UltraLightElement, UltraRenderableElement } from "ultra-light.js";
 
 interface IOptionProps {
     /**

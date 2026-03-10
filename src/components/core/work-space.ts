@@ -1,4 +1,4 @@
-import { UltraComponent, ultraEffect, UltraLightElement, ultraState } from "@ultra-light";
+import { UltraComponent, UltraLightElement, ultraState } from "ultra-light.js";
 import { checkObjectClip } from "@utils/checkObjectClip";
 import { TElementCoordinates, TCreatableElement } from "@/types/TWorkSpace";
 import { createElementMap, getNextElementId } from "@/utils/component";
@@ -19,10 +19,14 @@ export function WorkSpace() {
     const [ pendingUpdate, setPendingUpdate, subscribeToPendingUpdate] = ultraState<string | null>(null);
     const [, setIsMeasuring, subscribeToIsMeasuring ] = ultraState<boolean>(false);
 
+    /**
+     * Checks whether an element within the board can be moved or not.
+     * @param elementAPI 
+     * @returns 
+     */
     function canMove(
         elementAPI: TLayer2Config | TLayer3Config,
     ){
-
         if (isLayer3(elementAPI)) {
             const ifaces = elementAPI.getIfaces();
             const numofConnections = Object.keys(ifaces).filter(ifaceId => 
@@ -30,20 +34,25 @@ export function WorkSpace() {
             ).length;
             return numofConnections === 0;
         }
-
         const activeConnections = elementAPI.properties().connections
         .filter(connection => connection.api !== null);
-
         return activeConnections.length === 0;
-
     }
 
-    const onCreateItem = (
+    /**
+     * Handles the creation of a new network element.
+     * @param itemType 
+     * @param x 
+     * @param y 
+     * @param container 
+     * @returns 
+     */
+    function onCreateItem(
         itemType: TCreatableElement,
         x: number,
         y: number,
         container: HTMLElement
-    ): void => {
+    ): void {
         const elementMap = createElementMap(x, y);
         if (!(itemType in elementMap)) return;
         const newId = getNextElementId(itemType);
@@ -56,18 +65,20 @@ export function WorkSpace() {
         setElements(newElements);
     };
 
-    const onMoveItem = (
+    function onMoveItem(
         elementId: string,
         x: number,
         y: number
-    ): void => {
+    ): void {
         const newElements = { ...elements() };
         newElements[elementId] = { x, y };
         setElements(newElements);
         setPendingUpdate(elementId);
     };
 
-    const onDropItem = (event: Event): void => {
+    function onDropItem(
+        event: Event
+    ): void {
 
         event.preventDefault();
         const dropEvent = event as DragEvent;
@@ -75,7 +86,7 @@ export function WorkSpace() {
 
         if (!dropEvent.dataTransfer || !container) return;
 
-        const itemData = wCtx.get().elementAPI;
+        const itemData = wCtx.get()!.elementAPI;
         const config = itemData?.config;
         const boardRect = container.getBoundingClientRect();
         let x = dropEvent.clientX - boardRect.left;
@@ -86,7 +97,7 @@ export function WorkSpace() {
             
             if (!canMove(config)) {
                 
-                toCtx.get().createNotification(
+                toCtx.get()!.createNotification(
                     "Cannot move an element while it has active connections.",
                     'error'
                 );
@@ -107,7 +118,9 @@ export function WorkSpace() {
 
     };
 
-    const onPendingUpdate = (self: HTMLElement): void => {
+    function onPendingUpdate(
+        self: HTMLElement
+    ): void {
         //type guard
         const elementId = pendingUpdate();
         if (!elementId) return;
@@ -122,7 +135,9 @@ export function WorkSpace() {
         setPendingUpdate(null);
     };
 
-    const onMeasure = (self: UltraLightElement) => {
+    function onMeasure(
+        self: UltraLightElement
+    ) {
 
         const $workSpace = self as HTMLElement;
         const computedStyles = window.getComputedStyle($workSpace, null);
@@ -131,7 +146,7 @@ export function WorkSpace() {
         const boardRect = $workSpace.getBoundingClientRect();
 
         WORK_SPACE_CONTEXT.set({
-            ...WORK_SPACE_CONTEXT.get(),
+            ...WORK_SPACE_CONTEXT.get()!,
             boardProperties: {
                 boardHeight,
                 boardWidth,
@@ -141,19 +156,21 @@ export function WorkSpace() {
 
     };
 
-    const getCoordinatesByElementId = (elementId: string) => {
+    function getCoordinatesByElementId(
+        elementId: string
+    ) {
         return elements()[elementId] || null;
     };
 
-    ultraEffect(() => {
+    function onMount(){
         
         WORK_SPACE_CONTEXT.set({
-            ...WORK_SPACE_CONTEXT.get(),
+            ...WORK_SPACE_CONTEXT.get()!,
             measureBoard: () => setIsMeasuring(true),
             getCoordinatesByElementId
         });
 
-    }, []);
+    }        
 
     return UltraComponent({
 
@@ -188,7 +205,9 @@ export function WorkSpace() {
                 triggerFunction: onMeasure
             }
 
-        ]
+        ],
+
+        onMount: [onMount]
 
     });
 

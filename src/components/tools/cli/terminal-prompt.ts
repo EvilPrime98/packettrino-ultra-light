@@ -1,4 +1,4 @@
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import { TERMINAL_CONTEXT as tCtx } from "@/context/terminal-context";
 
 type Prompt = {

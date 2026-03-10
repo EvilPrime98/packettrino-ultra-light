@@ -1,4 +1,4 @@
-import { UltraComponent, ultraState } from "@/ultra-light/ultra-light";
+import { UltraComponent, ultraState } from "ultra-light.js";
 import styles from "./dhcp-server-menu.module.css";
 import { ReservationsTable } from "./reservations-table";
 import { DHCP_SERVER_MENU_CONTEXT as dsCtx } from "@/context/dhcp-server-menu-context";

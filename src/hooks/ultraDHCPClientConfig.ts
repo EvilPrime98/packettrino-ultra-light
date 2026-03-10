@@ -5,7 +5,7 @@ import type {
     IUltraRoutingConfig, 
     Lease 
 } from "@/types/TConfig";
-import { ultraState } from "@/ultra-light/ultra-light";
+import { ultraState } from "ultra-light.js";
 import { InterfaceDoesNotExistError } from "@/errors";
 import { getNetwork } from "@/utils/network_lib";
 

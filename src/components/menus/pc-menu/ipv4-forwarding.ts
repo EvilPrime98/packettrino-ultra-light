@@ -1,4 +1,4 @@
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import styles from "./pc-menu.module.css";
 import { PC_MENU_CTX as pmCtx } from "@/context/pc-menu-context";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";

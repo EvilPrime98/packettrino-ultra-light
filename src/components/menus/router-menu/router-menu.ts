@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
+import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "ultra-light.js";
 import BasicSection from "./basic-section";
 import RoutingRulesSection from "./routing-rules-section";
 import { ROUTER_MENU_CTX as rmCtx } from "@/context/router-menu-context";

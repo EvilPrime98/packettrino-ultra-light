@@ -1,5 +1,5 @@
 import { AdvancedOption } from "@/types/types";
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import CrossIcon from "@/components/icons/cross-icon";
 import styles from "./adv-options.module.css";
 

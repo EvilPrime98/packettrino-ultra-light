@@ -1,4 +1,4 @@
-import { UltraComponent } from "@ultra-light";
+import { UltraComponent } from "ultra-light.js";
 import { TPanelItem } from "@/types/TPanel";
 
 export default function PanelItem({ 

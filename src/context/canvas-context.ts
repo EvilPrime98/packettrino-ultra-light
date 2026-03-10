@@ -1,5 +1,5 @@
 import { IDefaultCableProps, IUltraPacketConfig, TAnimatedPacket } from "@/types/Tcanvas";
-import { UltraContext } from "@ultra-light";
+import { UltraContext } from "ultra-light.js";
 
 export type CanvasContextInterface = {
   

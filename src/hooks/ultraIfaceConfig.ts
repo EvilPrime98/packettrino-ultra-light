@@ -8,7 +8,7 @@ import {
 } from "@/errors";
 import { iface, IUltraIfaceConfig, TConnection } from "@/types/TConfig";
 import { getRandomMac } from "@/utils/network_lib";
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 
 type props = {
     initialIfaces?: number;

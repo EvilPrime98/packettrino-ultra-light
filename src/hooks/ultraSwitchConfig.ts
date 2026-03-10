@@ -1,4 +1,4 @@
-import { ultraState } from "@ultra-light";
+import { ultraState } from "ultra-light.js";
 import { MacRecord } from "@/types/types";
 import { isValidMac } from "@/utils/network_lib";
 import { AlignmentError, ConnectionAlreadyEstablishedError, InvalidMacAddressError, NotFoundMacRecord } from "@/errors";

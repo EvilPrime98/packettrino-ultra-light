@@ -1,5 +1,5 @@
 import { IRoutingRule } from "@/types/TConfig";
-import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "@/ultra-light/ultra-light";
+import { UltraActivity, UltraComponent, UltraLightElement, ultraState } from "ultra-light.js";
 import styles from './router-menu.module.css';
 import { ip_route } from "@/services/routing_service";
 import { TOASTER_CONTEXT as toCtx } from "@/context/toaster-context";
