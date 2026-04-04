@@ -12,8 +12,8 @@ importers:
         specifier: ^2.6.1
         version: 2.6.1
       ultra-light.js:
-        specifier: github:evilprime98/ultra-light-js
-        version: https://codeload.github.com/evilprime98/ultra-light-js/tar.gz/6199bbd5476192ef55ef40ea6eaaa95714829444
+        specifier: github:EvilPrime98/ultra-light-js
+        version: https://codeload.github.com/EvilPrime98/ultra-light-js/tar.gz/eea99880d7a99ce9616c1e14e545fd9b20b04111
     devDependencies:
       '@eslint/js':
         specifier: ^9.38.0
@@ -1128,8 +1128,8 @@ packages:
   uhyphen@0.2.0:
     resolution: {integrity: sha512-qz3o9CHXmJJPGBdqzab7qAYuW8kQGKNEuoHFYrBwV6hWIMcpAmxDLXojcHfFr9US1Pe6zUswEIJIbLI610fuqA==}
 
-  ultra-light.js@https://codeload.github.com/evilprime98/ultra-light-js/tar.gz/6199bbd5476192ef55ef40ea6eaaa95714829444:
-    resolution: {tarball: https://codeload.github.com/evilprime98/ultra-light-js/tar.gz/6199bbd5476192ef55ef40ea6eaaa95714829444}
+  ultra-light.js@https://codeload.github.com/EvilPrime98/ultra-light-js/tar.gz/eea99880d7a99ce9616c1e14e545fd9b20b04111:
+    resolution: {tarball: https://codeload.github.com/EvilPrime98/ultra-light-js/tar.gz/eea99880d7a99ce9616c1e14e545fd9b20b04111}
     version: 1.0.17
 
   undici-types@7.16.0:
@@ -2159,7 +2159,7 @@ snapshots:
 
   uhyphen@0.2.0: {}
 
-  ultra-light.js@https://codeload.github.com/evilprime98/ultra-light-js/tar.gz/6199bbd5476192ef55ef40ea6eaaa95714829444:
+  ultra-light.js@https://codeload.github.com/EvilPrime98/ultra-light-js/tar.gz/eea99880d7a99ce9616c1e14e545fd9b20b04111:
     dependencies:
       linkedom: 0.18.12
     transitivePeerDependencies:

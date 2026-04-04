@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "jiti": "^2.6.1",
-    "ultra-light.js": "github:evilprime98/ultra-light-js"
+    "ultra-light.js": "github:EvilPrime98/ultra-light-js"
   }
 }

@@ -1,4 +1,4 @@
-import { UltraComponent, ultraEffect, ultraState } from "ultra-light.js";
+import { UltraComponent, ultraState } from "ultra-light.js";
 import PanelItem from "./panel-item";
 import { ENV } from "@/context/env-context";
 
@@ -75,15 +75,13 @@ function PacketCursor() {
         })
     }
 
-    ultraEffect(() => {
-        document.body.style.cursor = "none";
-        document.addEventListener("mousemove", onMove);
-    }, []);
-
     const onCleanup = () => {
         document.body.style.cursor = "default";
         document.removeEventListener("mousemove", onMove);
     } 
+
+    document.body.style.cursor = "none";
+    document.addEventListener("mousemove", onMove);
 
     return UltraComponent({
         

@@ -1,4 +1,4 @@
-import { UltraActivity, UltraComponent, ultraEffect, ultraState } from "ultra-light.js";
+import { UltraActivity, UltraComponent, ultraState } from "ultra-light.js";
 import styles from './packet-tracer.module.css'
 import { TRACER_MENU_CTX as tmCtx } from "@/context/tracer-context";
 import { Packet } from "@/types/Tpackets";
@@ -68,14 +68,10 @@ export default function PacketTracer() {
         })
     }
 
-    ultraEffect(() => {
-
-        tmCtx.set({
-            ...tmCtx.get(),
-            addPacket: onAddPacket
-        });
-
-    }, []);
+    tmCtx.set({
+        ...tmCtx.get(),
+        addPacket: onAddPacket
+    });
 
     return UltraActivity({
 
