@@ -3,7 +3,8 @@ import { TCreatableElement } from "./TWorkSpace";
 export type TPanelItemType = TCreatableElement 
 | "note" 
 | "traffic" 
-| "settings";
+| "settings"
+| "ping"
 
 export interface TPanelItem {
     name: TPanelItemType;

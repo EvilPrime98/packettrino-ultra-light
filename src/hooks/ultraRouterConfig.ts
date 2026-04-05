@@ -75,11 +75,11 @@ export default function ultraRouterConfig({ itemIndex }: { itemIndex: string }):
         originId: string
     ) {
 
-        if (ENV.get().visualToggle) {
+        if (ENV.visualToggle.get()) {
             await visualize(originId, properties().elementId, packet);
         }
 
-        if (ENV.get().trackTraffic === true){
+        if (ENV.trackTraffic.get() === true){
             tmCtx.get().addPacket(packet, originId);
         }
         

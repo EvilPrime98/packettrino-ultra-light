@@ -92,11 +92,11 @@ export default function ultraPcConfig({
         originId: string
     ) {
 
-        if (ENV.get().visualToggle) {
+        if (ENV.visualToggle.get() === true) {
             await visualize(originId, properties().elementId, packet);
         }
 
-        if (ENV.get().trackTraffic === true) {
+        if (ENV.trackTraffic.get() === true) {
             tmCtx.get().addPacket(packet, originId);
         }
 

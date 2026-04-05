@@ -23,7 +23,7 @@ export default function ultraARPConfig(): IUltraARPConfig {
             mac: mac,
             timeOutId: setTimeout(() => {
                 deleteArpCache(ip);
-            }, ENV.get().$ARPENTRYTTL * 1000)
+            }, ENV.$ARPENTRYTTL.get() * 1000)
         };
 
         setArpCache(currentArpCache);

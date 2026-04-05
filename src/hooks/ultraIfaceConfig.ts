@@ -68,7 +68,7 @@ export default function ultraIfaceConfig({
             throw new AlreadyExistsError(`Interface ${interfaceId} already exists`);
         }
 
-        if (Object.keys(currIfaces).length >= ENV.get().maxNumberOfIfaces) {
+        if (Object.keys(currIfaces).length >= ENV.maxNumberOfIfaces.get()) {
             throw new MaxInterfacesError(`Maximum number of interfaces reached`);
         }
 

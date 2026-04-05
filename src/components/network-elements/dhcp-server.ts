@@ -38,7 +38,7 @@ export default function DhcpServer({ id, x, y }: TNewNetworkElementProperties): 
     }
 
     function onClick() {
-        if (ENV.get().quickPingMode === true) {
+        if (ENV.quickPingMode.get() === true) {
             setPacketState(true);
             quick_ping(serverAPI, () => {
                 setPacketState(false);

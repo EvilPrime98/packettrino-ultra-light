@@ -70,7 +70,7 @@ export default function Router({ x, y, id }: TNewNetworkElementProperties) {
 
     function onClick() {
 
-        if (ENV.get().quickPingMode === true) {
+        if (ENV.quickPingMode.get() === true) {
             setPacketState(true);
             quick_ping(elementAPI, () => {
                 setPacketState(false);

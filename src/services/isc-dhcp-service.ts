@@ -94,7 +94,7 @@ export async function sendDHCPDiscover(
         const timeoutId = setTimeout(() => {
             unsubscribe();
             reject(new Error('DHCP discover timed out'));
-        }, ENV.get().$REQUEST_TIMEOUT * 1000);
+        }, ENV.$REQUEST_TIMEOUT.get() * 1000);
 
         connectionAPI.sendPacket(
             packet, 

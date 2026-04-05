@@ -132,7 +132,7 @@ async function sendSinglePing(
 
         timeoutId = setTimeout(() => {
             cleanup(false);
-        }, ENV.get().$REQUEST_TIMEOUT * 1000);
+        }, ENV.$REQUEST_TIMEOUT.get() * 1000);
 
         routing(elementApi, icmpRequest)
         .then(wasRouted => {

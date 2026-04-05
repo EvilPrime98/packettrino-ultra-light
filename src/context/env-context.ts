@@ -1,7 +1,7 @@
 import { TLayer3Config } from "@/types/TConfig";
-import { UltraContext } from "ultra-light.js";
+import { ultraCompState } from "ultra-light.js";
 
-interface IEnv {
+type IEnv = {
     /**
      * Returns the next available item index.
      */
@@ -72,7 +72,7 @@ interface IEnv {
     maxNumberOfIfaces: number;
 }
 
-const ENV = UltraContext<IEnv>({
+const ENV = ultraCompState<IEnv>({
     itemIndex: 0,
     darkMode: false,
     visualToggle: true,
@@ -90,6 +90,6 @@ const ENV = UltraContext<IEnv>({
     dhcpMinLeaseTime: 10,
     dhcpMaxLeaseTime: 86400,
     maxNumberOfIfaces: 6
-});
+})
 
 export { ENV as ENV };

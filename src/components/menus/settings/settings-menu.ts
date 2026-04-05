@@ -28,13 +28,13 @@ export default function SettingsMenu() {
 
         if (!smCtx.get().isVisible) return;
 
-        setArpTTL(ENV.get().$ARPENTRYTTL);
+        setArpTTL(ENV.$ARPENTRYTTL.get());
 
         setCheckBoxes({
-            'dark-mode': ENV.get().darkMode,
-            'visual-toggle': ENV.get().visualToggle,
-            'ignore-arp-traffic': ENV.get().ignoreArpTraffic,
-            'ignore-layer2-traffic': ENV.get().ignoreLayer2Traffic
+            'dark-mode': ENV.darkMode.get(),
+            'visual-toggle': ENV.visualToggle.get(),
+            'ignore-arp-traffic': ENV.ignoreArpTraffic.get(),
+            'ignore-layer2-traffic': ENV.ignoreLayer2Traffic.get()
         })
 
     }
@@ -55,10 +55,7 @@ export default function SettingsMenu() {
     function onInputARPTTL(event: Event) {
         const $input = event.target as HTMLInputElement;
         setArpTTL(Number($input.value));
-        ENV.set({
-            ...ENV.get(),
-            $ARPENTRYTTL: Number($input.value)
-        })
+        ENV.$ARPENTRYTTL.set(Number($input.value));
     }
 
     function onChangeARPTTL(self: HTMLElement) {
@@ -98,10 +95,7 @@ export default function SettingsMenu() {
                         }
                     }],
                     onChange: (event: Event) => {
-                        ENV.set({
-                            ...ENV.get(),
-                            visualToggle: (event.target as HTMLInputElement).checked
-                        })
+                        ENV.visualToggle.set((event.target as HTMLInputElement).checked);
                     }
                 }),
 
@@ -116,10 +110,7 @@ export default function SettingsMenu() {
                         }
                     }],
                     onChange: (event: Event) => {
-                        ENV.set({
-                            ...ENV.get(),
-                            ignoreArpTraffic: (event.target as HTMLInputElement).checked
-                        })
+                        ENV.ignoreArpTraffic.set((event.target as HTMLInputElement).checked);
                     }
                 }),
 
@@ -134,26 +125,23 @@ export default function SettingsMenu() {
                         }
                     }],
                     onChange: (event: Event) => {
-                        ENV.set({
-                            ...ENV.get(),
-                            ignoreLayer2Traffic: (event.target as HTMLInputElement).checked
-                        })
+                        ENV.ignoreLayer2Traffic.set((event.target as HTMLInputElement).checked);
                     }
                 }),
 
                 Option({
                     type: 'range',
                     range: {
-                        min: ENV.get().$MINARPENTRYTTL,
-                        max: ENV.get().$MAXARPENTRYTTL,
-                        value: ENV.get().$ARPENTRYTTL
+                        min: ENV.$MINARPENTRYTTL.get(),
+                        max: ENV.$MAXARPENTRYTTL.get(),
+                        value: ENV.$ARPENTRYTTL.get()
                     },
                     id: "arp-ttl",
                     label: "ARP TTL",
                     onInput: onInputARPTTL,
                     children: [
                         UltraComponent({
-                            component: `<span id="arp-ttl-value">${ENV.get().$ARPENTRYTTL}s</span>`,
+                            component: `<span id="arp-ttl-value">${ENV.$ARPENTRYTTL.get()}s</span>`,
                             trigger: [{ subscriber: subcribeToArpTTL, triggerFunction: onChangeARPTTL }]
                         })
                     ]

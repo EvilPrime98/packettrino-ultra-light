@@ -6,7 +6,9 @@ export default function PacketTracerButton() {
 
     const onClick = () => {
         const currentState = TRACER_MENU_CTX.get().isVisible;
-        TRACER_MENU_CTX.set({ isVisible: !currentState });
+        TRACER_MENU_CTX.set({ 
+            isVisible: !currentState 
+        });
     }
 
     return UltraComponent({

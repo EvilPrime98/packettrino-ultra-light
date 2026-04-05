@@ -64,8 +64,8 @@ export function iscDhcpServerValidator(
         throw new Error(`Error: "${newServerProperties.offerLeaseTime}" is not an integer.`);
     }
 
-    if (Number(newServerProperties.offerLeaseTime) < ENV.get().dhcpMinLeaseTime 
-    || Number(newServerProperties.offerLeaseTime) > ENV.get().dhcpMaxLeaseTime) {
+    if (Number(newServerProperties.offerLeaseTime) < ENV.dhcpMinLeaseTime.get() 
+    || Number(newServerProperties.offerLeaseTime) > ENV.dhcpMaxLeaseTime.get()) {
         throw new Error(`Error: "${newServerProperties.offerLeaseTime}" is not a valid lease time. It must be between 120 and 86400 seconds.`);
     }
 

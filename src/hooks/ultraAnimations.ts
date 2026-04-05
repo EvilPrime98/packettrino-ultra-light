@@ -21,7 +21,7 @@ export default function ultraAnimations(): IUltraAnimations {
         if (!originCoordinates || !destinationCoordinates) return;
 
         if(packet.protocol === 'arp'){
-            if (ENV.get().ignoreArpTraffic === true) return;
+            if (ENV.ignoreArpTraffic.get() === true) return;
         }
 
         await csCtxd.get().createPacketAnimation(

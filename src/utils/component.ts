@@ -45,13 +45,9 @@ export function createFilesystem(): Record<string, IPTTFolder> {
  * @returns 
  */
 export function getNextElementId(itemType: string): string {
-    const foo = ENV.get();
-    const currentIndex = foo["itemIndex"];
+    const currentIndex = ENV.itemIndex.get();
     const newId = `${itemType}-${currentIndex}`;
-    ENV.set({
-        ...foo,
-        itemIndex: currentIndex + 1
-    });
+    ENV.itemIndex.set(currentIndex + 1);
     return newId;
 };
 

@@ -23,7 +23,7 @@ export default function ultraPacketConfig({ x1, y1, x2, y2 }: Props): IUltraPack
         if (startTime === null) startTime = time ?? performance.now();
 
         const elapsed = (time ?? performance.now()) - startTime;
-        const duration = ENV.get().visualSpeed;
+        const duration = ENV.visualSpeed.get();
         const progress = Math.min(elapsed / duration, 1);
 
         const x1Num = parseFloat(x1);

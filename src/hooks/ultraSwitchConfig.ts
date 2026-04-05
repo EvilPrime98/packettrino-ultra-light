@@ -105,11 +105,11 @@ export default function ultraSwitchConfig({ id }: { id: string }): IUltraSwitchC
 
     async function sendPacket(packet: Packet, itemId: string) {
         
-        if (ENV.get().visualToggle) {
+        if (ENV.visualToggle.get()) {
             await visualize( itemId, properties().elementId, packet);
         }
 
-        if (ENV.get().trackTraffic === true){
+        if (ENV.trackTraffic.get() === true){
             tmCtx.get().addPacket(packet, itemId);
         }
         

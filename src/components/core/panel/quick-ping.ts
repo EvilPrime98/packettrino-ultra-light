@@ -7,34 +7,19 @@ export default function QuickPingTool() {
     let cursor: ReturnType<typeof PacketCursor> | null = null;
 
     const onClick = () => {
-
-        if (ENV.get().quickPingMode === true) {
-
+        if (ENV.quickPingMode.get() === true) {
             document.body.style.cursor = "default";
-
             if (cursor) {
                 cursor._cleanup?.();
                 cursor.remove();
                 cursor = null;
             }
-
-            ENV.set({ 
-                ...ENV.get(), 
-                quickPingMode: false 
-            });
-
+            ENV.quickPingMode.set(false);
         }else{
-
-            ENV.set({ 
-                ...ENV.get(), 
-                quickPingMode: true 
-            });
-
+            ENV.quickPingMode.set(true);
             cursor = PacketCursor();
             document.body.appendChild(cursor);
-
         }
-
     }
 
     return UltraComponent({

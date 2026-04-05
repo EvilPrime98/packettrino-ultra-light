@@ -51,7 +51,7 @@ export default function Pc({ id, x, y }: TNewNetworkElementProperties): HTMLElem
 
     function onClick() {
 
-        if (ENV.get().quickPingMode === true) {
+        if (ENV.quickPingMode.get() === true) {
             setPacketState(true);
             quick_ping(pcAPI, () => {
                 setPacketState(false);

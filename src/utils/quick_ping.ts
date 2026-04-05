@@ -25,16 +25,9 @@ export const quick_ping = (() => {
     }
 
     async function onCleanup() {
-
-        ENV.set({
-            ...ENV.get(),
-            quickPingObject: []
-        });
-
+        ENV.quickPingObject.set([]);
         isProcessing = false;
-
         await executeOnFinishCallbacks();
-
     }
 
     return async function (
@@ -46,34 +39,25 @@ export const quick_ping = (() => {
             onFinishFunctions.add(onFinish);
         }
 
-        const currObjects = [...ENV.get().quickPingObject];
+        const currObjects = [...ENV.quickPingObject.get()];
 
         if (currObjects.length === 0) {
-            ENV.set({
-                ...ENV.get(),
-                quickPingObject: [elementAPI]
-            });
+            ENV.quickPingObject.set([elementAPI]);
             return;
         }
 
         if (isProcessing) {
-            ENV.set({
-                ...ENV.get(),
-                quickPingObject: [...currObjects, elementAPI]
-            });
+            ENV.quickPingObject.set([...currObjects, elementAPI]);
             return;
         }
 
         isProcessing = true;
 
-        ENV.set({
-            ...ENV.get(),
-            quickPingObject: [...currObjects, elementAPI]
-        });
+        ENV.quickPingObject.set([...currObjects, elementAPI]);
 
         try {
 
-            const [firstElementAPI, secondElementAPI] = ENV.get().quickPingObject;
+            const [firstElementAPI, secondElementAPI] = ENV.quickPingObject.get();
             const firstIfaceId = Object.keys(firstElementAPI.getIfaces())[0];
             const secondIfaceId = Object.keys(secondElementAPI.getIfaces())[0];
             const originIp = firstElementAPI.getIfaces()[firstIfaceId].ip;
