@@ -1,6 +1,5 @@
-import { UltraComponent, ultraState } from "ultra-light.js";
+import { UltraComponent, ultraCompState, ultraState } from "ultra-light.js";
 import styles from "./toaster.module.css";
-import '/error.svg';
 import CheckMarkIcon from "../icons/check-mark-icon";
 import CrossIcon from "../icons/cross-icon";
 import { ToasterProperties, TToasterNotification } from "@/types/TToaster";
@@ -15,58 +14,38 @@ const TOAST_ICONS = {
 
 export function Toaster() {
 
-    const [properties, setProperties, subscribeToProperties] = ultraState<ToasterProperties>({
+    const properties = ultraCompState<ToasterProperties>({
         message: "",
         isVisible: false,
         type: 'success',
         timeout: 1000
-    })
+    });
 
     const [isLoading, setIsLoading,] = ultraState(false);
-    const icon = TOAST_ICONS[properties().type] || TOAST_ICONS.info;
-    const initialClass = `${styles['toaster-container']} ${(properties().isVisible) ? '' : styles['hidden']}`;
+    const icon = TOAST_ICONS[properties.type.get()] || TOAST_ICONS.info;
+    const initialClass = `${styles['toaster-container']} ${(properties.isVisible.get()) ? '' : styles['hidden']}`;
 
-    function toasterTrigger(self: HTMLElement) {
-
-        if (!properties().isVisible || isLoading()) return;
-
+    function toasterTrigger(
+        self: HTMLElement
+    ) {
+        if (!properties.isVisible.get() || isLoading()) return;
         setIsLoading(true);
-
         self.classList.remove(styles['hidden']);
-
         setTimeout(() => {
-
             self.classList.add(styles['hidden']);
-
-            setProperties({
-                ...properties(),
-                isVisible: false
-            })
+            properties.isVisible.set(false);
             setIsLoading(false);
-
-        }, properties().timeout);
-
+        }, properties.timeout.get());
     }
 
     function createNotification(
         message: string | number, 
         type: TToasterNotification 
     ) {
-
-        const newState: ToasterProperties = {
-            ...properties(),
-            message,
-            isVisible: true,
-            type
-        }
-
-        setProperties(newState);
-
+        properties.message.set(message);
+        properties.isVisible.set(true);
+        properties.type.set(type);
     }
-
-    TOASTER_CONTEXT.set({
-        createNotification
-    })
 
     return UltraComponent({
 
@@ -76,24 +55,26 @@ export function Toaster() {
 
             UltraComponent({
 
-                component: `<div class="${styles.toast} ${styles[properties().type]}"></div>`,
+                component: `<div class="${styles.toast} ${styles[properties.type.get()]}"></div>`,
 
                 children: [
 
                     UltraComponent({
                         component: `<span class="${styles['toast-icon']}">${icon}</span>`,
                         trigger: [{
-                            subscriber: subscribeToProperties, triggerFunction: (self: HTMLElement) => {
-                                self.innerHTML = TOAST_ICONS[properties().type];
+                            subscriber: properties.type.subscribe, 
+                            triggerFunction: (self: HTMLElement) => {
+                                self.innerHTML = TOAST_ICONS[properties.type.get()];
                             }
                         }]
                     }),
 
                     UltraComponent({
-                        component: `<div class="${styles['toast-message']}">${properties().message}</div>`,
+                        component: `<div class="${styles['toast-message']}">${properties.message.get()}</div>`,
                         trigger: [{
-                            subscriber: subscribeToProperties, triggerFunction: (self: HTMLElement) => {
-                                self.innerHTML = properties().message.toString();
+                            subscriber: properties.message.subscribe,
+                            triggerFunction: (self: HTMLElement) => {
+                                self.innerHTML = properties.message.get().toString();
                             }
                         }]
                     })
@@ -104,9 +85,17 @@ export function Toaster() {
         ],
 
         trigger: [{ 
-            subscriber: subscribeToProperties, 
+            subscriber: properties.isVisible.subscribe, 
             triggerFunction: toasterTrigger 
-        }]
+        }],
+
+        onMount: [
+            () => {
+                TOASTER_CONTEXT.set({
+                    createNotification
+                })
+            }
+        ]
 
     });
 
